@@ -522,139 +522,171 @@ dig = ord("7") - ord("0")  # 7
 \section{Estructuras de Datos (Data Structures)}
 
 \subsection{Arreglos (Arrays)}
-Colección de tamaño \textbf{fijo} del mismo tipo; acceso $O(1)$ por
-índice. Úsalos cuando sabes el tamaño de antemano.
+Colección de tamaño \textbf{fijo} del mismo tipo. \textbf{Complejidad:}
+acceso/asignación por índice $O(1)$; crear $O(n)$.
 \begin{lstlisting}[style=cpp]
-int a[5] = {1,2,3,4,5};   // C++: tamano fijo
-a[0] = 10;
+int a[5] = {1,2,3,4,5};   // crear: O(n)
+a[0] = 10;                // acceso/asignacion: O(1)
 \end{lstlisting}
 \begin{lstlisting}[style=java]
-int[] a = new int[5];     // Java
-a[0] = 10;  int n = a.length;  // .length sin ()
+int[] a = new int[5];     // crear: O(n)
+a[0] = 10;                // acceso: O(1)
+int n = a.length;         // O(1)  (.length sin ())
 \end{lstlisting}
 \begin{lstlisting}[style=py]
-a = [0] * 5               # Python: no hay arreglo fijo,
-a[0] = 10                 # se usa list
+a = [0] * 5    # crear: O(n)  (no hay arreglo fijo)
+a[0] = 10      # acceso: O(1)
 \end{lstlisting}
 
 \subsection{Matrices (Arreglos 2D)}
-Arreglo bidimensional (filas $\times$ columnas), acceso $O(1)$ por
-\texttt{[i][j]}. Para grids, tableros y DP en dos dimensiones.
+Arreglo bidimensional (filas $\times$ columnas). \textbf{Complejidad:}
+acceso \texttt{[i][j]} $O(1)$; crear $n\times m$ en $O(nm)$.
 \begin{lstlisting}[style=cpp]
-vector<vector<int>> m(3, vector<int>(4, 0)); // 3x4
-m[1][2] = 7;
+vector<vector<int>> m(3, vector<int>(4,0)); // crear: O(n*m)
+m[1][2] = 7;                                 // acceso: O(1)
 \end{lstlisting}
 \begin{lstlisting}[style=java]
-int[][] m = new int[3][4];
-m[1][2] = 7;
+int[][] m = new int[3][4];   // crear: O(n*m)
+m[1][2] = 7;                 // acceso: O(1)
 \end{lstlisting}
 \begin{lstlisting}[style=py]
-m = [[0]*4 for _ in range(3)]  # ! NO [[0]*4]*3
-m[1][2] = 7                    # (comparten fila)
+m = [[0]*4 for _ in range(3)] # crear: O(n*m)
+m[1][2] = 7                   # acceso: O(1)
+# ! NO [[0]*4]*3 (las filas se comparten)
 \end{lstlisting}
 
 \subsection{Vectores / Listas dinámicas}
 Arreglo que \textbf{crece} solo (ArrayList / \texttt{vector} /
-\texttt{list}); acceso $O(1)$, agregar al final $O(1)$ amortizado. La
-más usada.
+\texttt{list}). \textbf{Complejidad:} acceso por índice $O(1)$; agregar
+al final $O(1)$ amortizado; insertar/borrar en medio $O(n)$; buscar
+$O(n)$.
 \begin{lstlisting}[style=cpp]
 vector<int> v;
-v.push_back(3);  int x = v[0];  int n = v.size();
+v.push_back(3);   // final: O(1) amortizado
+int x = v[0];     // acceso: O(1)
+int n = v.size(); // O(1)
 \end{lstlisting}
 \begin{lstlisting}[style=java]
 ArrayList<Integer> v = new ArrayList<>();
-v.add(3);  int x = v.get(0);  int n = v.size();
+v.add(3);          // final: O(1) amortizado
+int x = v.get(0);  // acceso: O(1)
+int n = v.size();  // O(1)
 \end{lstlisting}
 \begin{lstlisting}[style=py]
 v = []
-v.append(3);  x = v[0];  n = len(v)
+v.append(3)   # final: O(1) amortizado
+x = v[0]      # acceso: O(1)
+n = len(v)    # O(1)
 \end{lstlisting}
 
 \subsection{Listas enlazadas (LinkedList)}
-Nodos enlazados: insertar/eliminar en los \textbf{extremos} es $O(1)$,
-pero el acceso por índice es $O(n)$. Útil como cola o deque.
+Nodos enlazados. \textbf{Complejidad:} insertar/eliminar en los
+\textbf{extremos} $O(1)$; acceso por índice $O(n)$; buscar $O(n)$. Útil
+como cola o deque.
 \begin{lstlisting}[style=cpp]
-list<int> l;                 // o deque<int>
-l.push_front(1);  l.push_back(9);
+list<int> l;              // o deque<int>
+l.push_front(1);          // O(1)
+l.push_back(9);           // O(1)   acceso [i]: O(n)
 \end{lstlisting}
 \begin{lstlisting}[style=java]
 LinkedList<Integer> l = new LinkedList<>();
-l.addFirst(1);  l.addLast(9);  l.removeFirst();
+l.addFirst(1);            // O(1)
+l.addLast(9);             // O(1)
+l.removeFirst();          // O(1)   get(i): O(n)
 \end{lstlisting}
 \begin{lstlisting}[style=py]
 from collections import deque
-d = deque();  d.appendleft(1);  d.append(9)
+d = deque()
+d.appendleft(1)           # O(1)
+d.append(9)               # O(1)
+d.popleft()               # O(1)   d[i]: O(n)
 \end{lstlisting}
 
 \subsection{Conjuntos hash (HashSet)}
-Colección \textbf{sin duplicados} y sin orden; insertar, buscar y
-borrar en $O(1)$ promedio. Para preguntar pertenencia rápido.
+Colección \textbf{sin duplicados} y sin orden. \textbf{Complejidad:}
+insertar, buscar y borrar $O(1)$ promedio ($O(n)$ peor caso).
 \begin{lstlisting}[style=cpp]
 unordered_set<int> s;
-s.insert(3);  bool hay = s.count(3);
+s.insert(3);            // O(1) prom.
+bool hay = s.count(3);  // O(1) prom.
 \end{lstlisting}
 \begin{lstlisting}[style=java]
 HashSet<Integer> s = new HashSet<>();
-s.add(3);  boolean hay = s.contains(3);
+s.add(3);                     // O(1) prom.
+boolean hay = s.contains(3);  // O(1) prom.
 \end{lstlisting}
 \begin{lstlisting}[style=py]
 s = set()
-s.add(3);  hay = 3 in s
+s.add(3)      # O(1) prom.
+hay = 3 in s  # O(1) prom.
 \end{lstlisting}
 
 \subsection{Mapas / Diccionarios hash}
 Pares \textbf{clave $\rightarrow$ valor} sin orden (HashMap /
-\texttt{unordered\_map} / \texttt{dict}); acceso por clave $O(1)$
-promedio. Para contar, indexar o memoizar.
+\texttt{unordered\_map} / \texttt{dict}). \textbf{Complejidad:}
+insertar, acceder y borrar por clave $O(1)$ promedio ($O(n)$ peor
+caso).
 \begin{lstlisting}[style=cpp]
 unordered_map<string,int> m;
-m["a"] = 1;  int v = m["a"];
+m["a"] = 1;      // insertar/asignar: O(1) prom.
+int v = m["a"];  // acceso: O(1) prom.
 \end{lstlisting}
 \begin{lstlisting}[style=java]
 HashMap<String,Integer> m = new HashMap<>();
-m.put("a", 1);  int v = m.getOrDefault("a", 0);
+m.put("a", 1);                    // O(1) prom.
+int v = m.getOrDefault("a", 0);   // O(1) prom.
 \end{lstlisting}
 \begin{lstlisting}[style=py]
 m = {}
-m["a"] = 1;  v = m.get("a", 0)   # get con default
+m["a"] = 1          # O(1) prom.
+v = m.get("a", 0)   # O(1) prom.  (get con default)
 \end{lstlisting}
 
 \subsection{Conjuntos ordenados (TreeSet)}
-Conjunto sin duplicados \textbf{mantenido ordenado}; operaciones
-$O(\log n)$; permite piso, techo y rangos.
+Conjunto sin duplicados \textbf{mantenido ordenado} (árbol balanceado).
+\textbf{Complejidad:} insertar, buscar, borrar y piso/techo
+$O(\log n)$.
 \begin{lstlisting}[style=cpp]
-set<int> s;                  // arbol balanceado
-s.insert(5); s.insert(1);
-int menor = *s.begin();      // 1
-auto it = s.lower_bound(3);  // primer >= 3
+set<int> s;
+s.insert(5); s.insert(1);    // O(log n) c/u
+int menor = *s.begin();      // min: O(1)
+auto it = s.lower_bound(3);  // techo: O(log n)
 \end{lstlisting}
 \begin{lstlisting}[style=java]
 TreeSet<Integer> s = new TreeSet<>();
-s.add(5); s.add(1);
-int menor = s.first();       // 1
-Integer techo = s.ceiling(3);// >= 3
+s.add(5); s.add(1);          // O(log n) c/u
+int menor = s.first();       // O(log n)
+Integer techo = s.ceiling(3);// O(log n)
 \end{lstlisting}
 \begin{lstlisting}[style=py]
-# ! Python NO trae TreeSet built-in:
-# usa sortedcontainers.SortedSet o bisect
+# ! Python NO trae TreeSet built-in
+from sortedcontainers import SortedSet
+s = SortedSet()
+s.add(5); s.add(1)     # O(log n) c/u
+menor = s[0]           # min: O(log n)
+i = s.bisect_left(3)   # techo: O(log n)
 \end{lstlisting}
 
 \subsection{Mapas ordenados (TreeMap)}
-Mapa clave $\rightarrow$ valor \textbf{ordenado por clave};
-$O(\log n)$; permite rango y floor/ceiling de claves.
+Mapa clave $\rightarrow$ valor \textbf{ordenado por clave} (árbol
+balanceado). \textbf{Complejidad:} insertar, acceder, borrar y
+floor/ceiling $O(\log n)$.
 \begin{lstlisting}[style=cpp]
-map<string,int> m;           // ordenado por clave
-m["b"] = 2;  m["a"] = 1;
-auto primera = m.begin();    // clave menor
+map<string,int> m;
+m["b"] = 2;  m["a"] = 1;     // O(log n) c/u
+auto primera = m.begin();    // clave menor: O(1)
 \end{lstlisting}
 \begin{lstlisting}[style=java]
 TreeMap<String,Integer> m = new TreeMap<>();
-m.put("b", 2);  m.put("a", 1);
-String prim = m.firstKey();  // "a"
+m.put("b", 2);  m.put("a", 1);  // O(log n) c/u
+String prim = m.firstKey();     // O(log n)
 \end{lstlisting}
 \begin{lstlisting}[style=py]
-# ! dict conserva orden de INSERCION (3.7+),
-# no orden por clave. Ordenado: sortedcontainers
+# ! dict NO ordena por clave (conserva insercion)
+from sortedcontainers import SortedDict
+m = SortedDict()
+m["b"] = 2; m["a"] = 1   # O(log n) c/u
+prim = m.peekitem(0)     # menor clave: O(log n)
 \end{lstlisting}
 
 \section{Disjoint Set Union (DSU)}
