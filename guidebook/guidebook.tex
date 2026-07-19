@@ -520,7 +520,142 @@ dig = ord("7") - ord("0")  # 7
 %---------------------------------------------------------------------------
 
 \section{Estructuras de Datos (Data Structures)}
-\pendiente
+
+\subsection{Arreglos (Arrays)}
+Colección de tamaño \textbf{fijo} del mismo tipo; acceso $O(1)$ por
+índice. Úsalos cuando sabes el tamaño de antemano.
+\begin{lstlisting}[style=cpp]
+int a[5] = {1,2,3,4,5};   // C++: tamano fijo
+a[0] = 10;
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+int[] a = new int[5];     // Java
+a[0] = 10;  int n = a.length;  // .length sin ()
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+a = [0] * 5               # Python: no hay arreglo fijo,
+a[0] = 10                 # se usa list
+\end{lstlisting}
+
+\subsection{Matrices (Arreglos 2D)}
+Arreglo bidimensional (filas $\times$ columnas), acceso $O(1)$ por
+\texttt{[i][j]}. Para grids, tableros y DP en dos dimensiones.
+\begin{lstlisting}[style=cpp]
+vector<vector<int>> m(3, vector<int>(4, 0)); // 3x4
+m[1][2] = 7;
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+int[][] m = new int[3][4];
+m[1][2] = 7;
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+m = [[0]*4 for _ in range(3)]  # ! NO [[0]*4]*3
+m[1][2] = 7                    # (comparten fila)
+\end{lstlisting}
+
+\subsection{Vectores / Listas dinámicas}
+Arreglo que \textbf{crece} solo (ArrayList / \texttt{vector} /
+\texttt{list}); acceso $O(1)$, agregar al final $O(1)$ amortizado. La
+más usada.
+\begin{lstlisting}[style=cpp]
+vector<int> v;
+v.push_back(3);  int x = v[0];  int n = v.size();
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+ArrayList<Integer> v = new ArrayList<>();
+v.add(3);  int x = v.get(0);  int n = v.size();
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+v = []
+v.append(3);  x = v[0];  n = len(v)
+\end{lstlisting}
+
+\subsection{Listas enlazadas (LinkedList)}
+Nodos enlazados: insertar/eliminar en los \textbf{extremos} es $O(1)$,
+pero el acceso por índice es $O(n)$. Útil como cola o deque.
+\begin{lstlisting}[style=cpp]
+list<int> l;                 // o deque<int>
+l.push_front(1);  l.push_back(9);
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+LinkedList<Integer> l = new LinkedList<>();
+l.addFirst(1);  l.addLast(9);  l.removeFirst();
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+from collections import deque
+d = deque();  d.appendleft(1);  d.append(9)
+\end{lstlisting}
+
+\subsection{Conjuntos hash (HashSet)}
+Colección \textbf{sin duplicados} y sin orden; insertar, buscar y
+borrar en $O(1)$ promedio. Para preguntar pertenencia rápido.
+\begin{lstlisting}[style=cpp]
+unordered_set<int> s;
+s.insert(3);  bool hay = s.count(3);
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+HashSet<Integer> s = new HashSet<>();
+s.add(3);  boolean hay = s.contains(3);
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+s = set()
+s.add(3);  hay = 3 in s
+\end{lstlisting}
+
+\subsection{Mapas / Diccionarios hash}
+Pares \textbf{clave $\rightarrow$ valor} sin orden (HashMap /
+\texttt{unordered\_map} / \texttt{dict}); acceso por clave $O(1)$
+promedio. Para contar, indexar o memoizar.
+\begin{lstlisting}[style=cpp]
+unordered_map<string,int> m;
+m["a"] = 1;  int v = m["a"];
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+HashMap<String,Integer> m = new HashMap<>();
+m.put("a", 1);  int v = m.getOrDefault("a", 0);
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+m = {}
+m["a"] = 1;  v = m.get("a", 0)   # get con default
+\end{lstlisting}
+
+\subsection{Conjuntos ordenados (TreeSet)}
+Conjunto sin duplicados \textbf{mantenido ordenado}; operaciones
+$O(\log n)$; permite piso, techo y rangos.
+\begin{lstlisting}[style=cpp]
+set<int> s;                  // arbol balanceado
+s.insert(5); s.insert(1);
+int menor = *s.begin();      // 1
+auto it = s.lower_bound(3);  // primer >= 3
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+TreeSet<Integer> s = new TreeSet<>();
+s.add(5); s.add(1);
+int menor = s.first();       // 1
+Integer techo = s.ceiling(3);// >= 3
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+# ! Python NO trae TreeSet built-in:
+# usa sortedcontainers.SortedSet o bisect
+\end{lstlisting}
+
+\subsection{Mapas ordenados (TreeMap)}
+Mapa clave $\rightarrow$ valor \textbf{ordenado por clave};
+$O(\log n)$; permite rango y floor/ceiling de claves.
+\begin{lstlisting}[style=cpp]
+map<string,int> m;           // ordenado por clave
+m["b"] = 2;  m["a"] = 1;
+auto primera = m.begin();    // clave menor
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+TreeMap<String,Integer> m = new TreeMap<>();
+m.put("b", 2);  m.put("a", 1);
+String prim = m.firstKey();  // "a"
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+# ! dict conserva orden de INSERCION (3.7+),
+# no orden por clave. Ordenado: sortedcontainers
+\end{lstlisting}
 
 \section{Disjoint Set Union (DSU)}
 \pendiente
