@@ -689,8 +689,79 @@ m["b"] = 2; m["a"] = 1   # O(log n) c/u
 prim = m.peekitem(0)     # menor clave: O(log n)
 \end{lstlisting}
 
-\section{Disjoint Set Union (DSU)}
-\pendiente
+\subsection{Pilas (Stack)}
+Estructura \textbf{LIFO} (último en entrar, primero en salir).
+\textbf{Complejidad:} push, pop y consultar el tope $O(1)$. Para DFS
+iterativo, paréntesis balanceados, deshacer.
+\begin{lstlisting}[style=cpp]
+stack<int> pila;
+pila.push(3);          // O(1)
+int tope = pila.top(); // O(1)
+pila.pop();            // O(1)
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+Deque<Integer> pila = new ArrayDeque<>(); // no uses Stack
+pila.push(3);              // O(1)
+int tope = pila.peek();    // O(1)
+pila.pop();                // O(1)
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+pila = []
+pila.append(3)   # push: O(1)
+tope = pila[-1]  # O(1)
+pila.pop()       # O(1)
+\end{lstlisting}
+
+\subsection{Colas (Queue)}
+Estructura \textbf{FIFO} (primero en entrar, primero en salir).
+\textbf{Complejidad:} encolar y desencolar $O(1)$. Base del BFS.
+\begin{lstlisting}[style=cpp]
+queue<int> cola;
+cola.push(3);              // encolar: O(1)
+int frente = cola.front(); // O(1)
+cola.pop();                // desencolar: O(1)
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+Queue<Integer> cola = new ArrayDeque<>();
+cola.offer(3);             // encolar: O(1)
+int frente = cola.peek();  // O(1)
+cola.poll();               // desencolar: O(1)
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+from collections import deque
+cola = deque()
+cola.append(3)   # encolar: O(1)
+frente = cola[0] # O(1)
+cola.popleft()   # desencolar: O(1)
+\end{lstlisting}
+
+\subsection{Colas de prioridad (Priority Queue / Heap)}
+Devuelve siempre el elemento de mayor (o menor) prioridad.
+\textbf{Complejidad:} insertar y extraer $O(\log n)$; consultar el tope
+$O(1)$. Para Dijkstra, Prim, k-ésimo mayor.
+\begin{lstlisting}[style=cpp]
+priority_queue<int> pq;    // MAX-heap por defecto
+pq.push(3);          // O(log n)
+int mx = pq.top();   // O(1)  (el mayor)
+pq.pop();            // O(log n)
+// min-heap:
+priority_queue<int, vector<int>, greater<int>> pqMin;
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+PriorityQueue<Integer> pq = new PriorityQueue<>(); // MIN-heap
+pq.offer(3);         // O(log n)
+int mn = pq.peek();  // O(1)  (el menor)
+pq.poll();           // O(log n)
+// max-heap: new PriorityQueue<>(Collections.reverseOrder())
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+import heapq
+pq = []
+heapq.heappush(pq, 3)  # O(log n)
+mn = pq[0]             # O(1)  (el menor; heapq es MIN-heap)
+heapq.heappop(pq)      # O(log n)
+# max-heap: guarda los valores negados (-x)
+\end{lstlisting}
 
 %---------------------------------------------------------------------------
 \part{Ordenamiento y Búsqueda}
@@ -742,6 +813,9 @@ prim = m.peekitem(0)     # menor clave: O(log n)
 \pendiente
 
 \section{Árboles (Trees)}
+\pendiente
+
+\section{Disjoint Set Union (DSU)}
 \pendiente
 
 %---------------------------------------------------------------------------
