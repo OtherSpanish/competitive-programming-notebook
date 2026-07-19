@@ -11,6 +11,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
 \usepackage{microtype}
+\usepackage{amsmath}   % \text en modo matematico
 % Nombres en español (sin depender de babel-spanish, que no está instalado aquí)
 \renewcommand{\contentsname}{Índice}
 \renewcommand{\partname}{Parte}
@@ -771,7 +772,114 @@ heapq.heappop(pq)      # O(log n)
 \pendiente
 
 \section{Búsqueda Binaria (Binary Search)}
-\pendiente
+Requiere datos \textbf{ordenados} o un \textbf{predicado monótono}
+(pasa de falso a verdadero una sola vez). \textbf{Complejidad:}
+$O(\log n)$ en discreto; $O(\text{iter})$ en reales;
+$O(L\log n)$ con cadenas. Tip: usa \texttt{lo+(hi-lo)/2} para el
+\texttt{mid} y evitar overflow.
+
+\subsection{En arreglo ordenado}
+Primer índice $\geq x$ (\texttt{lower\_bound}) o $> x$
+(\texttt{upper\_bound}).
+\begin{lstlisting}[style=cpp]
+int i = lower_bound(a.begin(),a.end(),x)-a.begin(); // >= x
+int j = upper_bound(a.begin(),a.end(),x)-a.begin(); // >  x
+bool hay = binary_search(a.begin(),a.end(),x);
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+int idx = Arrays.binarySearch(a, x); // >=0 si existe
+// lower_bound manual:
+int lo=0, hi=a.length;
+while (lo<hi){ int m=(lo+hi)>>>1;
+  if(a[m]<x) lo=m+1; else hi=m; }  // lo = primer >= x
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+from bisect import bisect_left, bisect_right
+i = bisect_left(a, x)    # primer >= x
+j = bisect_right(a, x)   # primer >  x
+\end{lstlisting}
+
+\subsection{Menor $x$ que cumple}
+Predicado monótono F..F\,T..T; busca la \textbf{frontera} izquierda.
+\begin{lstlisting}[style=cpp]
+long long res=-1;
+while(lo<=hi){ long long mid=lo+(hi-lo)/2;
+  if(cumple(mid)){res=mid; hi=mid-1;} // sirve -> izq
+  else lo=mid+1; }
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+long res=-1;
+while(lo<=hi){ long mid=lo+(hi-lo)/2;
+  if(cumple(mid)){res=mid; hi=mid-1;}
+  else lo=mid+1; }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+res = -1
+while lo <= hi:
+    mid = (lo + hi) // 2
+    if cumple(mid): res = mid; hi = mid - 1
+    else: lo = mid + 1
+\end{lstlisting}
+
+\subsection{Mayor $x$ que cumple}
+Predicado monótono T..T\,F..F; busca la \textbf{frontera} derecha
+(solo cambian dos líneas respecto al anterior).
+\begin{lstlisting}[style=cpp]
+long long res=-1;
+while(lo<=hi){ long long mid=lo+(hi-lo)/2;
+  if(cumple(mid)){res=mid; lo=mid+1;} // sirve -> der
+  else hi=mid-1; }
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+long res=-1;
+while(lo<=hi){ long mid=lo+(hi-lo)/2;
+  if(cumple(mid)){res=mid; lo=mid+1;}
+  else hi=mid-1; }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+res = -1
+while lo <= hi:
+    mid = (lo + hi) // 2
+    if cumple(mid): res = mid; lo = mid + 1
+    else: hi = mid - 1
+\end{lstlisting}
+
+\subsection{Sobre reales}
+Respuesta continua (raíces, puntos de equilibrio); iteras un número
+fijo de veces en vez de comparar $lo\leq hi$.
+\begin{lstlisting}[style=cpp]
+for(int it=0; it<100; it++){ double mid=(lo+hi)/2;
+  if(cumple(mid)) hi=mid; else lo=mid; }
+// lo ~ hi = frontera
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+for(int it=0; it<100; it++){ double mid=(lo+hi)/2;
+  if(cumple(mid)) hi=mid; else lo=mid; }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+for _ in range(100):
+    mid = (lo + hi) / 2
+    if cumple(mid): hi = mid
+    else: lo = mid
+\end{lstlisting}
+
+\subsection{Con strings}
+Igual que en arreglo ordenado, pero comparación lexicográfica: cada
+comparación cuesta $O(L)$, total $O(L\log n)$.
+\begin{lstlisting}[style=cpp]
+// vector<string> s ordenado
+int i = lower_bound(s.begin(),s.end(),string("caro"))
+        - s.begin();
+bool hay = binary_search(s.begin(),s.end(),string("caro"));
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+int idx = Arrays.binarySearch(s, "caro"); // usa compareTo
+// manual: if(s[m].compareTo(x) < 0) lo=m+1; else hi=m;
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+i = bisect_left(s, "caro")   # str comparan lexicografico
+hay = i < len(s) and s[i] == "caro"
+\end{lstlisting}
 
 %---------------------------------------------------------------------------
 \part{Matemáticas}
