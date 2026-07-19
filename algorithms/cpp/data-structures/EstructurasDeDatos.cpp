@@ -4,10 +4,13 @@
 #include <vector>
 #include <list>
 #include <deque>
+#include <stack>
+#include <queue>
 #include <set>
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
+#include <functional>   // greater<> para min-heap
 #include <string>
 using namespace std;
 
@@ -71,10 +74,37 @@ void mapasYDiccionarios() {
     auto primera = tmap.begin();           // clave menor: O(1)
 }
 
+void pilasColasYPrioridad() {
+    // Pila (stack): LIFO. push/pop/top O(1). DFS iterativo, parentesis.
+    stack<int> pila;
+    pila.push(3);              // O(1)
+    int tope = pila.top();     // O(1)
+    pila.pop();                // O(1)
+
+    // Cola (queue): FIFO. push/pop/front O(1). Base del BFS.
+    queue<int> cola;
+    cola.push(3);              // encolar: O(1)
+    int frente = cola.front(); // O(1)
+    cola.pop();                // desencolar: O(1)
+
+    // Cola de prioridad (heap): MAX-heap por defecto.
+    // push/pop O(log n); top O(1). Para Dijkstra, Prim, k-esimo mayor.
+    priority_queue<int> pq;
+    pq.push(5);                // O(log n)
+    pq.push(1);                // O(log n)
+    int mayor = pq.top();      // O(1)   (el mayor: 5)
+    pq.pop();                  // O(log n)
+
+    // MIN-heap:
+    priority_queue<int, vector<int>, greater<int>> pqMin;
+    pqMin.push(5);             // O(log n)   top() da el menor
+}
+
 int main() {
     arreglosYMatrices();
     vectoresYListas();
     conjuntos();
     mapasYDiccionarios();
+    pilasColasYPrioridad();
     return 0;
 }
