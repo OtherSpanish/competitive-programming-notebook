@@ -1,0 +1,232 @@
+%==============================================================================
+%  Competitive Programming Notebook — Guidebook
+%  Autor: Juan  ·  Universidad del Bosque
+%  Formato: doble columna (izquierda / derecha), estilo team notebook ICPC
+%  Compilar con: pdflatex guidebook.tex   (dos veces, para el índice)
+%==============================================================================
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+% ---- Codificación e idioma -------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+% Nombres en español (sin depender de babel-spanish, que no está instalado aquí)
+\renewcommand{\contentsname}{Índice}
+\renewcommand{\partname}{Parte}
+
+% ---- Diseño de página ------------------------------------------------------
+\usepackage[a4paper,margin=1.6cm,columnsep=0.8cm]{geometry}
+\setlength{\columnseprule}{0.4pt}             % línea fina que divide izquierda/derecha
+\usepackage{xcolor}
+\definecolor{acento}{RGB}{20,45,85}           % azul marino formal
+\definecolor{acentoClaro}{RGB}{70,110,170}
+\definecolor{grisCodigo}{RGB}{245,245,247}
+\definecolor{comentario}{RGB}{95,120,95}
+\definecolor{palabraClave}{RGB}{30,70,150}
+\definecolor{cadena}{RGB}{150,80,40}
+\def\columnseprulecolor{\color{gray!40}}
+
+% ---- Encabezados y pie -----------------------------------------------------
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape Competitive Programming Notebook}
+\fancyhead[R]{\small\nouppercase{\itshape\rightmark}}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{acento}}{\thesection}{0.6em}{}
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries\color{acentoClaro}}{\thesubsection}{0.5em}{}
+\titleformat{\part}
+  {\normalfont\Large\bfseries\color{acento}\filcenter}{\partname~\thepart}{0.5em}{}
+
+% ---- Resaltado de código ---------------------------------------------------
+\usepackage{listings}
+\lstset{
+  backgroundcolor=\color{grisCodigo},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{palabraClave}\bfseries,
+  commentstyle=\color{comentario}\itshape,
+  stringstyle=\color{cadena},
+  numbers=left, numberstyle=\tiny\color{gray}, numbersep=5pt,
+  showstringspaces=false, breaklines=true, tabsize=2,
+  frame=single, rulecolor=\color{gray!40},
+  columns=fullflexible, keepspaces=true,
+  extendedchars=true,
+  literate=
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1 {¡}{{!`}}1 {°}{{\textdegree}}1
+}
+\lstdefinestyle{cpp}{language=C++}
+\lstdefinestyle{java}{language=Java}
+\lstdefinestyle{py}{language=Python}
+
+% ---- Enlaces (índice navegable) --------------------------------------------
+\usepackage[colorlinks=true,linkcolor=acento,urlcolor=acentoClaro]{hyperref}
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+
+% Marcador de secciones aún sin contenido
+\newcommand{\pendiente}{\textit{\color{gray}Contenido en desarrollo.}\par\medskip}
+
+%==============================================================================
+\begin{document}
+
+% ===== PORTADA =============================================================
+\onecolumn
+\thispagestyle{empty}
+\begin{titlepage}
+  \centering
+  \vspace*{\fill}
+
+  {\large\scshape Universidad del Bosque}\\[4pt]
+  {\normalsize Facultad de Ingeniería}\\[2pt]
+  {\normalsize Ingeniería de Software \& Ingeniería en Robótica}\\[24pt]
+
+  \color{acento}\rule{\linewidth}{1.2pt}\\[8pt]
+  {\Huge\bfseries Competitive Programming}\\[10pt]
+  {\Huge\bfseries Notebook}\\[10pt]
+  {\large\itshape Algoritmos, estructuras de datos y plantillas}\\[8pt]
+  {\large C\texttt{++} \quad$\cdot$\quad Java \quad$\cdot$\quad Python}\\[6pt]
+  \color{acento}\rule{\linewidth}{1.2pt}\\[28pt]
+
+  \color{black}
+  {\large\bfseries Juan}\\[4pt]
+  {\normalsize Estudiante — 4.\textsuperscript{o} semestre}\\[2pt]
+  {\normalsize Doble titulación: Software \& Robótica}\\[36pt]
+
+  {\normalsize Bogotá, Colombia \quad$\cdot$\quad 2026}
+
+  \vspace*{\fill}
+\end{titlepage}
+
+% ===== ÍNDICE ==============================================================
+\thispagestyle{empty}
+\tableofcontents
+\clearpage
+
+% ===== CUERPO (doble columna) ==============================================
+\twocolumn
+
+%---------------------------------------------------------------------------
+\part{Fundamentos}
+%---------------------------------------------------------------------------
+
+\section{Entrada / Salida Rápida (Fast I/O)}
+De más lento (didáctico) a más rápido (para TLE ajustado). Usa el lector por
+bytes solo cuando haya del orden de $10^6$–$10^7$ lecturas.
+
+\subsection{C\texttt{++} (g\texttt{++} 8.1, -std=c\texttt{++}17)}
+\begin{lstlisting}[style=cpp]
+#include <iostream>
+using namespace std;
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);           // no mezclar con scanf
+    int entero;
+    cin >> entero;
+    cout << entero << "\n";     // "\n", nunca endl
+}
+\end{lstlisting}
+
+\subsection{Java}
+\begin{lstlisting}[style=java]
+BufferedReader br = new BufferedReader(
+    new InputStreamReader(System.in));
+StringTokenizer st =
+    new StringTokenizer(br.readLine());
+int entero = Integer.parseInt(st.nextToken());
+\end{lstlisting}
+
+\subsection{Python (3.7.4)}
+\begin{lstlisting}[style=py]
+import sys
+def main():
+    datos = sys.stdin.buffer.read().split()
+    entero = int(datos[0])
+    sys.stdout.write(f"{entero}\n")
+main()
+\end{lstlisting}
+
+\section{Formateo de Salida}
+\pendiente
+
+\section{Condicionales y Ciclos}
+\pendiente
+
+%---------------------------------------------------------------------------
+\part{Estructuras de Datos}
+%---------------------------------------------------------------------------
+
+\section{Estructuras de Datos (Data Structures)}
+\pendiente
+
+\section{Disjoint Set Union (DSU)}
+\pendiente
+
+%---------------------------------------------------------------------------
+\part{Ordenamiento y Búsqueda}
+%---------------------------------------------------------------------------
+
+\section{Ordenamiento y Búsqueda (Sorting \& Searching)}
+\pendiente
+
+\section{Búsqueda Binaria (Binary Search)}
+\pendiente
+
+%---------------------------------------------------------------------------
+\part{Matemáticas}
+%---------------------------------------------------------------------------
+
+\section{Matemáticas (Math)}
+\pendiente
+
+\section{Teoría de Números (Number Theory)}
+\pendiente
+
+\section{Combinatoria (Combinatorics)}
+\pendiente
+
+\section{Máscaras de Bits (Bitmasking)}
+\pendiente
+
+\section{Geometría (Geometry)}
+\pendiente
+
+%---------------------------------------------------------------------------
+\part{Técnicas Algorítmicas}
+%---------------------------------------------------------------------------
+
+\section{Programación Dinámica (Dynamic Programming)}
+\pendiente
+
+\section{Algoritmos Voraces (Greedy)}
+\pendiente
+
+\section{Ad-hoc y Simulación}
+\pendiente
+
+%---------------------------------------------------------------------------
+\part{Grafos y Árboles}
+%---------------------------------------------------------------------------
+
+\section{Grafos (Graphs)}
+\pendiente
+
+\section{Árboles (Trees)}
+\pendiente
+
+%---------------------------------------------------------------------------
+\part{Cadenas}
+%---------------------------------------------------------------------------
+
+\section{Cadenas (Strings)}
+\pendiente
+
+\end{document}
