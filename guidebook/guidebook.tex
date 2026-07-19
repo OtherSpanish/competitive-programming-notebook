@@ -123,48 +123,100 @@ De más lento (didáctico) a más rápido (para TLE ajustado). Usa el lector por
 bytes solo cuando haya del orden de $10^6$–$10^7$ lecturas.
 
 \subsection{C\texttt{++} (g\texttt{++} 8.1, -std=c\texttt{++}17)}
-\textbf{Rápido:} desactiva la sincronización con C (una sola vez al
-inicio). Punto dulce para casi todo.
+\textbf{Tier 1 — Básico:} \texttt{cin} / \texttt{cout}.
 \begin{lstlisting}[style=cpp]
-#include <iostream>
-using namespace std;
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(nullptr);           // no mezclar con scanf
-    int entero; long long largo;
-    cin >> entero >> largo;
-    cout << entero << "\n";     // "\n", nunca endl (endl frena)
-}
+int entero; double decimal; string palabra, linea;
+cin >> entero >> decimal >> palabra;  // >> lee UN token
+// ! cin >> deja el '\n' pendiente;
+// ! el 1er getline sale VACÍO -> hay que ignorarlo
+cin.ignore();
+getline(cin, linea);                  // línea completa
 \end{lstlisting}
-\textbf{Más rápido:} lector propio por bytes con \texttt{fread}.
-Úsalo solo con $10^6$–$10^7$ lecturas.
+\textbf{Tier 2 — Rápido:} desactiva la sync con C (una vez en
+\texttt{main}). Punto dulce para casi todo.
+\begin{lstlisting}[style=cpp]
+ios_base::sync_with_stdio(false);
+cin.tie(nullptr);            // ! no mezclar con scanf/printf
+cout << entero << "\n";      // "\n", nunca endl (endl frena)
+\end{lstlisting}
+\textbf{Tier 3 — Más rápido:} lector por bytes con
+\texttt{fread}. Solo con $10^6$–$10^7$ lecturas.
 \begin{lstlisting}[style=cpp]
 struct FastReader {
     static const int TAM = 1 << 16;   // 64 KB
-    char bufer[TAM]; int puntero = 0, leidos = 0;
+    char bufer[TAM];
+    int puntero = 0, leidos = 0;
+
     int leer() {
         if (puntero == leidos) {
-            leidos = fread(bufer, 1, TAM, stdin);
+            leidos = (int) fread(bufer, 1, TAM, stdin);
             puntero = 0;
         }
-        return leidos == 0 ? -1 : bufer[puntero++];
+        return leidos == 0 ? -1 : bufer[puntero++]; // -1=EOF
     }
     int nextInt() {
-        int resultado = 0, c = leer();
-        while (c <= ' ') c = leer();       // saltar blancos
-        bool negativo = (c == '-');
-        if (negativo) c = leer();
-        while (c >= '0' && c <= '9') {
-            resultado = resultado * 10 + (c - '0');
-            c = leer();
+        int resultado = 0, b = leer();
+        while (b <= ' ') b = leer();      // saltar blancos
+        bool negativo = (b == '-');
+        if (negativo) b = leer();
+        while (b >= '0' && b <= '9') {
+            resultado = resultado * 10 + (b - '0'); b = leer();
         }
         return negativo ? -resultado : resultado;
+    }
+    long long nextLong() {
+        long long resultado = 0; int b = leer();
+        while (b <= ' ') b = leer();
+        bool negativo = (b == '-');
+        if (negativo) b = leer();
+        while (b >= '0' && b <= '9') {
+            resultado = resultado * 10 + (b - '0'); b = leer();
+        }
+        return negativo ? -resultado : resultado;
+    }
+    double nextDouble() {
+        double resultado = 0, divisor = 1; int b = leer();
+        while (b <= ' ') b = leer();
+        bool negativo = (b == '-');
+        if (negativo) b = leer();
+        while (b >= '0' && b <= '9') {
+            resultado = resultado * 10 + (b - '0'); b = leer();
+        }
+        if (b == '.') {
+            b = leer();
+            while (b >= '0' && b <= '9') {
+                resultado += (b - '0') / (divisor *= 10); b = leer();
+            }
+        }
+        return negativo ? -resultado : resultado;
+    }
+    string next() {                       // un token
+        string s; int b = leer();
+        while (b <= ' ') b = leer();
+        while (b > ' ') { s += (char) b; b = leer(); }
+        return s;
+    }
+    string nextLine() {                   // línea completa
+        string s; int b = leer();
+        while (b != '\n' && b != -1) {
+            if (b != '\r') s += (char) b; b = leer();
+        }
+        return s;
     }
 };
 \end{lstlisting}
 
 \subsection{Java}
-\textbf{Intermedio:} \texttt{BufferedReader} +
+\textbf{Tier 1 — Básico:} \texttt{Scanner} + \texttt{System.out}.
+\begin{lstlisting}[style=java]
+Scanner sc = new Scanner(System.in);
+int entero = sc.nextInt();
+String palabra = sc.next();     // un token
+// ! tras nextInt/next, el 1er nextLine sale VACÍO:
+sc.nextLine();                  // quema la línea pendiente
+String linea = sc.nextLine();   // ahora sí la línea real
+\end{lstlisting}
+\textbf{Tier 2 — Intermedio:} \texttt{BufferedReader} +
 \texttt{StringTokenizer} + \texttt{PrintWriter}. Estándar en CP.
 \begin{lstlisting}[style=java]
 BufferedReader lector = new BufferedReader(
@@ -180,40 +232,288 @@ int segundo = Integer.parseInt(separador.nextToken());
 escritor.println(primero + segundo);
 escritor.flush();   // ! OBLIGATORIO al final, si no, no imprime
 \end{lstlisting}
-\textbf{Leer un arreglo} de una línea:
+\textbf{Tier 3 — StreamTokenizer:} veloz para leer números.
 \begin{lstlisting}[style=java]
-int n = Integer.parseInt(lector.readLine().trim());
-int[] arreglo = new int[n];
-separador = new StringTokenizer(lector.readLine());
-for (int i = 0; i < n; i++)
-    arreglo[i] = Integer.parseInt(separador.nextToken());
+StreamTokenizer in = new StreamTokenizer(
+    new BufferedReader(new InputStreamReader(System.in)));
+in.nextToken();
+int entero = (int) in.nval;  // ! nval es double: ojo con > 2^53
+\end{lstlisting}
+\textbf{Tier 4 — Más rápido:} lector por bytes
+(\texttt{DataInputStream}). El más veloz sin librerías.
+\begin{lstlisting}[style=java]
+static class FastReader {
+    private final DataInputStream flujo;
+    private final byte[] bufer = new byte[1 << 16];
+    private int puntero = 0, leidos = 0;
+
+    FastReader() { flujo = new DataInputStream(System.in); }
+
+    int nextInt() throws IOException {
+        int resultado = 0, b = leer();
+        while (b <= ' ') b = leer();
+        boolean negativo = (b == '-');
+        if (negativo) b = leer();
+        while (b >= '0' && b <= '9') {
+            resultado = resultado * 10 + (b - '0'); b = leer();
+        }
+        return negativo ? -resultado : resultado;
+    }
+    long nextLong() throws IOException {
+        long resultado = 0; int b = leer();
+        while (b <= ' ') b = leer();
+        boolean negativo = (b == '-');
+        if (negativo) b = leer();
+        while (b >= '0' && b <= '9') {
+            resultado = resultado * 10 + (b - '0'); b = leer();
+        }
+        return negativo ? -resultado : resultado;
+    }
+    private int leer() throws IOException {
+        if (puntero == leidos) {
+            leidos = flujo.read(bufer, 0, bufer.length);
+            puntero = 0;
+        }
+        return leidos == -1 ? -1 : bufer[puntero++];
+    }
+}
 \end{lstlisting}
 
 \subsection{Python (3.7.4)}
-\textbf{Intermedio:} \texttt{readline} + \texttt{split} +
-\texttt{map} (más rápido que \texttt{input()}).
+\textbf{Tier 1 — Básico:} \texttt{input()} / \texttt{print()}.
+\begin{lstlisting}[style=py]
+entero = int(input())                   # lee UNA línea
+primero, segundo = map(int, input().split())
+\end{lstlisting}
+\textbf{Tier 2 — Intermedio:} \texttt{sys.stdin}/\texttt{stdout}
+(más rápido que \texttt{input()}).
 \begin{lstlisting}[style=py]
 import sys
 entrada = sys.stdin.readline
-primero, segundo = map(int, entrada().split())
+salida = sys.stdout.write
+a, b = map(int, entrada().split())
+salida(f"{a + b}\n")
 \end{lstlisting}
-\textbf{Más rápido:} leer TODO el \texttt{stdin} de golpe y
-tokenizar. La salida, en UNA sola escritura.
+\textbf{Tier 3 — Más rápido:} leer TODO el \texttt{stdin} de
+golpe y tokenizar; la salida, en UNA sola escritura.
 \begin{lstlisting}[style=py]
 import sys
 def main():
     datos = sys.stdin.buffer.read().split()
-    n = int(datos[0])
-    arreglo = list(map(int, datos[1:1 + n]))
-    sys.stdout.write(f"{sum(arreglo)}\n")
+    indice = 0
+    def siguiente_int():      # avanza por los tokens
+        nonlocal indice
+        valor = int(datos[indice]); indice += 1
+        return valor
+
+    n = siguiente_int()
+    total = 0
+    for _ in range(n):
+        total += siguiente_int()
+    sys.stdout.write(f"{total}\n")
 main()
+
+# Nota: en Python 32-bit ojo con la memoria (~2 GB).
+# Para DFS recursivo: sys.setrecursionlimit(300000)
 \end{lstlisting}
 
 \section{Formateo de Salida}
-\pendiente
+
+\subsection{C\texttt{++} (\texttt{printf})}
+\begin{lstlisting}[style=cpp]
+printf("%d\n", 42);          // 42     entero
+printf("%lld\n", largo);     // long long: SIEMPRE %lld
+printf("%5d\n", 42);         // "   42" ancho 5, derecha
+printf("%-5d|\n", 42);       // "42   |" izquierda
+printf("%05d\n", 42);        // 00042  rellena ceros
+printf("%+d\n", 42);         // +42    fuerza signo
+printf("%x  %X\n", 255,255); // ff  FF hexadecimal
+printf("%.2f\n", 3.14159);   // 3.14   (lo mas usado en CP)
+printf("%.0f\n", 3.7);       // 4      REDONDEA
+printf("%e\n", 31415.9);     // 3.141590e+04 cientifica
+printf("%c  %s\n", 'A', "hola");
+printf("100%%\n");           // 100%   %% = literal
+// ! NO uses %n en C (peligroso). scanf: double con %lf
+\end{lstlisting}
+
+\subsection{Java (\texttt{System.out.printf})}
+\begin{lstlisting}[style=java]
+System.out.printf("%d%n", 42);          // 42
+System.out.printf("%,d%n", 1000000);    // 1,000,000 miles
+System.out.printf("%05d%n", 42);        // 00042
+System.out.printf("%+d%n", 42);         // +42
+System.out.printf("%x%n", 255);         // ff
+System.out.printf("%.2f%n", 3.14159);   // 3.14
+System.out.printf("%-10s|%n", "hi");    // "hi        |"
+System.out.printf("%b%n", true);        // true
+// %n = salto portable (mejor que \n);  %% = %
+\end{lstlisting}
+
+\subsection{Python (3 formas)}
+\begin{lstlisting}[style=py]
+# 1) operador % (estilo C)
+print("%d  %.2f" % (42, 3.14))
+# 2) str.format
+print("{:05d}".format(42))     # 00042
+print("{:,}".format(1000000))  # 1,000,000
+print("{:.1%}".format(0.25))   # 25.0%
+# 3) f-strings (lo mas limpio, 3.6+)
+x = 3.14159
+print(f"{x:.2f}")              # 3.14
+print(f"{42:+d}  {255:x}")     # +42  ff
+\end{lstlisting}
 
 \section{Condicionales y Ciclos}
-\pendiente
+
+\subsection{C\texttt{++}}
+\begin{lstlisting}[style=cpp]
+if (x > 0) cout << "pos";
+else if (x < 0) cout << "neg";
+else cout << "cero";
+
+string s = (x >= 0) ? "no neg" : "neg";  // ternario
+
+switch (x) {                 // solo int/char, NO string
+    case 1: /*...*/ break;   // ! sin break: fall-through
+    case 2: case 3: /*...*/ break;   // varios case = OR
+    default: /*...*/ ;
+}
+if (int r = x % 2; r == 0) {}   // C++17: if con init
+
+for (int i = 0; i < n; i++) {}
+for (int v : datos) {}          // range-based (sin indice)
+for (int &v : datos) v *= 2;    // & modifica el original
+while (c < n) c++;
+do { c--; } while (c > 0);      // ejecuta AL MENOS 1 vez
+// break / continue.
+// ! C++ NO tiene break con etiqueta: usa bandera o return
+\end{lstlisting}
+
+\subsection{Java}
+\begin{lstlisting}[style=java]
+if (x > 0) {} else if (x < 0) {} else {}
+
+String s = (x >= 0) ? "no neg" : "neg";  // ternario
+
+switch (x) {
+    case 1: /*...*/ break;   // ! sin break: fall-through
+    case 2: case 3: /*...*/ break;
+    default: /*...*/ ;
+}
+
+for (int i = 0; i < n; i++) {}
+for (int v : arreglo) {}        // for-each
+while (c < n) c++;
+do { c--; } while (c > 0);      // al menos 1 vez
+
+externo:                        // EXCLUSIVO: break con etiqueta
+for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+        if (i + j == 3) break externo;  // rompe el externo
+\end{lstlisting}
+
+\subsection{Python (3.7.4)}
+\begin{lstlisting}[style=py]
+if x > 0:
+    pass
+elif x < 0:        # 'elif', no 'else if'
+    pass
+else:
+    pass
+
+s = "no neg" if x >= 0 else "neg"   # ternario
+
+# ! 3.7 NO tiene match/case (3.10). Usa dict de despacho:
+opciones = {1: "uno", 2: "dos", 3: "tres"}
+print(opciones.get(x, "otro"))      # .get con default
+
+for i in range(n):     # range(inicio, fin, paso), fin excl.
+    pass
+for v in datos:        # for-each idiomatico
+    pass
+for i, v in enumerate(datos):   # indice + valor
+    pass
+while c < n:
+    c += 1
+while True:            # ! Python NO tiene do-while
+    c -= 1
+    if c <= 0:
+        break
+
+for i in range(5):     # EXCLUSIVO: for-else
+    if i == 99:
+        break
+else:                  # corre solo si NO hubo break
+    print("sin break")
+\end{lstlisting}
+
+\section{Conversiones, Parseos y Casteos}
+
+\subsection{C\texttt{++}}
+\begin{lstlisting}[style=cpp]
+// string -> numero (parseo)
+int e = stoi("42");
+long long l = stoll("10000000000");
+double d = stod("3.14");
+int bin = stoi("1010", nullptr, 2);   // 10
+int hex = stoi("ff", nullptr, 16);    // 255
+// numero -> string
+string s = to_string(42);             // "42"
+// casteo: (int) TRUNCA hacia 0
+int t = (int) 3.99;                   // 3
+int r = static_cast<int>(3.99);       // 3
+// ! int/int = division ENTERA
+double mal = 7 / 2;                   // 3.0
+double bien = 7 / 2.0;                // 3.5
+// caracteres
+int cod = (int) 'A';   // 65
+char ch = (char) 66;   // 'B'
+int dig = '7' - '0';   // 7
+\end{lstlisting}
+
+\subsection{Java}
+\begin{lstlisting}[style=java]
+// String -> numero (parseo)
+int e = Integer.parseInt("42");
+long l = Long.parseLong("10000000000");
+double d = Double.parseDouble("3.14");
+int bin = Integer.parseInt("1010", 2); // 10
+int hex = Integer.parseInt("ff", 16);  // 255
+// numero -> String
+String s = String.valueOf(42);         // "42"
+String h = Integer.toHexString(255);   // "ff"
+// casteo
+int t = (int) 3.99;                    // 3 (TRUNCA)
+int r = (int) Math.round(3.99);        // 4
+double mal = 7 / 2;                    // 3.0
+double bien = 7 / 2.0;                 // 3.5
+// caracteres
+int cod = (int) 'A';   // 65
+char ch = (char) 66;   // 'B'
+int dig = '7' - '0';   // 7
+\end{lstlisting}
+
+\subsection{Python (3.7.4)}
+\begin{lstlisting}[style=py]
+# string -> numero
+e = int("42"); d = float("3.14")
+bin = int("1010", 2)    # 10
+hex = int("ff", 16)     # 255
+e2 = int(float("3.99")) # 3 (int("3.14") da ERROR)
+# numero -> string
+s = str(42)             # "42"
+b = format(10, "b")     # "1010" (sin prefijo)
+h = format(255, "x")    # "ff"
+# casteo
+t = int(3.99)           # 3 (TRUNCA hacia 0)
+r = round(3.99)         # 4
+piso = 7 // 2           # 3
+real = 7 / 2            # 3.5 (siempre float)
+# caracteres
+cod = ord("A")          # 65
+ch = chr(66)            # "B"
+dig = ord("7") - ord("0")  # 7
+\end{lstlisting}
 
 %---------------------------------------------------------------------------
 \part{Estructuras de Datos}
