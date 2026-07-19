@@ -769,7 +769,162 @@ heapq.heappop(pq)      # O(log n)
 %---------------------------------------------------------------------------
 
 \section{Ordenamiento y Búsqueda (Sorting \& Searching)}
-\pendiente
+Varias búsquedas lineales y sub-lineales. (La búsqueda binaria tiene
+su propia sección.)
+
+\subsection{Número faltante (Missing Number)}
+En $[0..n]$ falta un número: suma esperada $-$ suma real.
+\textbf{Complejidad:} $O(n)$.
+\begin{lstlisting}[style=cpp]
+long long esp = (long long)n*(n+1)/2;          // suma 0..n
+long long falta = esp - accumulate(a.begin(),a.end(),0LL);
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+long falta = (long)n*(n+1)/2;
+for (int x : a) falta -= x;
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+falta = n*(n+1)//2 - sum(a)
+\end{lstlisting}
+
+\subsection{Máximo / Mínimo (Array Max/Min)}
+Recorrido lineal. \textbf{Complejidad:} $O(n)$.
+\begin{lstlisting}[style=cpp]
+int mn = *min_element(a.begin(), a.end());
+int mx = *max_element(a.begin(), a.end());
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+int mn = a[0], mx = a[0];
+for (int x : a) { mn = Math.min(mn,x); mx = Math.max(mx,x); }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+mn, mx = min(a), max(a)
+\end{lstlisting}
+
+\subsection{Par de suma absoluta mínima}
+Par con $|a_i+a_j|$ mínimo: ordenar + dos punteros desde los extremos.
+\textbf{Complejidad:} $O(n\log n)$ (por el sort).
+\begin{lstlisting}[style=cpp]
+sort(a.begin(), a.end());
+int lo=0, hi=a.size()-1; long long mej=LLONG_MAX;
+while(lo<hi){ long long s=(long long)a[lo]+a[hi];
+  mej=min(mej,llabs(s));
+  if(s<0) lo++; else hi--; }
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+Arrays.sort(a);
+int lo=0, hi=a.length-1; long mej=Long.MAX_VALUE;
+while(lo<hi){ long s=(long)a[lo]+a[hi];
+  mej=Math.min(mej,Math.abs(s));
+  if(s<0) lo++; else hi--; }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+a.sort(); lo, hi = 0, len(a)-1; mej = float("inf")
+while lo < hi:
+    s = a[lo] + a[hi]; mej = min(mej, abs(s))
+    if s < 0: lo += 1
+    else: hi -= 1
+\end{lstlisting}
+
+\subsection{Par con diferencia dada (Difference Pair)}
+¿Existe par con $a_j-a_i=d$? Ordenar + dos punteros.
+\textbf{Complejidad:} $O(n\log n)$.
+\begin{lstlisting}[style=cpp]
+sort(a.begin(),a.end()); int i=0,j=1,n=a.size();
+while(i<n && j<n){
+  if(i!=j && a[j]-a[i]==d) return true;
+  if(a[j]-a[i]<d) j++; else i++; }
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+Arrays.sort(a); int i=0,j=1,n=a.length;
+while(i<n && j<n){
+  if(i!=j && a[j]-a[i]==d) return true;
+  if(a[j]-a[i]<d) j++; else i++; }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+a.sort(); i, j, n = 0, 1, len(a)
+while i < n and j < n:
+    if i != j and a[j]-a[i] == d: return True
+    if a[j]-a[i] < d: j += 1
+    else: i += 1
+\end{lstlisting}
+
+\subsection{Búsqueda ternaria (Ternary Search)}
+Máximo (o mínimo) de una función \textbf{unimodal}: parte el rango en
+tres. \textbf{Complejidad:} $O(\log n)$. (NO es $O(n\log n)$.)
+\begin{lstlisting}[style=cpp]
+while(hi-lo>2){ long long m1=lo+(hi-lo)/3, m2=hi-(hi-lo)/3;
+  if(f(m1)<f(m2)) lo=m1+1; else hi=m2-1; }
+// revisa [lo,hi] y devuelve el x que maximiza f
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+while(hi-lo>2){ long m1=lo+(hi-lo)/3, m2=hi-(hi-lo)/3;
+  if(f(m1)<f(m2)) lo=m1+1; else hi=m2-1; }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+while hi - lo > 2:
+    m1 = lo + (hi-lo)//3; m2 = hi - (hi-lo)//3
+    if f(m1) < f(m2): lo = m1 + 1
+    else: hi = m2 - 1
+\end{lstlisting}
+
+\subsection{Búsqueda de Fibonacci (Fibonacci Search)}
+En arreglo \textbf{ordenado}, divide con números de Fibonacci (solo
+sumas/restas, sin división). \textbf{Complejidad:} $O(\log n)$.
+\begin{lstlisting}[style=cpp]
+int f2=0,f1=1,fb=f1+f2;
+while(fb<n){ f2=f1; f1=fb; fb=f1+f2; }
+int off=-1;
+while(fb>1){ int i=min(off+f2,n-1);
+  if(a[i]<x){ fb=f1; f1=f2; f2=fb-f1; off=i; }
+  else if(a[i]>x){ fb=f2; f1=f1-f2; f2=fb-f1; }
+  else return i; }
+if(f1==1 && off+1<n && a[off+1]==x) return off+1;
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+f2, f1 = 0, 1; fb = f1 + f2
+while fb < n: f2, f1 = f1, fb; fb = f1 + f2
+off = -1
+while fb > 1:
+    i = min(off + f2, n-1)
+    if a[i] < x: fb, f1, f2, off = f1, f2, f1 - f2, i
+    elif a[i] > x: fb, f1, f2 = f2, f1 - f2, fb - f1
+    else: return i
+\end{lstlisting}
+(En Java es idéntico al C\texttt{++}, cambiando \texttt{a.length}.)
+
+\subsection{Búsqueda exponencial (Exponential Search)}
+En arreglo \textbf{ordenado}: dobla el índice hasta pasar el objetivo,
+luego binaria en ese bloque. Ideal si el rango es enorme/ilimitado.
+\textbf{Complejidad:} $O(\log n)$.
+\begin{lstlisting}[style=cpp]
+if(a[0]==x) return 0;
+int i=1; while(i<n && a[i]<=x) i*=2;   // dobla el rango
+// luego binaria en [i/2, min(i,n-1)]
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+if a[0] == x: return 0
+i = 1
+while i < n and a[i] <= x: i *= 2
+# luego binaria en [i//2, min(i, n-1)]
+\end{lstlisting}
+
+\subsection{Búsqueda por saltos (Jump Search)}
+En arreglo \textbf{ordenado}: salta en bloques de $\sqrt{n}$ y luego
+barre el bloque. \textbf{Complejidad:} $O(\sqrt{n})$.
+\begin{lstlisting}[style=cpp]
+int paso=max(1,(int)sqrt((double)n)), prev=0;
+while(prev<n && a[min(prev+paso,n)-1]<x) prev+=paso;
+for(int i=prev; i<min(prev+paso,n); i++)
+  if(a[i]==x) return i;
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+import math
+paso = max(1, int(math.sqrt(n))); prev = 0
+while prev < n and a[min(prev+paso, n)-1] < x: prev += paso
+for i in range(prev, min(prev+paso, n)):
+    if a[i] == x: return i
+\end{lstlisting}
 
 \section{Búsqueda Binaria (Binary Search)}
 Requiere datos \textbf{ordenados} o un \textbf{predicado monótono}
