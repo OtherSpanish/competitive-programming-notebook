@@ -764,6 +764,96 @@ heapq.heappop(pq)      # O(log n)
 # max-heap: guarda los valores negados (-x)
 \end{lstlisting}
 
+\subsection{Vector circular (Circular Buffer)}
+\textbf{Idea:} un arreglo de tamaño fijo donde los índices ``dan la
+vuelta'' con módulo: al pasar del final se regresa a la posición $0$.
+Guardas un \texttt{ini} y un \texttt{tam}; agregar y leer es $O(1)$ sin
+mover datos. Cuando se llena, el nuevo pisa al más viejo. Ideal como
+cola de tamaño fijo o ventana deslizante.
+\textbf{Complejidad:} push/get $O(1)$.
+\begin{lstlisting}[style=cpp]
+struct VectorCircular {
+  vector<int> buf; int cap, ini=0, tam=0;
+  VectorCircular(int c):buf(c),cap(c){}
+  void push(int x){ buf[(ini+tam)%cap]=x;
+    if(tam<cap) tam++; else ini=(ini+1)%cap; } // O(1)
+  int get(int i){ return buf[(ini+i)%cap]; }    // O(1)
+};
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+int[] buf; int cap, ini=0, tam=0;
+void push(int x){ buf[(ini+tam)%cap]=x;
+  if(tam<cap) tam++; else ini=(ini+1)%cap; }    // O(1)
+int get(int i){ return buf[(ini+i)%cap]; }      // O(1)
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+def push(self, x):                 # O(1)
+    self.buf[(self.ini+self.tam) % self.cap] = x
+    if self.tam < self.cap: self.tam += 1
+    else: self.ini = (self.ini+1) % self.cap
+def get(self, i):                  # O(1)
+    return self.buf[(self.ini+i) % self.cap]
+\end{lstlisting}
+
+\subsection{Árbol de Fenwick (BIT)}
+\textbf{Idea:} mantiene sumas de prefijos permitiendo \emph{actualizar
+un elemento} y \emph{consultar la suma de un prefijo}, ambas en
+$O(\log n)$ (un arreglo simple solo logra una de las dos rápido). El
+truco: cada índice $i$ ``cubre'' un bloque de tamaño $i\,\&\,(-i)$ (su
+bit menos significativo), así que subiendo/bajando por esos bloques
+tocas solo $\log n$ posiciones. Suma de $[l,r]=$
+query$(r)-$query$(l-1)$. \textbf{Complejidad:} update/query
+$O(\log n)$.
+\begin{lstlisting}[style=cpp]
+void update(int i,long long v){       // suma v en pos i
+  for(; i<=n; i+=i&(-i)) t[i]+=v; }   // O(log n)
+long long query(int i){ long long s=0;
+  for(; i>0; i-=i&(-i)) s+=t[i]; return s; } // O(log n)
+\end{lstlisting}
+\begin{lstlisting}[style=java]
+void update(int i,long v){
+  for(; i<=n; i+=i&(-i)) t[i]+=v; }   // O(log n)
+long query(int i){ long s=0;
+  for(; i>0; i-=i&(-i)) s+=t[i]; return s; }  // O(log n)
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+def update(self, i, v):        # O(log n)
+    while i <= self.n:
+        self.t[i] += v; i += i & (-i)
+def query(self, i):            # suma [1..i], O(log n)
+    s = 0
+    while i > 0:
+        s += self.t[i]; i -= i & (-i)
+    return s
+\end{lstlisting}
+
+\subsection{Sparse Table (RMQ)}
+\textbf{Idea:} responde \emph{Range Minimum Query} (el mínimo de
+cualquier rango) en $O(1)$, sobre un arreglo que \textbf{no cambia}.
+Precalcula, para cada posición, el mínimo de los rangos de largo
+$1,2,4,\dots$ ($2^k$). Cualquier rango $[l,r]$ se cubre con dos bloques
+de largo $2^k$ que se solapan, y como el mínimo es idempotente el
+solape no molesta: la consulta son dos lecturas. Sirve igual para
+máximo o gcd. \textbf{Complejidad:} construir $O(n\log n)$, consulta
+$O(1)$. (Si el arreglo cambia, usa Segment Tree: $O(\log n)$/op.)
+\begin{lstlisting}[style=cpp]
+sp[0]=a;                              // build: O(n log n)
+for(int k=1;k<K;k++) for(int i=0;i+(1<<k)<=n;i++)
+  sp[k][i]=min(sp[k-1][i], sp[k-1][i+(1<<(k-1))]);
+int minRango(int l,int r){            // O(1)
+  int k=lg[r-l+1];
+  return min(sp[k][l], sp[k][r-(1<<k)+1]); }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+for k in range(1, K):          # build: O(n log n)
+    for i in range(n-(1<<k)+1):
+        sp[k][i]=min(sp[k-1][i], sp[k-1][i+(1<<(k-1))])
+def min_rango(l, r):           # O(1)
+    k = lg[r-l+1]
+    return min(sp[k][l], sp[k][r-(1<<k)+1])
+\end{lstlisting}
+(En Java es idéntico al C\texttt{++} con \texttt{Math.min}.)
+
 %---------------------------------------------------------------------------
 \part{Ordenamiento y Búsqueda}
 %---------------------------------------------------------------------------
@@ -963,6 +1053,73 @@ paso = max(1, int(math.sqrt(n))); prev = 0
 while prev < n and a[min(prev+paso, n)-1] < x: prev += paso
 for i in range(prev, min(prev+paso, n)):
     if a[i] == x: return i
+\end{lstlisting}
+
+\subsection{Heap Sort}
+\textbf{Idea:} usa un \emph{heap} (montículo) para ordenar in-place.
+Primero reorganiza el arreglo en un max-heap (el mayor queda en la
+raíz) en $O(n)$. Luego, repetidamente: intercambia la raíz (el mayor)
+con el último elemento activo —dejándolo ya ordenado al final— y
+``hunde'' la nueva raíz para restaurar el heap. Cada extracción cuesta
+$O(\log n)$. No usa memoria extra, pero no es estable.
+\textbf{Complejidad:} $O(n\log n)$ siempre (mejor, peor y promedio).
+\begin{lstlisting}[style=cpp]
+void bajar(vector<int>&a,int n,int i){    // hunde: O(log n)
+  while(true){ int m=i,l=2*i+1,r=2*i+2;
+    if(l<n&&a[l]>a[m]) m=l;
+    if(r<n&&a[r]>a[m]) m=r;
+    if(m==i) break; swap(a[i],a[m]); i=m; } }
+void heapSort(vector<int>&a){ int n=a.size();
+  for(int i=n/2-1;i>=0;i--) bajar(a,n,i);   // heap: O(n)
+  for(int i=n-1;i>0;i--){ swap(a[0],a[i]);  // max al final
+    bajar(a,i,0); } }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+def bajar(a, n, i):                # hunde: O(log n)
+    while True:
+        m, l, r = i, 2*i+1, 2*i+2
+        if l < n and a[l] > a[m]: m = l
+        if r < n and a[r] > a[m]: m = r
+        if m == i: break
+        a[i], a[m] = a[m], a[i]; i = m
+def heap_sort(a):
+    n = len(a)
+    for i in range(n//2-1, -1, -1): bajar(a, n, i)  # O(n)
+    for i in range(n-1, 0, -1):
+        a[0], a[i] = a[i], a[0]; bajar(a, i, 0)
+\end{lstlisting}
+(En Java es idéntico al C\texttt{++} con \texttt{a.length}.)
+
+\subsection{QuickSelect}
+\textbf{Idea:} encuentra el $k$-ésimo menor \emph{sin ordenar todo}.
+Igual que quicksort particiona alrededor de un pivote, pero como sabes
+en qué lado cae la posición $k$, recurres a \emph{un solo} lado y
+descartas el otro. Eso baja el costo promedio de $O(n\log n)$ a $O(n)$
+(cada nivel procesa la mitad: $n+n/2+n/4+\dots=2n$). El peor caso
+$O(n^2)$ ocurre con pivotes malos (se evita eligiendo el pivote al
+azar). \textbf{Complejidad:} promedio $O(n)$, peor $O(n^2)$.
+\begin{lstlisting}[style=cpp]
+int quickSelect(vector<int>&a,int lo,int hi,int k){
+  if(lo==hi) return a[lo];
+  int p=a[(lo+hi)/2], i=lo, j=hi;
+  while(i<=j){ while(a[i]<p) i++; while(a[j]>p) j--;
+    if(i<=j){ swap(a[i],a[j]); i++; j--; } }
+  if(k<=j) return quickSelect(a,lo,j,k);   // k a la izq
+  if(k>=i) return quickSelect(a,i,hi,k);   // k a la der
+  return a[k]; }
+\end{lstlisting}
+\begin{lstlisting}[style=py]
+def quick_select(a, lo, hi, k):
+    if lo == hi: return a[lo]
+    p = a[(lo+hi)//2]; i, j = lo, hi
+    while i <= j:
+        while a[i] < p: i += 1
+        while a[j] > p: j -= 1
+        if i <= j:
+            a[i], a[j] = a[j], a[i]; i += 1; j -= 1
+    if k <= j: return quick_select(a, lo, j, k)
+    if k >= i: return quick_select(a, i, hi, k)
+    return a[k]
 \end{lstlisting}
 
 \section{Búsqueda Binaria (Binary Search)}
