@@ -1,5 +1,6 @@
 # Estructuras de datos mas usadas en Python (3.7.4) para CP.
 # Cada operacion lleva su complejidad algoritmica.
+import heapq                    # cola de prioridad (min-heap)
 from collections import deque   # cola doble (lista enlazada practica)
 
 
@@ -57,11 +58,35 @@ def diccionarios():
     prim = ordenado.peekitem(0)  # menor clave: O(log n)
 
 
+def pilas_colas_y_prioridad():
+    # Pila (Stack): LIFO. append/pop/tope O(1). DFS iterativo, parentesis.
+    pila = []
+    pila.append(3)         # push: O(1)
+    tope = pila[-1]        # O(1)
+    pila.pop()             # O(1)
+
+    # Cola (Queue): FIFO. append/popleft O(1). Base del BFS. (usa deque)
+    cola = deque()
+    cola.append(3)         # encolar: O(1)
+    frente = cola[0]       # O(1)
+    cola.popleft()         # desencolar: O(1)
+
+    # Cola de prioridad (heap): heapq es MIN-heap.
+    # heappush/heappop O(log n); tope pq[0] O(1). Dijkstra, k-esimo mayor.
+    pq = []
+    heapq.heappush(pq, 5)  # O(log n)
+    heapq.heappush(pq, 1)  # O(log n)
+    menor = pq[0]          # O(1)   (el menor: 1)
+    heapq.heappop(pq)      # O(log n)
+    # MAX-heap: guarda los valores negados -> heapq.heappush(pq, -x)
+
+
 def main():
     arreglos_y_matrices()
     listas()
     conjuntos()
     diccionarios()
+    pilas_colas_y_prioridad()
 
 
 main()
