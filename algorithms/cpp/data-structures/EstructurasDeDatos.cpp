@@ -1,4 +1,5 @@
 // Estructuras de datos mas usadas en C++ (g++ 8.1, -std=c++17) para CP.
+// Cada operacion lleva su complejidad algoritmica.
 #include <iostream>
 #include <vector>
 #include <list>
@@ -11,62 +12,63 @@
 using namespace std;
 
 void arreglosYMatrices() {
-    // Arreglo: tamano FIJO, acceso O(1) por indice.
-    int arreglo[5] = {1, 2, 3, 4, 5};
-    arreglo[0] = 10;
+    // Arreglo: tamano FIJO. Acceso O(1); crear O(n).
+    int arreglo[5] = {1, 2, 3, 4, 5};      // crear: O(n)
+    arreglo[0] = 10;                       // acceso: O(1)
 
-    // Matriz fija (2D):
+    // Matriz fija (2D): acceso O(1); crear O(n*m).
     int matriz[3][4] = {};
-    matriz[1][2] = 7;
+    matriz[1][2] = 7;                      // acceso: O(1)
 
-    // Matriz dinamica (vector de vectores):
+    // Matriz dinamica (vector de vectores): crear O(n*m).
     vector<vector<int>> mat(3, vector<int>(4, 0));
-    mat[1][2] = 7;
+    mat[1][2] = 7;                         // acceso: O(1)
 }
 
 void vectoresYListas() {
-    // vector: arreglo DINAMICO (equivale a ArrayList). Acceso O(1), push_back O(1).
+    // vector: acceso O(1); push_back O(1) amortizado;
+    // insertar/borrar en medio O(n); buscar O(n).
     vector<int> v;
-    v.push_back(3);
-    int x = v[0];
-    int n = (int) v.size();
+    v.push_back(3);                        // final: O(1) amortizado
+    int x = v[0];                          // acceso: O(1)
+    int n = (int) v.size();                // O(1)
 
-    // list: lista doblemente enlazada. Insertar en extremos O(1).
+    // list: insertar/borrar en extremos O(1); acceso por indice O(n).
     list<int> enlazada;
-    enlazada.push_back(9);
-    enlazada.push_front(1);
+    enlazada.push_back(9);                 // O(1)
+    enlazada.push_front(1);                // O(1)
 
-    // deque: cola doble. push/pop en AMBOS extremos O(1).
+    // deque: push/pop en AMBOS extremos O(1); acceso [i] O(1).
     deque<int> cola;
-    cola.push_back(2);
-    cola.push_front(0);
+    cola.push_back(2);                     // O(1)
+    cola.push_front(0);                    // O(1)
 }
 
 void conjuntos() {
-    // unordered_set = HashSet: sin orden, O(1) promedio.
+    // unordered_set = HashSet: insert/find/erase O(1) prom. (O(n) peor).
     unordered_set<int> hset;
-    hset.insert(3);
-    bool hay = hset.count(3);
+    hset.insert(3);                        // O(1) prom.
+    bool hay = hset.count(3);              // O(1) prom.
 
-    // set = TreeSet: ORDENADO (arbol), O(log n). lower_bound = piso/techo.
+    // set = TreeSet: ORDENADO. insert/find/erase/lower_bound O(log n).
     set<int> tset;
-    tset.insert(5);
-    tset.insert(1);
-    int menor = *tset.begin();             // 1
-    auto it = tset.lower_bound(3);         // primer valor >= 3
+    tset.insert(5);                        // O(log n)
+    tset.insert(1);                        // O(log n)
+    int menor = *tset.begin();             // min: O(1)
+    auto it = tset.lower_bound(3);         // techo: O(log n)
 }
 
 void mapasYDiccionarios() {
-    // unordered_map = HashMap: sin orden, O(1) promedio.
+    // unordered_map = HashMap: insert/acceso/erase O(1) prom.
     unordered_map<string, int> hmap;
-    hmap["a"] = 1;
-    int v = hmap["a"];
+    hmap["a"] = 1;                         // O(1) prom.
+    int v = hmap["a"];                     // O(1) prom.
 
-    // map = TreeMap: ORDENADO por clave, O(log n).
+    // map = TreeMap: ORDENADO por clave. insert/acceso/erase O(log n).
     map<string, int> tmap;
-    tmap["b"] = 2;
-    tmap["a"] = 1;
-    auto primera = tmap.begin();           // clave menor ("a")
+    tmap["b"] = 2;                         // O(log n)
+    tmap["a"] = 1;                         // O(log n)
+    auto primera = tmap.begin();           // clave menor: O(1)
 }
 
 int main() {
