@@ -1,7 +1,12 @@
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -66,10 +71,38 @@ public class EstructurasDeDatos {
         String primera = tmap.firstKey();  // O(log n)  ("a")
     }
 
+    static void pilasColasYPrioridad() {
+        // Pila (Stack): LIFO. push/pop/peek O(1). Usa Deque, NO java.util.Stack.
+        Deque<Integer> pila = new ArrayDeque<>();
+        pila.push(3);                  // O(1)
+        int tope = pila.peek();        // O(1)
+        pila.pop();                    // O(1)
+
+        // Cola (Queue): FIFO. offer/poll/peek O(1). Base del BFS.
+        Queue<Integer> cola = new ArrayDeque<>();
+        cola.offer(3);                 // encolar: O(1)
+        int frente = cola.peek();      // O(1)
+        cola.poll();                   // desencolar: O(1)
+
+        // Cola de prioridad (heap): MIN-heap por defecto.
+        // offer/poll O(log n); peek O(1). Para Dijkstra, Prim, k-esimo mayor.
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+        pq.offer(5);                   // O(log n)
+        pq.offer(1);                   // O(log n)
+        int menor = pq.peek();         // O(1)   (el menor: 1)
+        pq.poll();                     // O(log n)
+
+        // MAX-heap:
+        PriorityQueue<Integer> pqMax =
+            new PriorityQueue<>(Collections.reverseOrder());
+        pqMax.offer(5);                // O(log n)   peek() da el mayor
+    }
+
     public static void main(String[] args) {
         arreglosYMatrices();
         listasDinamicas();
         conjuntos();
         mapasYDiccionarios();
+        pilasColasYPrioridad();
     }
 }
