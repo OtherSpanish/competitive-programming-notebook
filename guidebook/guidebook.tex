@@ -123,34 +123,89 @@ De más lento (didáctico) a más rápido (para TLE ajustado). Usa el lector por
 bytes solo cuando haya del orden de $10^6$–$10^7$ lecturas.
 
 \subsection{C\texttt{++} (g\texttt{++} 8.1, -std=c\texttt{++}17)}
+\textbf{Rápido:} desactiva la sincronización con C (una sola vez al
+inicio). Punto dulce para casi todo.
 \begin{lstlisting}[style=cpp]
 #include <iostream>
 using namespace std;
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);           // no mezclar con scanf
-    int entero;
-    cin >> entero;
-    cout << entero << "\n";     // "\n", nunca endl
+    int entero; long long largo;
+    cin >> entero >> largo;
+    cout << entero << "\n";     // "\n", nunca endl (endl frena)
 }
+\end{lstlisting}
+\textbf{Más rápido:} lector propio por bytes con \texttt{fread}.
+Úsalo solo con $10^6$–$10^7$ lecturas.
+\begin{lstlisting}[style=cpp]
+struct FastReader {
+    static const int TAM = 1 << 16;   // 64 KB
+    char bufer[TAM]; int puntero = 0, leidos = 0;
+    int leer() {
+        if (puntero == leidos) {
+            leidos = fread(bufer, 1, TAM, stdin);
+            puntero = 0;
+        }
+        return leidos == 0 ? -1 : bufer[puntero++];
+    }
+    int nextInt() {
+        int resultado = 0, c = leer();
+        while (c <= ' ') c = leer();       // saltar blancos
+        bool negativo = (c == '-');
+        if (negativo) c = leer();
+        while (c >= '0' && c <= '9') {
+            resultado = resultado * 10 + (c - '0');
+            c = leer();
+        }
+        return negativo ? -resultado : resultado;
+    }
+};
 \end{lstlisting}
 
 \subsection{Java}
+\textbf{Intermedio:} \texttt{BufferedReader} +
+\texttt{StringTokenizer} + \texttt{PrintWriter}. Estándar en CP.
 \begin{lstlisting}[style=java]
-BufferedReader br = new BufferedReader(
+BufferedReader lector = new BufferedReader(
     new InputStreamReader(System.in));
-StringTokenizer st =
-    new StringTokenizer(br.readLine());
-int entero = Integer.parseInt(st.nextToken());
+PrintWriter escritor = new PrintWriter(
+    new BufferedWriter(new OutputStreamWriter(System.out)));
+
+StringTokenizer separador =
+    new StringTokenizer(lector.readLine());
+int primero = Integer.parseInt(separador.nextToken());
+int segundo = Integer.parseInt(separador.nextToken());
+
+escritor.println(primero + segundo);
+escritor.flush();   // ! OBLIGATORIO al final, si no, no imprime
+\end{lstlisting}
+\textbf{Leer un arreglo} de una línea:
+\begin{lstlisting}[style=java]
+int n = Integer.parseInt(lector.readLine().trim());
+int[] arreglo = new int[n];
+separador = new StringTokenizer(lector.readLine());
+for (int i = 0; i < n; i++)
+    arreglo[i] = Integer.parseInt(separador.nextToken());
 \end{lstlisting}
 
 \subsection{Python (3.7.4)}
+\textbf{Intermedio:} \texttt{readline} + \texttt{split} +
+\texttt{map} (más rápido que \texttt{input()}).
+\begin{lstlisting}[style=py]
+import sys
+entrada = sys.stdin.readline
+primero, segundo = map(int, entrada().split())
+\end{lstlisting}
+\textbf{Más rápido:} leer TODO el \texttt{stdin} de golpe y
+tokenizar. La salida, en UNA sola escritura.
 \begin{lstlisting}[style=py]
 import sys
 def main():
     datos = sys.stdin.buffer.read().split()
-    entero = int(datos[0])
-    sys.stdout.write(f"{entero}\n")
+    n = int(datos[0])
+    arreglo = list(map(int, datos[1:1 + n]))
+    sys.stdout.write(f"{sum(arreglo)}\n")
 main()
 \end{lstlisting}
 
