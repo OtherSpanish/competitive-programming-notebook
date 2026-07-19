@@ -773,8 +773,12 @@ Varias búsquedas lineales y sub-lineales. (La búsqueda binaria tiene
 su propia sección.)
 
 \subsection{Número faltante (Missing Number)}
-En $[0..n]$ falta un número: suma esperada $-$ suma real.
-\textbf{Complejidad:} $O(n)$.
+\textbf{Idea:} los números $0,1,\dots,n$ deberían sumar
+$\frac{n(n+1)}{2}$ (fórmula de Gauss). Si falta uno, la suma real queda
+corta \emph{exactamente} en ese valor, así que el faltante es
+(suma esperada $-$ suma real). Basta un recorrido para acumular la suma.
+Alternativa sin riesgo de overflow: hacer XOR de $0..n$ y de todos los
+elementos; lo que quede es el faltante. \textbf{Complejidad:} $O(n)$.
 \begin{lstlisting}[style=cpp]
 long long esp = (long long)n*(n+1)/2;          // suma 0..n
 long long falta = esp - accumulate(a.begin(),a.end(),0LL);
@@ -788,7 +792,10 @@ falta = n*(n+1)//2 - sum(a)
 \end{lstlisting}
 
 \subsection{Máximo / Mínimo (Array Max/Min)}
-Recorrido lineal. \textbf{Complejidad:} $O(n)$.
+\textbf{Idea:} recorres el arreglo una sola vez llevando el menor y el
+mayor vistos hasta ahora; comparás cada elemento contra ambos y
+actualizas. No requiere ordenar (ordenar sería $O(n\log n)$, peor). Con
+un recorrido consigues los dos a la vez. \textbf{Complejidad:} $O(n)$.
 \begin{lstlisting}[style=cpp]
 int mn = *min_element(a.begin(), a.end());
 int mx = *max_element(a.begin(), a.end());
@@ -802,8 +809,14 @@ mn, mx = min(a), max(a)
 \end{lstlisting}
 
 \subsection{Par de suma absoluta mínima}
-Par con $|a_i+a_j|$ mínimo: ordenar + dos punteros desde los extremos.
-\textbf{Complejidad:} $O(n\log n)$ (por el sort).
+\textbf{Idea:} buscamos el par cuya suma esté \emph{más cerca de cero}.
+Tras ordenar, ponemos un puntero en cada extremo. La suma de los
+extremos te dice hacia dónde moverte: si es negativa, para acercarla a
+$0$ hay que subir el menor (\texttt{lo++}); si es positiva, hay que
+bajar el mayor (\texttt{hi--}). Cada movimiento descarta el candidato
+menos prometedor, y en el camino guardas el $|suma|$ más pequeño visto.
+Los dos punteros recorren el arreglo una vez ($O(n)$); domina el sort.
+\textbf{Complejidad:} $O(n\log n)$.
 \begin{lstlisting}[style=cpp]
 sort(a.begin(), a.end());
 int lo=0, hi=a.size()-1; long long mej=LLONG_MAX;
@@ -827,8 +840,13 @@ while lo < hi:
 \end{lstlisting}
 
 \subsection{Par con diferencia dada (Difference Pair)}
-¿Existe par con $a_j-a_i=d$? Ordenar + dos punteros.
-\textbf{Complejidad:} $O(n\log n)$.
+\textbf{Idea:} ¿existe un par cuya diferencia sea exactamente $d$? Tras
+ordenar, dos punteros avanzan hacia adelante: si la diferencia actual
+$a_j-a_i$ es menor que $d$, adelantas el puntero lejano ($j$) para
+agrandarla; si es mayor, adelantas el cercano ($i$) para achicarla; si
+es igual, encontraste el par. Como el arreglo está ordenado, la
+diferencia crece con $j$ y decrece con $i$, así que el barrido nunca
+retrocede. \textbf{Complejidad:} $O(n\log n)$ (domina el sort).
 \begin{lstlisting}[style=cpp]
 sort(a.begin(),a.end()); int i=0,j=1,n=a.size();
 while(i<n && j<n){
@@ -850,8 +868,14 @@ while i < n and j < n:
 \end{lstlisting}
 
 \subsection{Búsqueda ternaria (Ternary Search)}
-Máximo (o mínimo) de una función \textbf{unimodal}: parte el rango en
-tres. \textbf{Complejidad:} $O(\log n)$. (NO es $O(n\log n)$.)
+\textbf{Idea:} sirve para hallar el pico de una función
+\textbf{unimodal} (sube y luego baja, con un solo máximo — no para buscar
+un valor en un arreglo cualquiera). Partes el rango en tres con dos
+puntos $m_1<m_2$ y comparas: si $f(m_1)<f(m_2)$, el máximo no puede estar
+a la izquierda de $m_1$, así que descartas ese tercio; en caso contrario
+descartas el tercio derecho. Cada paso elimina $\sim\frac{1}{3}$ del
+rango, por eso converge en logarítmico. (Para un mínimo, invierte la
+comparación.) \textbf{Complejidad:} $O(\log n)$ — NO $O(n\log n)$.
 \begin{lstlisting}[style=cpp]
 while(hi-lo>2){ long long m1=lo+(hi-lo)/3, m2=hi-(hi-lo)/3;
   if(f(m1)<f(m2)) lo=m1+1; else hi=m2-1; }
@@ -869,8 +893,14 @@ while hi - lo > 2:
 \end{lstlisting}
 
 \subsection{Búsqueda de Fibonacci (Fibonacci Search)}
-En arreglo \textbf{ordenado}, divide con números de Fibonacci (solo
-sumas/restas, sin división). \textbf{Complejidad:} $O(\log n)$.
+\textbf{Idea:} misma estrategia que la binaria (descartar mitades de un
+arreglo ordenado), pero en vez de partir por el punto medio elige el
+punto de comparación usando números de Fibonacci consecutivos. Mantiene
+tres Fibonacci y en cada paso mira la posición \texttt{off+f2}; según el
+elemento sea menor o mayor que el objetivo, retrocede uno o dos pasos en
+la secuencia. Ventaja: solo usa \emph{sumas y restas}, nunca división,
+lo que la hace útil en hardware sin división rápida o para saltar por
+posiciones amigables con la caché. \textbf{Complejidad:} $O(\log n)$.
 \begin{lstlisting}[style=cpp]
 int f2=0,f1=1,fb=f1+f2;
 while(fb<n){ f2=f1; f1=fb; fb=f1+f2; }
@@ -894,9 +924,13 @@ while fb > 1:
 (En Java es idéntico al C\texttt{++}, cambiando \texttt{a.length}.)
 
 \subsection{Búsqueda exponencial (Exponential Search)}
-En arreglo \textbf{ordenado}: dobla el índice hasta pasar el objetivo,
-luego binaria en ese bloque. Ideal si el rango es enorme/ilimitado.
-\textbf{Complejidad:} $O(\log n)$.
+\textbf{Idea:} dos fases sobre un arreglo \textbf{ordenado}. Primero
+\emph{acotas} el objetivo doblando el índice ($1,2,4,8,\dots$) hasta que
+$a[i]$ lo supera; en ese momento sabes que el objetivo está entre $i/2$
+e $i$. Segundo, haces una binaria normal dentro de ese bloque. Como el
+bloque encontrado tiene tamaño proporcional a la posición del objetivo,
+es ideal cuando el arreglo es enorme o de tamaño desconocido y el
+objetivo está cerca del inicio. \textbf{Complejidad:} $O(\log n)$.
 \begin{lstlisting}[style=cpp]
 if(a[0]==x) return 0;
 int i=1; while(i<n && a[i]<=x) i*=2;   // dobla el rango
@@ -910,8 +944,13 @@ while i < n and a[i] <= x: i *= 2
 \end{lstlisting}
 
 \subsection{Búsqueda por saltos (Jump Search)}
-En arreglo \textbf{ordenado}: salta en bloques de $\sqrt{n}$ y luego
-barre el bloque. \textbf{Complejidad:} $O(\sqrt{n})$.
+\textbf{Idea:} en vez de revisar elemento por elemento, avanzas en
+bloques de tamaño $\sqrt{n}$ mirando solo el \emph{último} de cada
+bloque; cuando ese último ya supera al objetivo, sabes que (si existe)
+está en el bloque anterior, así que lo barres linealmente. El balance
+$\sqrt{n}$ saltos $+$ $\sqrt{n}$ del barrido minimiza el total. Punto
+medio entre la lineal ($O(n)$) y la binaria ($O(\log n)$), útil cuando
+saltar hacia atrás es costoso. \textbf{Complejidad:} $O(\sqrt{n})$.
 \begin{lstlisting}[style=cpp]
 int paso=max(1,(int)sqrt((double)n)), prev=0;
 while(prev<n && a[min(prev+paso,n)-1]<x) prev+=paso;
@@ -927,15 +966,21 @@ for i in range(prev, min(prev+paso, n)):
 \end{lstlisting}
 
 \section{Búsqueda Binaria (Binary Search)}
-Requiere datos \textbf{ordenados} o un \textbf{predicado monótono}
-(pasa de falso a verdadero una sola vez). \textbf{Complejidad:}
-$O(\log n)$ en discreto; $O(\text{iter})$ en reales;
-$O(L\log n)$ con cadenas. Tip: usa \texttt{lo+(hi-lo)/2} para el
-\texttt{mid} y evitar overflow.
+\textbf{Idea central:} mantienes un rango $[lo,hi]$ donde \emph{sabes}
+que está la respuesta y en cada paso lo partes por la mitad, descartando
+la mitad que no puede contenerla. Como reduces a la mitad cada vez,
+llegas en $\log_2 n$ pasos. Funciona si los datos están \textbf{ordenados}
+o, más general, si existe un \textbf{predicado monótono} (una condición
+que pasa de falsa a verdadera una sola vez): entonces buscas la frontera
+del cambio. \textbf{Complejidad:} $O(\log n)$ en discreto,
+$O(\text{iter})$ en reales, $O(L\log n)$ con cadenas. Tip: usa
+\texttt{lo+(hi-lo)/2} para el \texttt{mid} y evitar overflow.
 
 \subsection{En arreglo ordenado}
-Primer índice $\geq x$ (\texttt{lower\_bound}) o $> x$
-(\texttt{upper\_bound}).
+\textbf{Cómo:} comparas $x$ con el elemento del medio; si es menor,
+descartas la mitad derecha, si es mayor la izquierda. \texttt{lower\_bound}
+te da el primer índice con valor $\geq x$ y \texttt{upper\_bound} el
+primer $> x$; con eso sabes si $x$ existe y cuántas copias hay.
 \begin{lstlisting}[style=cpp]
 int i = lower_bound(a.begin(),a.end(),x)-a.begin(); // >= x
 int j = upper_bound(a.begin(),a.end(),x)-a.begin(); // >  x
@@ -955,7 +1000,14 @@ j = bisect_right(a, x)   # primer >  x
 \end{lstlisting}
 
 \subsection{Menor $x$ que cumple}
-Predicado monótono F..F\,T..T; busca la \textbf{frontera} izquierda.
+\textbf{Cómo:} aquí no buscas en un arreglo sino en el \emph{rango de
+respuestas posibles}. El predicado es monótono F..F\,T..T (una vez que
+algo ``sirve'', todo lo mayor también). En cada paso pruebas el
+\texttt{mid}: si cumple, lo guardas como candidato y sigues buscando a la
+izquierda (\texttt{hi=mid-1}) por si hay uno menor que también sirva; si
+no cumple, subes (\texttt{lo=mid+1}). Al final \texttt{res} es la
+frontera izquierda: el \emph{menor} que cumple. Ejemplo: ``mínima
+capacidad para repartir en $\leq k$ días''.
 \begin{lstlisting}[style=cpp]
 long long res=-1;
 while(lo<=hi){ long long mid=lo+(hi-lo)/2;
@@ -977,8 +1029,12 @@ while lo <= hi:
 \end{lstlisting}
 
 \subsection{Mayor $x$ que cumple}
-Predicado monótono T..T\,F..F; busca la \textbf{frontera} derecha
-(solo cambian dos líneas respecto al anterior).
+\textbf{Cómo:} el caso espejo. Ahora el predicado es T..T\,F..F (sirve
+hasta cierto punto y luego deja de servir). Cuando el \texttt{mid}
+cumple, lo guardas y buscas a la \emph{derecha} (\texttt{lo=mid+1}) por
+si hay uno mayor que también sirva; si no cumple, bajas
+(\texttt{hi=mid-1}). Respecto al anterior solo cambian esas dos líneas.
+Ejemplo: ``máxima longitud de corte tal que salgan $\geq k$ piezas''.
 \begin{lstlisting}[style=cpp]
 long long res=-1;
 while(lo<=hi){ long long mid=lo+(hi-lo)/2;
@@ -1000,8 +1056,12 @@ while lo <= hi:
 \end{lstlisting}
 
 \subsection{Sobre reales}
-Respuesta continua (raíces, puntos de equilibrio); iteras un número
-fijo de veces en vez de comparar $lo\leq hi$.
+\textbf{Cómo:} cuando la respuesta es un número \emph{real} (raíces,
+puntos de equilibrio) no hay ``mitad entera'' ni condición $lo\leq hi$
+para parar. En su lugar iteras un número fijo de veces (unas 100 basta:
+el rango se divide por $2^{100}$, precisión más que suficiente),
+moviendo \texttt{lo} o \texttt{hi} al \texttt{mid} según el predicado.
+Al terminar, \texttt{lo}$\approx$\texttt{hi} es la frontera buscada.
 \begin{lstlisting}[style=cpp]
 for(int it=0; it<100; it++){ double mid=(lo+hi)/2;
   if(cumple(mid)) hi=mid; else lo=mid; }
@@ -1019,8 +1079,12 @@ for _ in range(100):
 \end{lstlisting}
 
 \subsection{Con strings}
-Igual que en arreglo ordenado, pero comparación lexicográfica: cada
-comparación cuesta $O(L)$, total $O(L\log n)$.
+\textbf{Cómo:} exactamente la misma binaria, pero comparando cadenas en
+orden \emph{lexicográfico} (diccionario) en lugar de números. La única
+diferencia de costo es que comparar dos cadenas cuesta $O(L)$ (longitud),
+no $O(1)$, así que el total sube a $O(L\log n)$. Ojo: el arreglo debe
+estar ordenado con el mismo criterio (ASCII: mayúsculas antes que
+minúsculas).
 \begin{lstlisting}[style=cpp]
 // vector<string> s ordenado
 int i = lower_bound(s.begin(),s.end(),string("caro"))
