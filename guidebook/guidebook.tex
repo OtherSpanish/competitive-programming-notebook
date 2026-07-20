@@ -765,56 +765,74 @@ heapq.heappop(pq)      # O(log n)
 \end{lstlisting}
 
 \subsection{Vector circular (Circular Buffer)}
-\textbf{Idea:} un arreglo de tamaño fijo donde los índices ``dan la
-vuelta'' con módulo: al pasar del final se regresa a la posición $0$.
-Guardas un \texttt{ini} y un \texttt{tam}; agregar y leer es $O(1)$ sin
-mover datos. Cuando se llena, el nuevo pisa al más viejo. Ideal como
-cola de tamaño fijo o ventana deslizante.
-\textbf{Complejidad:} push/get $O(1)$.
+\textbf{Idea:} un arreglo de tamaño fijo (\texttt{cap}) que se comporta
+como una \textbf{cola doble}: guardas dónde empieza (\texttt{ini}) y
+cuántos elementos hay (\texttt{tam}), y cada posición lógica $i$ se
+traduce a física con módulo: \texttt{(ini+i)\%cap}. Así, agregar o
+sacar por \emph{cualquiera} de los dos extremos es $O(1)$ \emph{sin
+mover datos} (en un arreglo normal, insertar al frente cuesta $O(n)$
+porque hay que correr todo). Al llenarse, un \texttt{pushBack} pisa al
+más viejo. Es la base de colas de tamaño fijo, ventanas deslizantes y
+buffers de audio/red. \textbf{Complejidad:} todo $O(1)$.
 \begin{lstlisting}[style=cpp]
 struct VectorCircular {
   vector<int> buf; int cap, ini=0, tam=0;
   VectorCircular(int c):buf(c),cap(c){}
-  void push(int x){ buf[(ini+tam)%cap]=x;
-    if(tam<cap) tam++; else ini=(ini+1)%cap; } // O(1)
-  int get(int i){ return buf[(ini+i)%cap]; }    // O(1)
+  void pushBack(int x){ buf[(ini+tam)%cap]=x;
+    if(tam<cap) tam++; else ini=(ini+1)%cap; }   // O(1)
+  void pushFront(int x){ ini=(ini-1+cap)%cap;
+    buf[ini]=x; if(tam<cap) tam++; }             // O(1)
+  int popFront(){ int v=buf[ini];
+    ini=(ini+1)%cap; tam--; return v; }          // O(1)
+  int popBack(){ tam--; return buf[(ini+tam)%cap]; }
+  int front(){ return buf[ini]; }
+  int back(){ return buf[(ini+tam-1)%cap]; }
 };
 \end{lstlisting}
 \begin{lstlisting}[style=java]
-int[] buf; int cap, ini=0, tam=0;
-void push(int x){ buf[(ini+tam)%cap]=x;
-  if(tam<cap) tam++; else ini=(ini+1)%cap; }    // O(1)
-int get(int i){ return buf[(ini+i)%cap]; }      // O(1)
+void pushBack(int x){ buf[(ini+tam)%cap]=x;
+  if(tam<cap) tam++; else ini=(ini+1)%cap; }
+void pushFront(int x){ ini=(ini-1+cap)%cap;
+  buf[ini]=x; if(tam<cap) tam++; }
+int popFront(){ int v=buf[ini];
+  ini=(ini+1)%cap; tam--; return v; }
 \end{lstlisting}
 \begin{lstlisting}[style=py]
-def push(self, x):                 # O(1)
-    self.buf[(self.ini+self.tam) % self.cap] = x
+def push_back(self, x):
+    self.buf[(self.ini+self.tam)%self.cap] = x
     if self.tam < self.cap: self.tam += 1
     else: self.ini = (self.ini+1) % self.cap
-def get(self, i):                  # O(1)
-    return self.buf[(self.ini+i) % self.cap]
+def push_front(self, x):
+    self.ini = (self.ini-1) % self.cap
+    self.buf[self.ini] = x
+    if self.tam < self.cap: self.tam += 1
 \end{lstlisting}
 
 \subsection{Árbol de Fenwick (BIT)}
-\textbf{Idea:} mantiene sumas de prefijos permitiendo \emph{actualizar
-un elemento} y \emph{consultar la suma de un prefijo}, ambas en
-$O(\log n)$ (un arreglo simple solo logra una de las dos rápido). El
-truco: cada índice $i$ ``cubre'' un bloque de tamaño $i\,\&\,(-i)$ (su
-bit menos significativo), así que subiendo/bajando por esos bloques
-tocas solo $\log n$ posiciones. Suma de $[l,r]=$
-query$(r)-$query$(l-1)$. \textbf{Complejidad:} update/query
-$O(\log n)$.
+\textbf{Idea:} un arreglo normal da suma de prefijo en $O(1)$ pero
+actualizar un elemento cuesta $O(n)$ (o al revés si guardas prefijos).
+El Fenwick equilibra ambas a $O(\log n)$ guardando \emph{sumas
+parciales inteligentes}: la posición $i$ almacena la suma de un bloque
+de tamaño $i\,\&\,(-i)$ (su bit menos significativo) que termina en
+$i$. Para consultar un prefijo saltas hacia atrás quitando el bit bajo
+($i\mathrel{-}=i\,\&\,(-i)$); para actualizar subes sumándolo
+($i\mathrel{+}=i\,\&\,(-i)$). Cada camino toca a lo más $\log n$
+posiciones (un bit por paso). Es 1-indexado.
+
+\textbf{Básico:} update puntual y suma de prefijo; suma de rango
+$[l,r]=$ query$(r)-$query$(l-1)$.
 \begin{lstlisting}[style=cpp]
-void update(int i,long long v){       // suma v en pos i
-  for(; i<=n; i+=i&(-i)) t[i]+=v; }   // O(log n)
-long long query(int i){ long long s=0;
-  for(; i>0; i-=i&(-i)) s+=t[i]; return s; } // O(log n)
+void update(int i,long long v){       // suma v en pos i.  O(log n)
+  for(; i<=n; i+=i&(-i)) t[i]+=v; }
+long long query(int i){ long long s=0;// suma [1..i].      O(log n)
+  for(; i>0; i-=i&(-i)) s+=t[i]; return s; }
+long long rango(int l,int r){ return query(r)-query(l-1); }
 \end{lstlisting}
 \begin{lstlisting}[style=java]
 void update(int i,long v){
   for(; i<=n; i+=i&(-i)) t[i]+=v; }   // O(log n)
 long query(int i){ long s=0;
-  for(; i>0; i-=i&(-i)) s+=t[i]; return s; }  // O(log n)
+  for(; i>0; i-=i&(-i)) s+=t[i]; return s; }
 \end{lstlisting}
 \begin{lstlisting}[style=py]
 def update(self, i, v):        # O(log n)
@@ -827,15 +845,52 @@ def query(self, i):            # suma [1..i], O(log n)
     return s
 \end{lstlisting}
 
+\textbf{Construir en $O(n)$:} en vez de $n$ updates ($O(n\log n)$),
+propaga cada valor a su ``padre'' una sola vez.
+\begin{lstlisting}[style=cpp]
+for(int i=1;i<=n;i++){ t[i]+=a[i-1];
+  int j=i+(i&(-i)); if(j<=n) t[j]+=t[i]; }   // O(n)
+\end{lstlisting}
+
+\textbf{$k$-ésimo elemento (lower\_bound sobre prefijos):} si el BIT
+cuenta frecuencias, con \emph{binary lifting} bajas por el árbol y
+encuentras el menor índice cuyo prefijo alcanza \texttt{objetivo}, en
+$O(\log n)$ (mucho mejor que binaria$+$query, que sería $O(\log^2 n)$).
+\begin{lstlisting}[style=cpp]
+int lowerBound(long long objetivo){   // O(log n)
+  int pos=0; long long ac=0, LOG=1;
+  while((1<<LOG)<=n) LOG++;
+  for(int k=LOG-1;k>=0;k--){ int nx=pos+(1<<k);
+    if(nx<=n && ac+t[nx]<objetivo){ pos=nx; ac+=t[nx]; } }
+  return pos+1; }
+\end{lstlisting}
+
+\textbf{Update de rango + query de rango:} con \emph{dos} BIT y el truco
+de diferencias, ``sumar $v$ a todo $[l,r]$'' y consultar sumas de rango,
+ambas $O(\log n)$.
+\begin{lstlisting}[style=cpp]
+void rangoUpdate(int l,int r,long long v){   // suma v a [l,r]
+  b1.update(l,v);       b1.update(r+1,-v);
+  b2.update(l,v*(l-1)); b2.update(r+1,-v*r); }
+long long prefijo(int i){ return b1.query(i)*i - b2.query(i); }
+long long rango(int l,int r){ return prefijo(r)-prefijo(l-1); }
+\end{lstlisting}
+(Java y Python son análogos, línea por línea; están completos en el
+archivo \texttt{EstructurasAvanzadas} del repo.)
+
 \subsection{Sparse Table (RMQ)}
 \textbf{Idea:} responde \emph{Range Minimum Query} (el mínimo de
 cualquier rango) en $O(1)$, sobre un arreglo que \textbf{no cambia}.
-Precalcula, para cada posición, el mínimo de los rangos de largo
-$1,2,4,\dots$ ($2^k$). Cualquier rango $[l,r]$ se cubre con dos bloques
-de largo $2^k$ que se solapan, y como el mínimo es idempotente el
-solape no molesta: la consulta son dos lecturas. Sirve igual para
-máximo o gcd. \textbf{Complejidad:} construir $O(n\log n)$, consulta
-$O(1)$. (Si el arreglo cambia, usa Segment Tree: $O(\log n)$/op.)
+Precalcula \texttt{sp[k][i]} $=$ mínimo del bloque que empieza en $i$ y
+tiene largo $2^k$. La clave: para el rango $[l,r]$ tomas $k=\lfloor
+\log_2(r-l+1)\rfloor$ y lo cubres con \emph{dos} bloques de largo $2^k$
+—uno pegado a $l$ y otro pegado a $r$— que \textbf{se solapan}; como el
+mínimo es \emph{idempotente} ($\min(x,x)=x$), contar el solape dos
+veces no cambia el resultado, así que la consulta son solo dos lecturas.
+Sirve igual para máximo o gcd (cambiando \texttt{min}); para saber
+\emph{qué índice} es el mínimo, guarda índices en vez de valores.
+\textbf{Complejidad:} construir $O(n\log n)$, consulta $O(1)$. (Si el
+arreglo \emph{cambia}, usa Segment Tree: $O(\log n)$/op.)
 \begin{lstlisting}[style=cpp]
 sp[0]=a;                              // build: O(n log n)
 for(int k=1;k<K;k++) for(int i=0;i+(1<<k)<=n;i++)
@@ -1056,13 +1111,19 @@ for i in range(prev, min(prev+paso, n)):
 \end{lstlisting}
 
 \subsection{Heap Sort}
-\textbf{Idea:} usa un \emph{heap} (montículo) para ordenar in-place.
-Primero reorganiza el arreglo en un max-heap (el mayor queda en la
-raíz) en $O(n)$. Luego, repetidamente: intercambia la raíz (el mayor)
-con el último elemento activo —dejándolo ya ordenado al final— y
-``hunde'' la nueva raíz para restaurar el heap. Cada extracción cuesta
-$O(\log n)$. No usa memoria extra, pero no es estable.
-\textbf{Complejidad:} $O(n\log n)$ siempre (mejor, peor y promedio).
+\textbf{Idea:} un \emph{heap} binario se representa en el mismo arreglo:
+el hijo izquierdo de $i$ es $2i+1$ y el derecho $2i+2$; en un
+\emph{max-heap} todo padre es $\geq$ sus hijos, así que el mayor está en
+la raíz. Heap Sort tiene dos fases. \textbf{(1) Construir el heap}:
+recorres de abajo hacia arriba aplicando \texttt{bajar} (sift-down) a
+cada padre. Aunque parezca $O(n\log n)$, es $O(n)$: casi todos los nodos
+están cerca de las hojas y se hunden poco (la suma
+$\sum n/2^h\cdot h$ converge a $2n$). \textbf{(2) Ordenar}: repetidamente
+intercambias la raíz (el mayor) con el último elemento activo —quedando
+ya ordenado al final— y ``hundes'' la nueva raíz para restaurar el heap;
+cada una de las $n$ extracciones cuesta $O(\log n)$. In-place, sin
+memoria extra, pero \textbf{no estable}. \textbf{Complejidad:}
+$O(n\log n)$ en todos los casos.
 \begin{lstlisting}[style=cpp]
 void bajar(vector<int>&a,int n,int i){    // hunde: O(log n)
   while(true){ int m=i,l=2*i+1,r=2*i+2;
@@ -1092,35 +1153,49 @@ def heap_sort(a):
 
 \subsection{QuickSelect}
 \textbf{Idea:} encuentra el $k$-ésimo menor \emph{sin ordenar todo}.
-Igual que quicksort particiona alrededor de un pivote, pero como sabes
-en qué lado cae la posición $k$, recurres a \emph{un solo} lado y
-descartas el otro. Eso baja el costo promedio de $O(n\log n)$ a $O(n)$
-(cada nivel procesa la mitad: $n+n/2+n/4+\dots=2n$). El peor caso
-$O(n^2)$ ocurre con pivotes malos (se evita eligiendo el pivote al
-azar). \textbf{Complejidad:} promedio $O(n)$, peor $O(n^2)$.
+Como quicksort, particiona alrededor de un pivote dejando a la izquierda
+lo menor y a la derecha lo mayor; pero como sabes en qué lado cae la
+posición $k$, recurres (o iteras) sobre \emph{un solo} lado y descartas
+el otro. Por eso el promedio baja de $O(n\log n)$ a $O(n)$: cada fase
+procesa \emph{la mitad} del anterior, y $n+\tfrac{n}{2}+\tfrac{n}{4}+
+\dots = 2n$. El peor caso $O(n^2)$ aparece con pivotes pésimos (arreglo
+casi ordenado + pivote extremo); \textbf{elegir el pivote al azar} lo
+vuelve prácticamente imposible. La versión de abajo es iterativa (sin
+pila de recursión). Si necesitas garantía $O(n)$ en el peor caso, existe
+\emph{mediana de medianas} para elegir un buen pivote.
+\textbf{Complejidad:} promedio $O(n)$, peor $O(n^2)$.
 \begin{lstlisting}[style=cpp]
-int quickSelect(vector<int>&a,int lo,int hi,int k){
-  if(lo==hi) return a[lo];
-  int p=a[(lo+hi)/2], i=lo, j=hi;
-  while(i<=j){ while(a[i]<p) i++; while(a[j]>p) j--;
-    if(i<=j){ swap(a[i],a[j]); i++; j--; } }
-  if(k<=j) return quickSelect(a,lo,j,k);   // k a la izq
-  if(k>=i) return quickSelect(a,i,hi,k);   // k a la der
-  return a[k]; }
+int quickSelect(vector<int> a, int k){       // k in [0,n-1]
+  int lo=0, hi=a.size()-1;
+  while(lo<hi){
+    int p=a[lo+rand()%(hi-lo+1)], i=lo, j=hi; // pivote aleatorio
+    while(i<=j){ while(a[i]<p) i++; while(a[j]>p) j--;
+      if(i<=j){ swap(a[i],a[j]); i++; j--; } }
+    if(k<=j) hi=j;                             // k a la izq
+    else if(k>=i) lo=i;                        // k a la der
+    else return a[k];
+  }
+  return a[lo];
+}
+// C++ trae nth_element(a.begin(), a.begin()+k, a.end()); // O(n)
 \end{lstlisting}
 \begin{lstlisting}[style=py]
-def quick_select(a, lo, hi, k):
-    if lo == hi: return a[lo]
-    p = a[(lo+hi)//2]; i, j = lo, hi
-    while i <= j:
-        while a[i] < p: i += 1
-        while a[j] > p: j -= 1
-        if i <= j:
-            a[i], a[j] = a[j], a[i]; i += 1; j -= 1
-    if k <= j: return quick_select(a, lo, j, k)
-    if k >= i: return quick_select(a, i, hi, k)
-    return a[k]
+def quick_select(a, k):            # k in [0, n-1]
+    lo, hi = 0, len(a)-1
+    while lo < hi:
+        p = a[random.randint(lo, hi)]   # pivote aleatorio
+        i, j = lo, hi
+        while i <= j:
+            while a[i] < p: i += 1
+            while a[j] > p: j -= 1
+            if i <= j:
+                a[i], a[j] = a[j], a[i]; i += 1; j -= 1
+        if k <= j: hi = j
+        elif k >= i: lo = i
+        else: return a[k]
+    return a[lo]
 \end{lstlisting}
+(En Java igual, con \texttt{Random}; código completo en el repo.)
 
 \section{Búsqueda Binaria (Binary Search)}
 \textbf{Idea central:} mantienes un rango $[lo,hi]$ donde \emph{sabes}
