@@ -116,11 +116,12 @@
 % ===== CUERPO (doble columna) ==============================================
 \twocolumn
 
+\part{Introduccion}
 %---------------------------------------------------------------------------
-\part{Fundamentos Básicos}
+\section{Fundamentos Básicos}
 %---------------------------------------------------------------------------
 
-\section{Entrada / Salida Rápida (Fast I/O)}
+\subsection{Entrada / Salida Rápida (Fast I/O)}
 Usar lectura rápida para evitar TLE, hay 3 niveles de lectura rápida, estandarizar Tier 2 y usar Tier 3 (lector por
 bytes) solo cuando haya del orden de $10^6$--$10^7$ lecturas.
 
@@ -233,7 +234,7 @@ struct FastReader {
 };
 \end{lstlisting}
 
-\section{Formateo de Salida}
+\subsection{Formateo de Salida}
 
 
 La función \texttt{printf} utiliza una cadena de formato para indicar cómo
@@ -370,7 +371,7 @@ importantes son \texttt{\%d} para \texttt{int}, \texttt{\%lld} para
 y \texttt{\%.2f} (o una precisión diferente) para números reales.
 
 
-\section{Condicionales y Ciclos}
+\subsection{Condicionales y Ciclos}
 
 \begin{lstlisting}[style=cpp]
 // if / else: ejecuta un bloque segun una condicion
@@ -427,7 +428,7 @@ do {
 
 
 
-\section{Conversiones, Parseos y Casteos}
+\subsection{Conversiones, Parseos y Casteos}
 
 \begin{lstlisting}[style=cpp]
 // string -> numero (parseo)
@@ -1400,48 +1401,201 @@ Query/Update $O(\sqrt{n})$ \\
 \caption{Guía rápida: qué estructura de range queries usar según el problema, con su complejidad.}
 \end{table}
 
-
-
 \subsection{Prefix Sums}
 
-\subsection{Suma de Euler Totient ($\phi$) en un rango}
+\textbf{Idea:} si un arreglo \textbf{no cambia}, puedes precalcular
+\texttt{pref[i]} $=$ suma de los primeros $i$ elementos en $O(n)$, una
+sola vez. Cualquier suma de rango $[l,r]$ se responde restando dos
+prefijos: \texttt{pref[r+1] - pref[l]}. Es la base conceptual de todo
+lo demás en esta sección: Fenwick y Segment Tree existen justamente
+para soportar lo que Prefix Sums no puede (actualizaciones), a costa
+de más complejidad de código.
+
+\textbf{¿Por qué usarlo?} Es lo más simple y rápido posible para
+consultas de rango cuando el arreglo es estático. Cero estructuras de
+datos elaboradas, cero recursión, solo un arreglo auxiliar y una
+resta.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Suma de rango sobre un arreglo que nunca se modifica, con
+    muchas queries.
+    \item Suma de submatriz (versión 2D) sobre una matriz estática.
+    \item Aplicar $B$ actualizaciones de rango \textbf{offline} y
+    consultar el arreglo final una sola vez (Difference Array).
+    \item Como paso final de un precómputo de teoría de números
+    (criba de $\phi$, $\mu$, número de divisores, etc.) cuando el
+    problema pide sumas sobre esos valores en un rango.
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$ (u $O(nm)$ en 2D), consulta
+$O(1)$. No soporta actualizaciones puntuales eficientes: modificar un
+elemento y volver a consultar obliga a reconstruir, $O(n)$.
+
+
+\subsubsection{Prefix Sum 1D}
+
+\begin{lstlisting}[style=cpp]
+struct PrefixSum1D {
+    vector<long long> pref;
+    int n;
+
+    // CREATE: construye los prefijos a partir de a[0..n-1].
+    PrefixSum1D(vector<long long>& a) {
+        n = a.size();
+        pref.assign(n + 1, 0);
+
+        for (int i = 0; i < n; i++)
+            pref[i + 1] = pref[i] + a[i];
+    }                                          // O(n)
+
+    // READ: suma del rango [l, r] (0-indexado, inclusivo).
+    long long rango(int l, int r) {
+        if (l > r) return 0;
+        return pref[r + 1] - pref[l];
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7};
+
+PrefixSum1D ps(a);
+// arreglo logico: [5, 2, 9, 1, 7]  (posiciones 0..4)
+
+cout << ps.rango(0, 2);
+// 5 + 2 + 9 = 16
+
+cout << ps.rango(1, 4);
+// 2 + 9 + 1 + 7 = 19
+
+cout << ps.rango(3, 3);
+// 1
+\end{lstlisting}
+
+
+\subsubsection{Prefix Sum 2D}
+
+\begin{lstlisting}[style=cpp]
+struct PrefixSum2D {
+    vector<vector<long long>> pref;
+    int n, m;
+
+    // CREATE: construye la matriz de prefijos a partir de
+    // a[0..n-1][0..m-1] usando inclusion-exclusion.
+    PrefixSum2D(vector<vector<long long>>& a) {
+        n = a.size();
+        m = a[0].size();
+        pref.assign(n + 1, vector<long long>(m + 1, 0));
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                pref[i + 1][j + 1] = a[i][j] + pref[i][j + 1]
+                                    + pref[i + 1][j] - pref[i][j];
+    }                                          // O(n * m)
+
+    // READ: suma del rectangulo [x1..x2] x [y1..y2] (0-indexado,
+    // inclusivo), usando inclusion-exclusion sobre los prefijos.
+    long long rango(int x1, int y1, int x2, int y2) {
+        return pref[x2 + 1][y2 + 1] - pref[x1][y2 + 1]
+             - pref[x2 + 1][y1] + pref[x1][y1];
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<vector<long long>> a = {
+    {1, 2, 3},
+    {4, 5, 6},
+    {7, 8, 9}
+};
+
+PrefixSum2D ps(a);
+
+cout << ps.rango(0, 0, 1, 1);
+// 1+2+4+5 = 12
+
+cout << ps.rango(1, 1, 2, 2);
+// 5+6+8+9 = 28
+\end{lstlisting}
+
+
+\subsubsection{Difference Array (updates de rango offline)}
+
+\textbf{Idea:} el truco inverso a Prefix Sums: para sumar $v$ a todo
+un rango $[l,r]$, marcas \texttt{diff[l] += v} y \texttt{diff[r+1] -=
+v} en $O(1)$. Después de aplicar \textbf{todas} las actualizaciones,
+un solo recorrido con prefijos reconstruye el arreglo final. Sirve
+solo cuando todas las updates son \textbf{offline} (las conoces antes
+de necesitar consultar); si necesitas consultar \emph{entre}
+actualizaciones, usa FenwickRangeUpdate en su lugar.
+
+\begin{lstlisting}[style=cpp]
+struct DifferenceArray {
+    vector<long long> diff;
+    int n;
+
+    // CREATE: reserva un arreglo de diferencias de tamano n.
+    DifferenceArray(int n) : n(n) {
+        diff.assign(n + 1, 0);
+    }
+
+    // UPDATE: marca +v en todo el rango [l, r] (0-indexado).
+    void rangoUpdate(int l, int r, long long v) {
+        diff[l] += v;
+        if (r + 1 <= n)
+            diff[r + 1] -= v;
+    }                                          // O(1)
+
+    // READ: reconstruye el arreglo final tras aplicar todas
+    // las actualizaciones marcadas hasta el momento.
+    vector<long long> aplicar() {
+        vector<long long> a(n);
+        long long acc = 0;
+
+        for (int i = 0; i < n; i++) {
+            acc += diff[i];
+            a[i] = acc;
+        }
+
+        return a;
+    }                                          // O(n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+DifferenceArray d(5);
+
+d.rangoUpdate(1, 3, 4);
+d.rangoUpdate(0, 4, 1);
+d.rangoUpdate(2, 2, 10);
+
+vector<long long> resultado = d.aplicar();
+// resultado: [1, 5, 15, 5, 1]
+\end{lstlisting}
+
+
+\subsubsection{Aplicación: suma de Euler Totient ($\phi$) en un rango}
 
 \textbf{Idea:} $\phi(n)$ cuenta cuántos enteros en $[1,n]$ son
 coprimos con $n$. Calcular $\phi$ de \emph{un} número es teoría de
 números ($O(\sqrt n)$ factorizando); pero cuando el problema pide la
 \textbf{suma de $\phi(i)$ para $i$ en un rango $[l,r]$}, con muchas
-queries, el patrón es en dos fases: (1) precalculas el arreglo de
-$\phi$ una sola vez con una criba, y (2) respondes las queries de
-rango con las estructuras de esta sección (Prefix Sums o Fenwick)
-sobre ese arreglo ya calculado. La fase (1) es teoría de números; la
-fase (2) es exactamente Range Queries.
+queries, el patrón se resuelve en dos fases: (1) precalculas el
+arreglo de $\phi$ una sola vez con una criba (teoría de números), y
+(2) respondes las queries de rango con Prefix Sums sobre ese arreglo
+ya calculado (exactamente esta subsección). Factorizar cada número
+del rango por separado en cada query sería $O(q\sqrt n)$ y no escala;
+precalcular y sumar con prefijos reduce cada query a $O(1)$.
 
-\textbf{¿Por qué usarlo?} Factorizar cada número del rango uno por
-uno para responder cada query sería $O(q\sqrt n)$ y no escala.
-Precalcular $\phi$ una vez y sumar con prefijos reduce cada query a
-$O(1)$, sin importar cuántas se hagan.
-
-\textbf{Casos de uso:}
-
-\begin{itemize}
-    \item Suma de $\phi(i)$ (u otra función aritmética calculable por
-    criba, como $\mu$ o el número de divisores) en un rango $[l,r]$,
-    con $l,r \le N$ y $N$ manejable ($\le 10^7$ aprox.).
-    \item El mismo problema pero con $[L,R]$ muy grandes
-    ($R \le 10^{12}$) y $R-L$ pequeño: usa criba segmentada en vez de
-    criba desde 1.
-    \item Cualquier variante donde $\phi$ no cambia entre queries
-    (arreglo estático) $\Rightarrow$ Prefix Sums. Si además necesitas
-    modificar valores puntuales entre queries, usa Fenwick.
-\end{itemize}
-
-\textbf{Complejidad:} criba lineal $O(N)$, criba segmentada
-$O((R-L+1)\log\log R + \sqrt R)$; en ambos casos, una vez armado el
-arreglo, sumar un rango es $O(1)$ con Prefix Sums o $O(\log N)$ con
-Fenwick si hace falta actualizar.
-
-
-\subsubsection{Criba lineal de $\phi$ + Prefix Sums (rango $[1,N]$)}
+\paragraph{Criba lineal + Prefix Sums (rango $[1,N]$).}
 
 \begin{lstlisting}[style=cpp]
 struct PhiRangeSum {
@@ -1511,16 +1665,14 @@ cout << pr.rango(4, 8);
 // 2+4+2+6+4 = 18
 \end{lstlisting}
 
+\paragraph{Criba segmentada (rango $[L,R]$ grande).}
 
-\subsubsection{Criba segmentada de $\phi$ (rango $[L,R]$ grande)}
-
-\textbf{Idea:} si $R$ es muy grande ($10^{12}$) pero $R-L$ es
-manejable, no puedes cribar desde 1. En vez de eso, precalculas los
-primos hasta $\sqrt R$ con una criba normal, y para cada número del
-segmento $[L,R]$ le vas quitando sus factores primos pequeños,
-aplicando la fórmula $\phi(n) = n\prod_{p\mid n}(1-\tfrac1p)$. Si al
-final queda un residuo $>1$, es un único primo grande (mayor a
-$\sqrt R$) que también se aplica a la fórmula.
+Si $R$ es muy grande ($10^{12}$) pero $R-L$ es manejable, no puedes
+cribar desde 1. En vez de eso, precalculas los primos hasta
+$\sqrt R$, y para cada número del segmento $[L,R]$ le quitas sus
+factores primos pequeños, aplicando $\phi(n) = n\prod_{p\mid
+n}(1-\tfrac1p)$. Si al final queda un residuo $>1$, es un único
+primo grande (mayor a $\sqrt R$) que también se aplica a la fórmula.
 
 \begin{lstlisting}[style=cpp]
 struct PhiSegmentedRangeSum {
@@ -1631,13 +1783,14 @@ $\phi$ cambia entre queries
 \label{tab:phi_variants}
 \end{table}
 
-
 \textbf{Regla práctica:} el cálculo de $\phi$ en sí (la criba, lineal
 o segmentada) es teoría de números y no cambia según la query. Una vez
-que tienes el arreglo de $\phi$ listo, tratarlo como \emph{cualquier
-otro arreglo}: si no cambia, Prefix Sums; si necesitas actualizarlo
-puntualmente entre queries, Fenwick. No hace falta una estructura
-especial para $\phi$ más allá de construir bien el arreglo inicial.
+que tienes el arreglo de $\phi$ listo, trátalo como \emph{cualquier
+otro arreglo estático}: Prefix Sums resuelve el resto. No hace falta
+una estructura especial para $\phi$ más allá de construir bien el
+arreglo inicial.
+
+
 
 \subsection{Árbol de Fenwick (BIT)}
 
@@ -1950,7 +2103,326 @@ de rango con lazy propagation general, usa Segment Tree en su lugar.
 
 
 
+
 \subsection{Sqrt Decomposition}
+
+\textbf{Idea:} divide el arreglo en bloques de tamaño
+$\approx\sqrt n$ y guarda un resumen (suma, mínimo, etc.) por bloque.
+Un update toca solo un bloque; una query de rango toca a lo más dos
+bloques \emph{parciales} (recorridos elemento por elemento) y varios
+bloques \emph{completos} en el medio (usados de golpe con su resumen
+precalculado). Como hay $\approx\sqrt n$ bloques y cada bloque tiene
+$\approx\sqrt n$ elementos, todo cuesta $O(\sqrt n)$: ni tan lento
+como un arreglo plano, ni tan rápido como Fenwick/Segment Tree, pero
+mucho más simple de escribir y de adaptar a operaciones raras.
+
+\textbf{¿Por qué usarlo?} Es la estructura más flexible cuando no
+tienes tiempo de pensar un Segment Tree con lazy propagation
+correcto: soporta casi cualquier operación (suma, min, max, contar
+algo con una condición) con el mismo esqueleto de código, aunque sea
+$O(\sqrt n)$ en vez de $O(\log n)$. También es la base conceptual de
+Mo's Algorithm.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Necesitas implementar algo rápido bajo presión, sin
+    memorizar casos de Segment Tree con lazy propagation.
+    \item Operaciones donde min/max cambian de forma que Fenwick no
+    puede manejar (Fenwick solo sirve para operaciones invertibles
+    como la suma).
+    \item $n$ no es tan grande ($\le 10^5$–$10^6$) y $O(\sqrt n)$ por
+    operación es suficiente para el límite de tiempo.
+    \item Base para Mo's Algorithm (ver esa sección).
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$, update puntual $O(1)$ (suma)
+u $O(\sqrt n)$ (min/max), query de rango $O(\sqrt n)$, range update +
+range query $O(\sqrt n)$ con lazy por bloque.
+
+
+\subsubsection{Sqrt Decomposition clásico (point update, range query — suma)}
+
+\begin{lstlisting}[style=cpp]
+struct SqrtDecomposition {
+    vector<long long> a, bloque;
+    int n, tam;
+
+    // CREATE: construye el arreglo en bloques de tamano ~sqrt(n).
+    SqrtDecomposition(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tam = max(1, (int)sqrt((double)n));
+
+        bloque.assign((n + tam - 1) / tam, 0);
+
+        for (int i = 0; i < n; i++)
+            bloque[i / tam] += a[i];
+    }                                          // O(n)
+
+    // UPDATE: suma v al elemento en la posicion i.
+    void update(int i, long long v) {
+        a[i] += v;
+        bloque[i / tam] += v;
+    }                                          // O(1)
+
+    // READ: suma del rango [l, r] (0-indexado, inclusivo).
+    long long rango(int l, int r) {
+        long long s = 0;
+        int bl = l / tam, br = r / tam;
+
+        if (bl == br) {
+            for (int i = l; i <= r; i++)
+                s += a[i];
+            return s;
+        }
+
+        for (int i = l; i < (bl + 1) * tam; i++)
+            s += a[i];
+
+        for (int b = bl + 1; b < br; b++)
+            s += bloque[b];
+
+        for (int i = br * tam; i <= r; i++)
+            s += a[i];
+
+        return s;
+    }                                          // O(sqrt(n))
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7, 3, 8, 4};
+
+SqrtDecomposition sd(a);
+// arreglo logico: [5, 2, 9, 1, 7, 3, 8, 4]  (posiciones 0..7)
+// tam = 2 -> bloques: [5+2, 9+1, 7+3, 8+4] = [7, 10, 10, 12]
+
+cout << sd.rango(1, 5);
+// 2 + 9 + 1 + 7 + 3 = 22
+
+sd.update(3, 10);
+// arreglo logico: [5, 2, 9, 11, 7, 3, 8, 4]
+
+cout << sd.rango(1, 5);
+// 2 + 9 + 11 + 7 + 3 = 32
+\end{lstlisting}
+
+
+\subsubsection{Sqrt Decomposition con range update + range query (lazy por bloque)}
+
+\textbf{Idea:} igual que arriba, pero cada bloque guarda un valor
+\texttt{lazy} pendiente que representa ``sumar $v$ a todo el bloque''
+sin tocar cada elemento individualmente. Solo se aplica a los
+elementos reales cuando un update o query \textbf{parcial} necesita
+tocar ese bloque específico.
+
+\begin{lstlisting}[style=cpp]
+struct SqrtRangeUpdate {
+    vector<long long> a, bloqueSum, lazy;
+    int n, tam;
+
+    // CREATE: construye el arreglo en bloques de tamano ~sqrt(n).
+    SqrtRangeUpdate(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tam = max(1, (int)sqrt((double)n));
+
+        int nb = (n + tam - 1) / tam;
+        bloqueSum.assign(nb, 0);
+        lazy.assign(nb, 0);
+
+        for (int i = 0; i < n; i++)
+            bloqueSum[i / tam] += a[i];
+    }                                          // O(n)
+
+    // READ auxiliar: cantidad de elementos reales del bloque b.
+    int tamBloque(int b) {
+        return min(n, (b + 1) * tam) - b * tam;
+    }                                          // O(1)
+
+    // UPDATE: suma v a todo el rango [l, r].
+    void rangoUpdate(int l, int r, long long v) {
+        int bl = l / tam, br = r / tam;
+
+        if (bl == br) {
+            for (int i = l; i <= r; i++)
+                a[i] += v;
+            bloqueSum[bl] += v * (r - l + 1);
+            return;
+        }
+
+        for (int i = l; i < (bl + 1) * tam; i++)
+            a[i] += v;
+        bloqueSum[bl] += v * ((bl + 1) * tam - l);
+
+        for (int b = bl + 1; b < br; b++)
+            lazy[b] += v;
+
+        for (int i = br * tam; i <= r; i++)
+            a[i] += v;
+        bloqueSum[br] += v * (r - br * tam + 1);
+    }                                          // O(sqrt(n))
+
+    // READ: suma del rango [l, r].
+    long long rango(int l, int r) {
+        long long s = 0;
+        int bl = l / tam, br = r / tam;
+
+        if (bl == br) {
+            for (int i = l; i <= r; i++)
+                s += a[i] + lazy[bl];
+            return s;
+        }
+
+        for (int i = l; i < (bl + 1) * tam; i++)
+            s += a[i] + lazy[bl];
+
+        for (int b = bl + 1; b < br; b++)
+            s += bloqueSum[b] + lazy[b] * tamBloque(b);
+
+        for (int i = br * tam; i <= r; i++)
+            s += a[i] + lazy[br];
+
+        return s;
+    }                                          // O(sqrt(n))
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {1, 1, 1, 1, 1, 1};
+
+SqrtRangeUpdate sr(a);
+// tam = 2 -> bloques: [1+1, 1+1, 1+1] = [2, 2, 2]
+
+sr.rangoUpdate(1, 4, 10);
+// arreglo logico "efectivo": [1, 11, 11, 11, 11, 1]
+
+cout << sr.rango(0, 5);
+// 1+11+11+11+11+1 = 46
+
+cout << sr.rango(2, 3);
+// 11+11 = 22
+\end{lstlisting}
+
+
+\subsubsection{Variante para mínimo / máximo (point update, range query)}
+
+\textbf{Idea:} a diferencia de Fenwick (que solo sirve para
+operaciones \emph{invertibles} como la suma), Sqrt Decomposition
+soporta min/max con el mismo esqueleto: la única diferencia es que un
+update ya no puede ajustar el resumen del bloque en $O(1)$, porque
+quitar el valor viejo no dice si sigue habiendo otro elemento igual
+de chico. Hay que \textbf{reconstruir el mínimo de todo el bloque},
+lo cual sigue siendo $O(\sqrt n)$.
+
+\begin{lstlisting}[style=cpp]
+struct SqrtMinQuery {
+    vector<long long> a, bloqueMin;
+    int n, tam;
+
+    // CREATE: construye el arreglo en bloques de tamano ~sqrt(n).
+    SqrtMinQuery(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tam = max(1, (int)sqrt((double)n));
+
+        bloqueMin.assign((n + tam - 1) / tam, LLONG_MAX);
+
+        for (int i = 0; i < n; i++)
+            bloqueMin[i / tam] = min(bloqueMin[i / tam], a[i]);
+    }                                          // O(n)
+
+    // UPDATE: fija el valor absoluto de la posicion i en x.
+    // Reconstruye el minimo de todo el bloque, ya que a diferencia
+    // de la suma, el minimo no se puede ajustar incrementalmente.
+    void set(int i, long long x) {
+        a[i] = x;
+
+        int b = i / tam;
+        long long mn = LLONG_MAX;
+
+        for (int j = b * tam; j < min(n, (b + 1) * tam); j++)
+            mn = min(mn, a[j]);
+
+        bloqueMin[b] = mn;
+    }                                          // O(sqrt(n))
+
+    // READ: minimo del rango [l, r].
+    long long rango(int l, int r) {
+        long long mn = LLONG_MAX;
+        int bl = l / tam, br = r / tam;
+
+        if (bl == br) {
+            for (int i = l; i <= r; i++)
+                mn = min(mn, a[i]);
+            return mn;
+        }
+
+        for (int i = l; i < (bl + 1) * tam; i++)
+            mn = min(mn, a[i]);
+
+        for (int b = bl + 1; b < br; b++)
+            mn = min(mn, bloqueMin[b]);
+
+        for (int i = br * tam; i <= r; i++)
+            mn = min(mn, a[i]);
+
+        return mn;
+    }                                          // O(sqrt(n))
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7, 3, 8, 4};
+
+SqrtMinQuery sm(a);
+// tam = 2 -> bloques min: [2, 1, 3, 4]
+
+cout << sm.rango(0, 4);
+// min(5,2,9,1,7) = 1
+
+sm.set(3, 100);
+// arreglo logico: [5, 2, 9, 100, 7, 3, 8, 4]
+
+cout << sm.rango(0, 4);
+// min(5,2,9,100,7) = 2
+\end{lstlisting}
+
+\textbf{Comparación con Fenwick y Segment Tree:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Estructura} & \textbf{Update} & \textbf{Query} & \textbf{Min/Max?} \\
+\hline
+Sqrt Decomposition & $O(1)$–$O(\sqrt n)$ & $O(\sqrt n)$ & Sí \\
+\hline
+\texttt{FenwickTree} & $O(\log n)$ & $O(\log n)$ & No \\
+\hline
+Segment Tree & $O(\log n)$ & $O(\log n)$ & Sí \\
+\hline
+\end{tabular}
+\caption{Sqrt Decomposition vs. Fenwick vs. Segment Tree.}
+\end{table}
+
+\textbf{Regla práctica:} usa Sqrt Decomposition cuando quieras algo
+simple y flexible de escribir rápido, sobre todo si la operación no
+es una suma (Fenwick no sirve) y no quieres arriesgarte con un
+Segment Tree + Lazy Propagation bajo presión de tiempo. Si $n$ es muy
+grande o el límite de tiempo es ajustado, $O(\log n)$ de Segment Tree
+gana; si la operación es solo suma, Fenwick es más simple y más
+rápido.
+
 
 \subsection{Sparse Table (RMQ)}
 
@@ -2164,15 +2636,1336 @@ $O(n\log n)$ deja de valer la pena y conviene un Segment Tree.
 
 
 
+
 \subsection{Segment Tree}
+
+\textbf{Idea:} un árbol binario implícito (guardado en un arreglo)
+donde cada nodo representa el resultado combinado de un rango del
+arreglo original. La raíz cubre todo $[0,n-1]$; cada nodo se parte en
+dos mitades hasta llegar a las hojas, que son elementos individuales.
+Un update baja por el árbol tocando $O(\log n)$ nodos (uno por nivel);
+una query de rango se descompone en a lo más $O(\log n)$ nodos que
+cubren exactamente el rango pedido, sin necesidad de bloques
+parciales como en Sqrt Decomposition. A diferencia de Fenwick, sirve
+para \textbf{cualquier} operación asociativa (min, max, gcd, and, or,
+no solo sumas), y con Lazy Propagation soporta actualizaciones de
+rango completo.
+
+\textbf{¿Por qué usarlo?} Es la estructura más versátil de esta
+sección: $O(\log n)$ tanto para update como para query, funciona con
+casi cualquier operación asociativa, y con lazy propagation resuelve
+range update + range query para operaciones que Fenwick no puede
+(min, max, asignar un valor a todo un rango, etc.).
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Min/max/gcd de rango con actualizaciones (a diferencia de
+    Sparse Table, que exige arreglo estático).
+    \item Range update + range query con operaciones no invertibles:
+    asignar un valor a todo un rango, min/max con suma en rango, etc.
+    \item Cualquier operación asociativa que no sea una suma simple
+    (donde Fenwick ya alcanzaría y sería más simple).
+    \item Base para variantes más avanzadas: Segment Tree 2D, Merge
+    Sort Tree, Persistent Segment Tree, Segment Tree Beats.
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$, update puntual $O(\log n)$,
+query de rango $O(\log n)$, range update + range query con lazy
+propagation $O(\log n)$.
+
+
+\subsubsection{Segment Tree clásico (point update, range query — suma)}
+
+\begin{lstlisting}[style=cpp]
+struct SegmentTree {
+    vector<long long> tree, a;
+    int n;
+
+    // CREATE: reserva el arbol (tamano 4n es cota segura) y
+    // construye recursivamente a partir de a[0..n-1].
+    SegmentTree(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tree.assign(4 * n, 0);
+        if (n > 0)
+            build(1, 0, n - 1);
+    }                                          // O(n)
+
+    void build(int node, int l, int r) {
+        if (l == r) {
+            tree[node] = a[l];
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        build(2 * node, l, mid);
+        build(2 * node + 1, mid + 1, r);
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+
+    void updateUtil(int node, int l, int r, int i, long long x) {
+        if (l == r) {
+            tree[node] = x;
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        if (i <= mid)
+            updateUtil(2 * node, l, mid, i, x);
+        else
+            updateUtil(2 * node + 1, mid + 1, r, i, x);
+
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+
+    // UPDATE: fija el valor absoluto de la posicion i en x.
+    void update(int i, long long x) {
+        updateUtil(1, 0, n - 1, i, x);
+    }                                          // O(log n)
+
+    long long queryUtil(int node, int l, int r, int ql, int qr) {
+        if (qr < l || r < ql)
+            return 0;                          // neutro para suma
+
+        if (ql <= l && r <= qr)
+            return tree[node];
+
+        int mid = (l + r) / 2;
+        return queryUtil(2 * node, l, mid, ql, qr)
+             + queryUtil(2 * node + 1, mid + 1, r, ql, qr);
+    }
+
+    // READ: suma del rango [l, r] (0-indexado, inclusivo).
+    long long rango(int l, int r) {
+        return queryUtil(1, 0, n - 1, l, r);
+    }                                          // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7};
+
+SegmentTree st(a);
+// arreglo logico: [5, 2, 9, 1, 7]  (posiciones 0..4)
+
+cout << st.rango(1, 3);
+// 2 + 9 + 1 = 12
+
+st.update(2, 100);
+// arreglo logico: [5, 2, 100, 1, 7]
+
+cout << st.rango(1, 3);
+// 2 + 100 + 1 = 103
+\end{lstlisting}
+
+\textbf{Nota:} para min/max/gcd solo cambia el neutro del caso base
+(\texttt{LLONG\_MAX} para min, \texttt{0} para gcd, etc.) y el
+operador de combinación (\texttt{min(...)}, \texttt{\_\_gcd(...)}) en
+\texttt{build}, \texttt{updateUtil} y \texttt{queryUtil}.
+
+
+\subsubsection{Segment Tree con Lazy Propagation (range update + range query — suma)}
+
+\textbf{Idea:} cada nodo guarda un valor \texttt{lazy} pendiente que
+representa ``sumar $v$ a todo este rango'' sin aplicarlo todavía a
+los hijos. Se aplica (\emph{se propaga}) solo cuando hace falta bajar
+más en el árbol para otra operación.
+
+\begin{lstlisting}[style=cpp]
+struct SegmentTreeLazyAdd {
+    vector<long long> tree, lazy, a;
+    int n;
+
+    // CREATE: reserva arbol + lazy, construye a partir de a[0..n-1].
+    SegmentTreeLazyAdd(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tree.assign(4 * n, 0);
+        lazy.assign(4 * n, 0);
+        if (n > 0)
+            build(1, 0, n - 1);
+    }                                          // O(n)
+
+    void build(int node, int l, int r) {
+        if (l == r) {
+            tree[node] = a[l];
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        build(2 * node, l, mid);
+        build(2 * node + 1, mid + 1, r);
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+
+    // Aplica el lazy pendiente de este nodo y lo empuja a los hijos.
+    void propagar(int node, int l, int r) {
+        if (lazy[node] == 0)
+            return;
+
+        tree[node] += lazy[node] * (r - l + 1);
+
+        if (l != r) {
+            lazy[2 * node] += lazy[node];
+            lazy[2 * node + 1] += lazy[node];
+        }
+
+        lazy[node] = 0;
+    }
+
+    void rangoUpdateUtil(int node, int l, int r, int ql, int qr,
+                          long long v) {
+        propagar(node, l, r);
+
+        if (qr < l || r < ql)
+            return;
+
+        if (ql <= l && r <= qr) {
+            lazy[node] += v;
+            propagar(node, l, r);
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        rangoUpdateUtil(2 * node, l, mid, ql, qr, v);
+        rangoUpdateUtil(2 * node + 1, mid + 1, r, ql, qr, v);
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+
+    // UPDATE: suma v a todo el rango [l, r].
+    void rangoUpdate(int l, int r, long long v) {
+        rangoUpdateUtil(1, 0, n - 1, l, r, v);
+    }                                          // O(log n)
+
+    long long queryUtil(int node, int l, int r, int ql, int qr) {
+        propagar(node, l, r);
+
+        if (qr < l || r < ql)
+            return 0;
+
+        if (ql <= l && r <= qr)
+            return tree[node];
+
+        int mid = (l + r) / 2;
+        return queryUtil(2 * node, l, mid, ql, qr)
+             + queryUtil(2 * node + 1, mid + 1, r, ql, qr);
+    }
+
+    // READ: suma del rango [l, r].
+    long long rango(int l, int r) {
+        return queryUtil(1, 0, n - 1, l, r);
+    }                                          // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {1, 1, 1, 1, 1, 1};
+
+SegmentTreeLazyAdd st(a);
+
+st.rangoUpdate(1, 4, 10);
+// arreglo logico efectivo: [1, 11, 11, 11, 11, 1]
+
+cout << st.rango(0, 5);
+// 1+11+11+11+11+1 = 46
+
+cout << st.rango(2, 3);
+// 11+11 = 22
+\end{lstlisting}
+
+
+\subsubsection{Lazy Propagation con asignación (range assign + range query — mínimo)}
+
+\textbf{Idea:} en vez de \emph{sumar} un valor al rango, lo
+\textbf{reemplaza} por completo (\texttt{asigna x a todo
+$[l,r]$}). El lazy aquí no se acumula como en la suma: el último
+assign pisa a cualquier assign anterior pendiente, así que se necesita
+una bandera aparte para distinguir ``no hay lazy pendiente'' de
+``hay que asignar 0''.
+
+\begin{lstlisting}[style=cpp]
+struct SegmentTreeAssignMin {
+    vector<long long> tree, lazy, a;
+    vector<bool> tieneLazy;
+    int n;
+
+    // CREATE: reserva arbol + lazy + banderas, construye desde a.
+    SegmentTreeAssignMin(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tree.assign(4 * n, LLONG_MAX);
+        lazy.assign(4 * n, 0);
+        tieneLazy.assign(4 * n, false);
+        if (n > 0)
+            build(1, 0, n - 1);
+    }                                          // O(n)
+
+    void build(int node, int l, int r) {
+        if (l == r) {
+            tree[node] = a[l];
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        build(2 * node, l, mid);
+        build(2 * node + 1, mid + 1, r);
+        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
+    }
+
+    // Empuja el assign pendiente de este nodo hacia sus hijos.
+    void propagar(int node) {
+        if (!tieneLazy[node])
+            return;
+
+        for (int hijo : {2 * node, 2 * node + 1}) {
+            tree[hijo] = lazy[node];
+            lazy[hijo] = lazy[node];
+            tieneLazy[hijo] = true;
+        }
+
+        tieneLazy[node] = false;
+    }
+
+    void rangoAssignUtil(int node, int l, int r, int ql, int qr,
+                          long long x) {
+        if (qr < l || r < ql)
+            return;
+
+        if (ql <= l && r <= qr) {
+            tree[node] = x;
+            lazy[node] = x;
+            tieneLazy[node] = true;
+            return;
+        }
+
+        propagar(node);
+        int mid = (l + r) / 2;
+        rangoAssignUtil(2 * node, l, mid, ql, qr, x);
+        rangoAssignUtil(2 * node + 1, mid + 1, r, ql, qr, x);
+        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
+    }
+
+    // UPDATE: asigna x a todo el rango [l, r].
+    void rangoAssign(int l, int r, long long x) {
+        rangoAssignUtil(1, 0, n - 1, l, r, x);
+    }                                          // O(log n)
+
+    long long queryUtil(int node, int l, int r, int ql, int qr) {
+        if (qr < l || r < ql)
+            return LLONG_MAX;
+
+        if (ql <= l && r <= qr)
+            return tree[node];
+
+        propagar(node);
+        int mid = (l + r) / 2;
+        return min(queryUtil(2 * node, l, mid, ql, qr),
+                    queryUtil(2 * node + 1, mid + 1, r, ql, qr));
+    }
+
+    // READ: minimo del rango [l, r].
+    long long rango(int l, int r) {
+        return queryUtil(1, 0, n - 1, l, r);
+    }                                          // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7, 3};
+
+SegmentTreeAssignMin st(a);
+
+cout << st.rango(0, 5);
+// min(5,2,9,1,7,3) = 1
+
+st.rangoAssign(0, 2, 100);
+// arreglo logico efectivo: [100, 100, 100, 1, 7, 3]
+
+cout << st.rango(0, 2);
+// min(100,100,100) = 100
+
+cout << st.rango(0, 5);
+// min(100,100,100,1,7,3) = 1
+\end{lstlisting}
+
+\textbf{Comparación con las otras estructuras de rango:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Estructura} & \textbf{Update} & \textbf{Query} & \textbf{Min/Max?} \\
+\hline
+Segment Tree & $O(\log n)$ & $O(\log n)$ & Sí \\
+\hline
+Segment Tree + Lazy & $O(\log n)$ range & $O(\log n)$ range & Sí \\
+\hline
+\texttt{FenwickTree} & $O(\log n)$ punto & $O(\log n)$ rango & No \\
+\hline
+Sqrt Decomposition & $O(1)$–$O(\sqrt n)$ & $O(\sqrt n)$ & Sí \\
+\hline
+\end{tabular}
+\caption{Segment Tree vs. Fenwick vs. Sqrt Decomposition.}
+\end{table}
+
+\textbf{Regla práctica:} usa Segment Tree cuando necesites min/max/gcd
+(operaciones no invertibles que Fenwick no soporta), o cuando
+necesites range update + range query con una operación que no sea
+suma simple. Si la operación es solo suma y no necesitas range
+update, Fenwick es más simple y más rápido en la práctica (menor
+constante). Si no confías en escribir el lazy propagation correcto
+bajo presión, Sqrt Decomposition es una alternativa más simple a
+costa de $O(\sqrt n)$ en vez de $O(\log n)$.
+
 
 \subsection{RMQ (Range Minimum Query)}
 
+\textbf{Idea:} RMQ es el problema general de "dado un arreglo,
+encuentra el mínimo en cualquier rango $[l,r]$". Ya tienes las dos
+estructuras que lo resuelven: \textbf{Sparse Table} si el arreglo es
+estático ($O(1)$ por query) y \textbf{Segment Tree} si cambia
+($O(\log n)$ por query). Esta sección no repite esas estructuras,
+sino que muestra las dos aplicaciones clásicas donde un problema que
+\emph{no parece} de rango se puede \textbf{reformular} como RMQ sobre
+un arreglo auxiliar: LCA en árboles, y LCP entre sufijos arbitrarios
+de un string.
+
+\textbf{¿Por qué usarlo?} Reconocer cuándo un problema es "RMQ
+disfrazado" es lo que realmente separa resolver estos problemas en
+$O(1)$–$O(\log n)$ de resolverlos con fuerza bruta $O(n)$ por
+consulta. El patrón se repite: construyes un arreglo auxiliar donde
+la respuesta a tu pregunta real equivale al mínimo de un rango, y le
+aplicas Sparse Table o Segment Tree normal.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item LCA (ancestro común más bajo) de dos nodos en un árbol, con
+    muchas queries: Euler Tour + RMQ.
+    \item LCP (prefijo común más largo) entre dos sufijos
+    \emph{cualquiera} de un string (no necesariamente consecutivos en
+    el Suffix Array): Suffix Array + Kasai + RMQ sobre el LCP Array.
+    \item Cualquier problema donde la respuesta se pueda expresar como
+    "el mínimo de algo" sobre un rango de índices auxiliares.
+\end{itemize}
+
+\textbf{Complejidad:} en ambas aplicaciones, el precómputo (Euler
+Tour o Suffix Array + Kasai) es $O(n)$ a $O(n\log^2 n)$ según el
+método de Suffix Array usado; una vez armado el arreglo auxiliar, el
+RMQ es $O(n\log n)$ de build y $O(1)$ por query con Sparse Table
+(ambos casos son estáticos: el árbol y el string no cambian).
+
+
+\subsubsection{LCA vía Euler Tour + RMQ (Sparse Table)}
+
+\textbf{Idea:} recorres el árbol con un Euler Tour, anotando el nodo
+visitado cada vez que \textbf{entras o vuelves} a él (arreglo de
+tamaño $2n-1$) junto con su profundidad. El LCA de $u$ y $v$ es el
+nodo de \textbf{menor profundidad} que aparece entre la primera
+aparición de $u$ y la primera aparición de $v$ en ese recorrido —
+exactamente un RMQ (por profundidad) sobre el arreglo del Euler Tour.
+
+\begin{lstlisting}[style=cpp]
+struct LCA {
+    vector<int> euler, primeraApar, profundidad;
+    vector<vector<int>> sp;   // sp[k][i] = nodo con menor profundidad
+    vector<int> lg;
+
+    // CREATE: construye el Euler Tour del arbol (arr. de tamano
+    // 2n-1) y la Sparse Table sobre profundidad, para RMQ O(1).
+    LCA(vector<vector<int>>& adj, int raiz, int n) {
+        primeraApar.assign(n, -1);
+        profundidad.assign(n, 0);
+        euler.reserve(2 * n);
+
+        dfs(adj, raiz, -1, 0);
+        build();
+    }                                          // O(n log n)
+
+    void dfs(vector<vector<int>>& adj, int u, int p, int d) {
+        primeraApar[u] = euler.size();
+        profundidad[u] = d;
+        euler.push_back(u);
+
+        for (int v : adj[u]) {
+            if (v != p) {
+                dfs(adj, v, u, d + 1);
+                euler.push_back(u);
+            }
+        }
+    }
+
+    void build() {
+        int m = euler.size();
+        lg.assign(m + 1, 0);
+        for (int i = 2; i <= m; i++)
+            lg[i] = lg[i / 2] + 1;
+
+        int K = lg[m] + 1;
+        sp.assign(K, vector<int>(m));
+        sp[0] = euler;
+
+        for (int k = 1; k < K; k++)
+            for (int i = 0; i + (1 << k) <= m; i++) {
+                int l = sp[k - 1][i];
+                int r = sp[k - 1][i + (1 << (k - 1))];
+                sp[k][i] = profundidad[l] < profundidad[r] ? l : r;
+            }
+    }
+
+    // READ: LCA de u y v.
+    int query(int u, int v) {
+        int l = primeraApar[u], r = primeraApar[v];
+        if (l > r) swap(l, r);
+
+        int k = lg[r - l + 1];
+        int a = sp[k][l], b = sp[k][r - (1 << k) + 1];
+        return profundidad[a] < profundidad[b] ? a : b;
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+// arbol:      0
+//            / \
+//           1   2
+//          / \
+//         3   4
+
+vector<vector<int>> adj(5);
+adj[0] = {1, 2};
+adj[1] = {0, 3, 4};
+adj[2] = {0};
+adj[3] = {1};
+adj[4] = {1};
+
+LCA lca(adj, 0, 5);
+
+cout << lca.query(3, 4);
+// 1  (padre comun de 3 y 4)
+
+cout << lca.query(3, 2);
+// 0  (raiz)
+
+cout << lca.query(1, 4);
+// 1  (uno es ancestro del otro)
+\end{lstlisting}
+
+
+\subsubsection{LCP entre dos sufijos arbitrarios (Suffix Array + Kasai + RMQ)}
+
+\textbf{Idea:} el LCP Array (via Kasai) solo te da el LCP entre
+sufijos \textbf{consecutivos} en el Suffix Array. Para el LCP entre
+dos sufijos \textbf{cualquiera} $i,j$: los ubicas por su rango en el
+SA ($\texttt{rnk}[i]$, $\texttt{rnk}[j]$) y el LCP entre ambos es el
+\textbf{mínimo} del LCP Array en el rango entre esas dos posiciones
+—otra vez RMQ, esta vez sobre el LCP Array.
+
+\begin{lstlisting}[style=cpp]
+struct SuffixLCPQuery {
+    vector<int> sa, rnk, lcp;
+    vector<vector<int>> sp;
+    vector<int> lg;
+    int n;
+
+    // CREATE: construye SA, LCP (Kasai) y Sparse Table sobre lcp,
+    // todo en un solo paso.
+    SuffixLCPQuery(const string& s) {
+        n = s.size();
+        sa = buildSuffixArray(s);             // O(n log^2 n)
+        lcp = buildLCPArray(s, sa);           // O(n), Kasai
+
+        rnk.assign(n, 0);
+        for (int i = 0; i < n; i++)
+            rnk[sa[i]] = i;
+
+        buildSparse();
+    }                                          // O(n log^2 n)
+
+    void buildSparse() {
+        lg.assign(n + 1, 0);
+        for (int i = 2; i <= n; i++)
+            lg[i] = lg[i / 2] + 1;
+
+        int K = lg[n] + 1;
+        sp.assign(K, vector<int>(n));
+        sp[0] = lcp;
+
+        for (int k = 1; k < K; k++)
+            for (int i = 0; i + (1 << k) <= n; i++)
+                sp[k][i] = min(sp[k - 1][i],
+                                sp[k - 1][i + (1 << (k - 1))]);
+    }
+
+    // READ: LCP entre el sufijo que empieza en i y el que
+    // empieza en j (0-indexado sobre el string original).
+    int lcpEntreSufijos(int i, int j) {
+        if (i == j) return n - i;
+
+        int a = rnk[i], b = rnk[j];
+        if (a > b) swap(a, b);
+
+        // el minimo va de [a+1, b] en el LCP array
+        int k = lg[b - a];
+        return min(sp[k][a + 1], sp[k][b - (1 << k) + 1]);
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+SuffixLCPQuery slq("banana");
+
+cout << slq.lcpEntreSufijos(1, 3);
+// sufijo desde 1: "anana"
+// sufijo desde 3: "ana"
+// LCP = "ana" -> 3
+
+cout << slq.lcpEntreSufijos(0, 3);
+// sufijo desde 0: "banana"
+// sufijo desde 3: "ana"
+// LCP = "" -> 0
+\end{lstlisting}
+
+\textbf{Nota:} \texttt{buildSuffixArray} y \texttt{buildLCPArray} son
+las funciones estándar de Suffix Array + Kasai (ver la sección de
+Algoritmos de Strings); aquí solo se reutilizan como precómputo antes
+de aplicar RMQ.
+
+\textbf{Regla práctica:} cuando un problema pida "algo" entre dos
+elementos que no son adyacentes en su estructura original (dos nodos
+de un árbol, dos sufijos de un string, dos elementos de cualquier
+secuencia con una noción de "orden" y "profundidad/afinidad"),
+pregúntate si esa relación se puede expresar como el mínimo de un
+arreglo auxiliar construido con un recorrido lineal. Si sí, el
+problema se reduce a Sparse Table (estático) o Segment Tree
+(dinámico), ya cubiertos en las secciones anteriores.
+
+
 \subsection{Mo's Algorithm}
+
+\textbf{Idea:} responde $q$ queries de rango \textbf{offline} (las
+conoces todas de antemano) en $O((n+q)\sqrt n)$ total, sin ninguna
+estructura de datos elaborada. La clave es \textbf{ordenar las
+queries} —no procesarlas en el orden dado— agrupándolas por bloque de
+tamaño $\sqrt n$ según su extremo izquierdo $l$, y dentro de cada
+bloque por su extremo derecho $r$ (alternando la dirección en bloques
+pares/impares para aprovechar mejor la localidad). Luego mantienes un
+puntero $[curL, curR]$ que se \textbf{desliza} de una query a la
+siguiente con funciones \texttt{add}/\texttt{remove} en $O(1)$ cada
+una. Como los punteros nunca retroceden más de lo necesario gracias al
+orden elegido, el total de movimientos amortizado es
+$O((n+q)\sqrt n)$ en vez de $O(nq)$ con fuerza bruta.
+
+\textbf{¿Por qué usarlo?} Sirve para respuestas que \textbf{no tienen
+una estructura de rango obvia} (por ejemplo: contar elementos
+distintos, sumar cuadrados de frecuencias, contar pares con cierta
+propiedad) donde escribir un Segment Tree específico sería
+complicado o imposible, pero sí es fácil mantener la respuesta
+incrementalmente al agregar/quitar un elemento a la vez.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Contar elementos distintos en un rango, con muchas queries.
+    \item Sumas o conteos que dependen de \emph{frecuencias} dentro
+    del rango (no solo de valores individuales), donde \texttt{add}/
+    \texttt{remove} son fáciles pero no hay forma clara de combinar
+    dos sub-rangos con un Segment Tree.
+    \item Todas las queries se conocen de antemano (offline). Si
+    necesitas responder \textbf{online} (una query a la vez, sin ver
+    las siguientes), Mo's no aplica: usa Segment Tree o Sqrt
+    Decomposition.
+    \item El arreglo tiene pocos updates puntuales intercalados con
+    las queries: usa la variante \emph{Mo's con updates} (3D Mo's).
+\end{itemize}
+
+\textbf{Complejidad:} $O((n+q)\sqrt n)$ total para $q$ queries sin
+updates; $O(n^{5/3})$ (aprox.) para la variante con updates, usando
+bloques de tamaño $n^{2/3}$.
+
+
+\subsubsection{Mo's clásico (queries offline, sin updates)}
+
+\textbf{Ejemplo guía:} contar cuántos valores \textbf{distintos} hay
+en cada rango $[l,r]$ preguntado.
+
+\begin{lstlisting}[style=cpp]
+struct MoAlgorithm {
+    int n, blockSize;
+    vector<int> a;
+    vector<long long> cnt;
+    int curL = 0, curR = -1;
+    long long curDistinct = 0;
+
+    // CREATE: reserva el arreglo de frecuencias segun el maximo
+    // valor posible, y fija el tamano de bloque en ~sqrt(n).
+    MoAlgorithm(vector<int>& arr, int maxVal) {
+        a = arr;
+        n = a.size();
+        blockSize = max(1, (int)sqrt((double)n));
+        cnt.assign(maxVal, 0);
+    }                                          // O(n)
+
+    // UPDATE: agrega el elemento en pos a la ventana actual.
+    void add(int pos) {
+        if (cnt[a[pos]]++ == 0)
+            curDistinct++;
+    }                                          // O(1)
+
+    // UPDATE: quita el elemento en pos de la ventana actual.
+    void remove(int pos) {
+        if (--cnt[a[pos]] == 0)
+            curDistinct--;
+    }                                          // O(1)
+
+    // READ: procesa todas las queries offline (l, r inclusive,
+    // 0-indexadas) y devuelve las respuestas en el orden original.
+    vector<long long> resolver(vector<array<int, 2>>& queries) {
+        int q = queries.size();
+        vector<int> idx(q);
+        iota(idx.begin(), idx.end(), 0);
+
+        sort(idx.begin(), idx.end(), [&](int i, int j) {
+            int bi = queries[i][0] / blockSize;
+            int bj = queries[j][0] / blockSize;
+            if (bi != bj) return bi < bj;
+            return (bi & 1) ? (queries[i][1] > queries[j][1])
+                             : (queries[i][1] < queries[j][1]);
+        });
+
+        vector<long long> respuestas(q);
+        for (int id : idx) {
+            int l = queries[id][0], r = queries[id][1];
+
+            while (curR < r) add(++curR);
+            while (curL > l) add(--curL);
+            while (curR > r) remove(curR--);
+            while (curL < l) remove(curL++);
+
+            respuestas[id] = curDistinct;
+        }
+        return respuestas;
+    }                                          // O((n+q) sqrt(n))
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<int> a = {1, 2, 1, 3, 2, 4, 1};
+// valores en [1, 4]
+
+MoAlgorithm mo(a, 5);
+
+vector<array<int, 2>> queries = {
+    {0, 2},   // [1, 2, 1] -> 2 distintos
+    {1, 4},   // [2, 1, 3, 2] -> 3 distintos
+    {0, 6}    // arreglo completo -> 4 distintos
+};
+
+vector<long long> resp = mo.resolver(queries);
+// resp = [2, 3, 4]
+\end{lstlisting}
+
+
+\subsubsection{Mo's con updates (3D Mo's)}
+
+\textbf{Idea:} si además de queries hay \textbf{updates puntuales}
+intercaladas, se agrega una tercera dimensión al ordenamiento: el
+\emph{tiempo} $t$ (cuántas updates ya ocurrieron antes de cada
+query). Se ordenan las queries por
+$(\text{bloque}(l), \text{bloque}(r), t)$, y además de deslizar
+$[curL,curR]$, se avanza o retrocede $curT$ aplicando o revirtiendo
+updates una por una. El bloque óptimo cambia a
+$\approx n^{2/3}$ (en vez de $\sqrt n$) porque ahora hay tres
+dimensiones que balancear.
+
+\begin{lstlisting}[style=cpp]
+struct MoUpdates {
+    int n, blockSize;
+    vector<int> a;
+    vector<long long> cnt;
+    vector<pair<int, int>> updates;   // (pos, valor); ver nota abajo
+    int curL = 0, curR = -1, curT = 0;
+    long long curDistinct = 0;
+
+    // CREATE: reserva frecuencias y fija el bloque en ~n^(2/3).
+    MoUpdates(vector<int>& arr, int maxVal) {
+        a = arr;
+        n = a.size();
+        blockSize = max(1, (int)cbrt((double)n) *
+                            (int)cbrt((double)n));
+        cnt.assign(maxVal, 0);
+    }                                          // O(n)
+
+    void add(int pos) {
+        if (cnt[a[pos]]++ == 0) curDistinct++;
+    }                                          // O(1)
+
+    void remove(int pos) {
+        if (--cnt[a[pos]] == 0) curDistinct--;
+    }                                          // O(1)
+
+    // CREATE: registra una update (aplicarla no es inmediato,
+    // solo queda en la lista para procesarse en su momento).
+    void agregarUpdate(int pos, int val) {
+        updates.push_back({pos, val});
+    }                                          // O(1)
+
+    // UPDATE: aplica (o revierte, es la misma operacion) la
+    // update numero t. El truco: como updates[t].second guarda
+    // "el valor a poner", tras aplicarla queda guardado el valor
+    // viejo -> llamar de nuevo revierte exactamente al estado
+    // anterior.
+    void alternarUpdate(int t) {
+        int pos = updates[t].first;
+        int val = updates[t].second;
+
+        if (pos >= curL && pos <= curR)
+            remove(pos);
+
+        swap(a[pos], val);
+        updates[t].second = val;
+
+        if (pos >= curL && pos <= curR)
+            add(pos);
+    }                                          // O(1)
+
+    // READ: procesa todas las queries offline (l, r, t) y
+    // devuelve las respuestas en el orden original.
+    vector<long long> resolver(vector<array<int, 3>>& queries) {
+        int q = queries.size();
+        vector<int> idx(q);
+        iota(idx.begin(), idx.end(), 0);
+
+        sort(idx.begin(), idx.end(), [&](int i, int j) {
+            int bi = queries[i][0] / blockSize;
+            int bj = queries[j][0] / blockSize;
+            if (bi != bj) return bi < bj;
+
+            int ri = queries[i][1] / blockSize;
+            int rj = queries[j][1] / blockSize;
+            if (ri != rj) return ri < rj;
+
+            return queries[i][2] < queries[j][2];
+        });
+
+        vector<long long> respuestas(q);
+        for (int id : idx) {
+            int l = queries[id][0], r = queries[id][1],
+                t = queries[id][2];
+
+            while (curR < r) add(++curR);
+            while (curL > l) add(--curL);
+            while (curR > r) remove(curR--);
+            while (curL < l) remove(curL++);
+
+            while (curT < t) alternarUpdate(curT++);
+            while (curT > t) alternarUpdate(--curT);
+
+            respuestas[id] = curDistinct;
+        }
+        return respuestas;
+    }                                          // O(n^(5/3)) aprox.
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<int> a = {1, 2, 3};
+
+MoUpdates mo(a, 5);
+mo.agregarUpdate(0, 2);   // update #0: a[0] = 2
+mo.agregarUpdate(1, 1);   // update #1: a[1] = 1
+
+// queries: (l, r, cuantas updates ya se aplicaron)
+vector<array<int, 3>> queries = {
+    {0, 2, 0},   // arreglo original [1,2,3] -> 3 distintos
+    {0, 2, 1},   // tras update #0:  [2,2,3] -> 2 distintos
+    {0, 2, 2}    // tras update #1:  [2,1,3] -> 3 distintos
+};
+
+vector<long long> resp = mo.resolver(queries);
+// resp = [3, 2, 3]
+\end{lstlisting}
+
+\textbf{Nota:} para problemas sobre \textbf{árboles} (queries sobre
+un camino o subárbol) existe \emph{Mo's on Trees}, que aplana el
+árbol con un Euler Tour y aplica el mismo algoritmo sobre ese
+arreglo; el resto del razonamiento (ordenar queries, deslizar
+punteros) es idéntico.
+
+\textbf{Comparación con otras estructuras de rango:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|p{0.43\columnwidth}|p{0.30\columnwidth}|p{0.20\columnwidth}|}
+\hline
+\textbf{Situación} & \textbf{Estructura} & \textbf{Complejidad} \\
+\hline
+Queries offline, sin updates &
+Mo's clásico &
+$O((n+q)\sqrt{n})$ \\
+\hline
+Queries offline, con updates &
+Mo's con updates &
+$O(n^{5/3})$ \\
+\hline
+Queries online (una a la vez) &
+Segment Tree / Sqrt Decomp. &
+$O(\log n)$ / $O(\sqrt{n})$ \\
+\hline
+\end{tabular}
+\caption{Cuándo usar Mo's Algorithm frente a estructuras online.}
+\end{table}
+
+\textbf{Regla práctica:} usa Mo's solo cuando (1) todas las queries
+son offline, y (2) la respuesta es fácil de mantener
+incrementalmente con \texttt{add}/\texttt{remove}, pero difícil de
+combinar con un Segment Tree (min/max/suma sí se combinan fácil, así
+que ahí Mo's no aporta nada). Si el problema admite Segment Tree o
+Fenwick directamente, esas opciones son más simples y no necesitan
+que las queries sean offline.
 
 \subsection{Wavelet Tree}
 
+\textbf{Idea:} es un árbol binario sobre el \textbf{rango de valores}
+del arreglo (no sobre las posiciones, como Segment Tree). La raíz
+cubre $[\text{lo},\text{hi}]$ de valores posibles; en cada nodo, los
+elementos con valor $\le$ mediana van al hijo izquierdo y el resto al
+derecho, \textbf{preservando su orden relativo} (partición estable).
+Cada nodo guarda un arreglo \texttt{b[]} con cuántos elementos, hasta
+cada posición, fueron hacia la izquierda. Con eso puedes, en cada
+nivel, saber exactamente qué sub-rango de posiciones le corresponde a
+cada hijo — y bajar por el árbol respondiendo preguntas sobre
+\textbf{valores dentro de un rango de posiciones} en $O(\log C)$,
+donde $C$ es la cantidad de valores distintos.
+
+\textbf{¿Por qué usarlo?} Es la única estructura de esta sección que
+responde eficientemente preguntas que combinan \textbf{posición y
+valor} a la vez: "el $k$-ésimo menor en $[l,r]$", "cuántos elementos
+en $[l,r]$ son $\le X$", "cuántas veces aparece exactamente $X$ en
+$[l,r]$". Ninguna de las estructuras anteriores (Fenwick, Segment
+Tree, Sparse Table) resuelve esto directamente sin re-plantear el
+problema.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item $k$-ésimo elemento más chico (o más grande) dentro de un
+    rango $[l,r]$.
+    \item Conteo de elementos en $[l,r]$ cuyo valor está en un rango
+    $[a,b]$.
+    \item Frecuencia de un valor específico dentro de un rango de
+    posiciones (rank query).
+    \item Arreglo \textbf{estático} — no soporta updates sin
+    reconstruir (para eso existe la variante persistente, más
+    avanzada).
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n\log C)$, cada query
+$O(\log C)$, donde $C$ es la cantidad de valores distintos tras
+comprimir coordenadas.
+
+
+\subsubsection{Wavelet Tree: $k$-ésimo, conteo $\le X$ y frecuencia}
+
+\begin{lstlisting}[style=cpp]
+struct WaveletTree {
+    int lo, hi;
+    WaveletTree *izq = nullptr, *der = nullptr;
+    vector<int> b;   // b[i] = cuantos de a[0..i-1] fueron a la izq.
+
+    // CREATE: construye recursivamente sobre el segmento [from, to)
+    // de un arreglo mutable, particionando por la mediana de valor
+    // [lo, hi]. Los valores deben venir ya comprimidos a [0, C-1].
+    WaveletTree(int* from, int* to, int lo, int hi) : lo(lo), hi(hi) {
+        if (lo == hi || from >= to) return;
+
+        int mid = (lo + hi) / 2;
+        auto vaIzq = [mid](int x) { return x <= mid; };
+
+        b.reserve(to - from + 1);
+        b.push_back(0);
+        for (auto it = from; it != to; it++)
+            b.push_back(b.back() + vaIzq(*it));
+
+        auto pivote = stable_partition(from, to, vaIzq);
+        izq = new WaveletTree(from, pivote, lo, mid);
+        der = new WaveletTree(pivote, to, mid + 1, hi);
+    }                                          // O(n log C)
+
+    // READ: k-esimo valor mas chico en [l, r] (1-indexado, k desde 1).
+    int kth(int l, int r, int k) {
+        if (l > r) return -1;
+        if (lo == hi) return lo;
+
+        int enIzq = b[r] - b[l - 1];
+        int lb = b[l - 1], rb = b[r];
+
+        if (k <= enIzq)
+            return izq->kth(lb + 1, rb, k);
+        return der->kth(l - lb, r - rb, k - enIzq);
+    }                                          // O(log C)
+
+    // READ: cuantos elementos de [l, r] tienen valor <= val.
+    int contarMenorIgual(int l, int r, int val) {
+        if (l > r || val < lo) return 0;
+        if (hi <= val) return r - l + 1;
+
+        int lb = b[l - 1], rb = b[r];
+        return izq->contarMenorIgual(lb + 1, rb, val)
+             + der->contarMenorIgual(l - lb, r - rb, val);
+    }                                          // O(log C)
+
+    // READ: cuantas veces aparece exactamente val en [l, r].
+    int contarIgual(int l, int r, int val) {
+        if (l > r || val < lo || val > hi) return 0;
+        if (lo == hi) return r - l + 1;
+
+        int mid = (lo + hi) / 2;
+        int lb = b[l - 1], rb = b[r];
+
+        if (val <= mid)
+            return izq->contarIgual(lb + 1, rb, val);
+        return der->contarIgual(l - lb, r - rb, val);
+    }                                          // O(log C)
+
+    ~WaveletTree() {
+        delete izq;
+        delete der;
+    }
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento} (con compresión de coordenadas):
+
+\begin{lstlisting}[style=cpp]
+vector<int> original = {40, 10, 30, 10, 20, 40, 30};
+
+// comprimir a [0, C-1] para que el wavelet tree trabaje con
+// valores pequenos y contiguos.
+vector<int> ordenado = original;
+sort(ordenado.begin(), ordenado.end());
+ordenado.erase(unique(ordenado.begin(), ordenado.end()), ordenado.end());
+
+vector<int> comprimido(original.size());
+for (int i = 0; i < (int)original.size(); i++)
+    comprimido[i] = lower_bound(ordenado.begin(), ordenado.end(),
+                                  original[i]) - ordenado.begin();
+// comprimido: [3, 0, 2, 0, 1, 3, 2]   (valores 10,20,30,40 -> 0,1,2,3)
+
+WaveletTree wt(comprimido.data(),
+                comprimido.data() + comprimido.size(),
+                0, (int)ordenado.size() - 1);
+
+// 3er elemento mas chico en el rango [2, 6] (1-indexado)
+int idx = wt.kth(2, 6, 3);
+cout << ordenado[idx];
+// posiciones 2..6 (1-idx): 10,30,10,20,40,30 (valores 0-idx 2..6)
+// -> valores reales: 30,10,20,40,30 ordenados: 10,20,30,30,40
+// 3er mas chico = 30
+
+cout << wt.contarMenorIgual(1, 7, 1);
+// cuantos valores comprimidos <= 1 (o sea, <= 20) hay en todo el arreglo
+// original: 40,10,30,10,20,40,30 -> <=20 son: 10,10,20 -> 3
+
+cout << wt.contarIgual(1, 7, 0);
+// cuantas veces aparece el valor comprimido 0 (o sea, 10) -> 2
+\end{lstlisting}
+
+\textbf{Comparación con las otras estructuras de rango:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|p{3.3cm}|p{3.3cm}|}
+\hline
+\textbf{Pregunta} & \textbf{Estructura} \\
+\hline
+Suma/min/max de rango & Fenwick / Segment Tree / Sparse Table \\
+\hline
+$k$-ésimo menor, o conteo por rango de \textbf{valores}, en un rango de \textbf{posiciones} & Wavelet Tree \\
+\hline
+Elementos distintos, moda, funciones no lineales de frecuencia & Mo's Algorithm \\
+\hline
+\end{tabular}
+\caption{Cuándo el problema necesita Wavelet Tree en vez de las otras estructuras.}
+\end{table}
+
+\textbf{Regla práctica:} si el enunciado combina una condición sobre
+\textbf{valores} (``menor que'', ``entre $a$ y $b$'', ``el $k$-ésimo
+más chico'') con un rango de \textbf{posiciones}, y el arreglo es
+estático, es casi siempre Wavelet Tree. Si solo te piden agregar
+(suma/min/max) sin condición sobre el valor, usa las estructuras más
+simples de las secciones anteriores.
+
+
 \subsection{Heavy-Light Decomposition}
+
+\textbf{Idea:} descompone un árbol en \textbf{cadenas} de forma que
+cualquier camino desde la raíz hasta cualquier nodo cruza a lo más
+$O(\log n)$ cadenas distintas. En cada nodo, el hijo con el
+\textbf{subárbol más grande} (el hijo ``pesado'') continúa la misma
+cadena que su padre; los demás hijos inician cadenas nuevas. Al
+numerar los nodos en el orden en que se visitan (DFS que siempre
+sigue primero al hijo pesado), cada cadena queda como un \textbf{rango
+contiguo} de posiciones — así que una query sobre un \textbf{camino}
+del árbol se convierte en $O(\log n)$ queries de rango sobre un
+Segment Tree normal, una por cada cadena que el camino atraviesa.
+
+\textbf{¿Por qué usarlo?} Es la forma estándar de llevar range
+queries de un arreglo a un \textbf{árbol}: sumas/mínimos/updates en
+el camino entre dos nodos, o en el subárbol de un nodo. Sin HLD, un
+camino arbitrario no tiene ninguna estructura contigua sobre la cual
+aplicar Fenwick o Segment Tree directamente.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Suma/mínimo/máximo en el camino entre dos nodos $u$ y $v$.
+    \item Actualizar todos los nodos (o aristas) de un camino $u$-$v$.
+    \item Consultas o updates sobre el \textbf{subárbol} completo de un
+    nodo (más simple: el subárbol siempre es un rango contiguo, sin
+    necesidad de descomponer en cadenas).
+    \item Cualquier problema de árbol que ``se sentiría'' como Range
+    Queries si el árbol fuera un arreglo lineal.
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$ (dos DFS) más $O(n)$ del
+Segment Tree subyacente; query o update de \textbf{camino}
+$O(\log^2 n)$ ($O(\log n)$ cadenas $\times$ $O(\log n)$ por consulta
+al Segment Tree); query o update de \textbf{subárbol} $O(\log n)$
+(un solo rango contiguo).
+
+
+\subsubsection{HLD: suma en camino, suma en subárbol}
+
+\textbf{Idea de la implementación:} dos DFS \textbf{iterativas} (con
+pila explícita, para evitar stack overflow en árboles muy profundos
+o muy desbalanceados — un riesgo real con recursión cuando
+$n\ge10^5$ y el árbol es una cadena larga). El primero
+(\texttt{dfsTamano}) calcula el tamaño de cada subárbol y decide el
+hijo pesado de cada nodo. El segundo (\texttt{dfsDescomponer})
+recorre siempre primero al hijo pesado (así la cadena sigue
+consecutiva en las posiciones) y solo después explora los hijos
+livianos, cada uno iniciando su propia cadena nueva. Las posiciones
+resultantes (\texttt{pos[]}) alimentan un Segment Tree normal —aquí
+se reutiliza \texttt{SegmentTreeLazyAdd} de la sección anterior—
+sobre el cual se hacen las queries reales.
+
+\begin{lstlisting}[style=cpp]
+struct HLD {
+    vector<vector<int>> adj;
+    vector<int> padre, profundidad, tamano, pesado, cabeza, pos;
+    int n, timer = 0;
+    SegmentTreeLazyAdd* seg;   // Segment Tree sobre el orden pos[]
+
+    // CREATE: dos DFS iterativas para calcular cadenas, luego arma
+    // el Segment Tree sobre el arreglo reordenado por pos[].
+    HLD(vector<vector<int>>& adjacency, vector<long long>& valores,
+        int raiz) {
+        adj = adjacency;
+        n = adj.size();
+        padre.assign(n, -1);
+        profundidad.assign(n, 0);
+        tamano.assign(n, 1);
+        pesado.assign(n, -1);
+        cabeza.assign(n, raiz);
+        pos.assign(n, 0);
+
+        dfsTamano(raiz);
+        dfsDescomponer(raiz);
+
+        vector<long long> reordenado(n);
+        for (int v = 0; v < n; v++)
+            reordenado[pos[v]] = valores[v];
+
+        seg = new SegmentTreeLazyAdd(reordenado);
+    }                                          // O(n)
+
+    // Fase 1: obtiene un orden donde cada padre aparece ANTES que
+    // sus hijos (equivalente a un preorden), usando una pila.
+    // Fase 2: recorre ese orden al reves (hijos antes que padres)
+    // para acumular tamano[] y decidir el hijo pesado, igual que
+    // haria la version recursiva al "volver" de cada llamada.
+    void dfsTamano(int raiz) {
+        vector<int> orden;
+        stack<int> st;
+        st.push(raiz);
+        padre[raiz] = -1;
+        profundidad[raiz] = 0;
+
+        while (!st.empty()) {
+            int u = st.top();
+            st.pop();
+            orden.push_back(u);
+
+            for (int v : adj[u]) {
+                if (v != padre[u]) {
+                    padre[v] = u;
+                    profundidad[v] = profundidad[u] + 1;
+                    st.push(v);
+                }
+            }
+        }
+
+        for (int i = (int)orden.size() - 1; i >= 0; i--) {
+            int u = orden[i];
+            tamano[u] = 1;
+            int maxSub = 0;
+
+            for (int v : adj[u]) {
+                if (v == padre[u]) continue;
+
+                tamano[u] += tamano[v];
+                if (tamano[v] > maxSub) {
+                    maxSub = tamano[v];
+                    pesado[u] = v;
+                }
+            }
+        }
+    }                                          // O(n)
+
+    // Pila de pares (nodo, cabeza de su cadena). Para que el hijo
+    // pesado quede en el tope de la pila (y por lo tanto se
+    // procese inmediatamente despues, como en la version
+    // recursiva), se empuja de ULTIMO: los hijos livianos
+    // (cadena nueva) se empujan primero.
+    void dfsDescomponer(int raiz) {
+        stack<pair<int, int>> st;
+        st.push({raiz, raiz});
+
+        while (!st.empty()) {
+            auto [u, h] = st.top();
+            st.pop();
+
+            cabeza[u] = h;
+            pos[u] = timer++;
+
+            for (int v : adj[u]) {
+                if (v == padre[u] || v == pesado[u]) continue;
+                st.push({v, v});                // cadena nueva
+            }
+
+            if (pesado[u] != -1)
+                st.push({pesado[u], h});        // misma cadena
+        }
+    }                                          // O(n)
+
+    // READ: suma de todos los nodos en el camino u-v.
+    long long consultarCamino(int u, int v) {
+        long long resultado = 0;
+
+        while (cabeza[u] != cabeza[v]) {
+            if (profundidad[cabeza[u]] < profundidad[cabeza[v]])
+                swap(u, v);
+
+            resultado += seg->rango(pos[cabeza[u]], pos[u]);
+            u = padre[cabeza[u]];
+        }
+
+        if (profundidad[u] > profundidad[v]) swap(u, v);
+        resultado += seg->rango(pos[u], pos[v]);
+        return resultado;
+    }                                          // O(log^2 n)
+
+    // UPDATE: suma val a todos los nodos en el camino u-v.
+    void actualizarCamino(int u, int v, long long val) {
+        while (cabeza[u] != cabeza[v]) {
+            if (profundidad[cabeza[u]] < profundidad[cabeza[v]])
+                swap(u, v);
+
+            seg->rangoUpdate(pos[cabeza[u]], pos[u], val);
+            u = padre[cabeza[u]];
+        }
+
+        if (profundidad[u] > profundidad[v]) swap(u, v);
+        seg->rangoUpdate(pos[u], pos[v], val);
+    }                                          // O(log^2 n)
+
+    // READ: suma de todo el subarbol de u (rango contiguo por
+    // construccion, gracias al orden DFS de dfsDescomponer).
+    long long consultarSubarbol(int u) {
+        return seg->rango(pos[u], pos[u] + tamano[u] - 1);
+    }                                          // O(log n)
+
+    // UPDATE: suma val a todo el subarbol de u.
+    void actualizarSubarbol(int u, long long val) {
+        seg->rangoUpdate(pos[u], pos[u] + tamano[u] - 1, val);
+    }                                          // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+// arbol:        0
+//              /|\
+//             1 2 3
+//            /|
+//           4 5
+
+vector<vector<int>> adj(6);
+adj[0] = {1, 2, 3};
+adj[1] = {0, 4, 5};
+adj[2] = {0};
+adj[3] = {0};
+adj[4] = {1};
+adj[5] = {1};
+
+vector<long long> valores = {1, 2, 3, 4, 5, 6};
+// nodo:                     0  1  2  3  4  5
+
+HLD hld(adj, valores, 0);
+
+cout << hld.consultarCamino(4, 3);
+// camino 4 -> 1 -> 0 -> 3 : valores 5+2+1+4 = 12
+
+cout << hld.consultarSubarbol(1);
+// subarbol de 1: nodos {1,4,5} : 2+5+6 = 13
+
+hld.actualizarCamino(4, 5, 10);
+// suma 10 a cada nodo del camino 4 -> 1 -> 5
+
+cout << hld.consultarSubarbol(0);
+// subarbol de 0 (todo el arbol) tras el update:
+// 1+(2+10)+3+4+(5+10)+(6+10) = 51
+\end{lstlisting}
+
+\textbf{Nota:} al ser iterativas, \texttt{dfsTamano} y
+\texttt{dfsDescomponer} no tienen riesgo de stack overflow incluso en
+árboles con $n\ge10^5$ y forma de ``cadena larga'' (el peor caso para
+recursión). \texttt{SegmentTreeLazyAdd} es exactamente el struct de
+la sección de Segment Tree — cualquier otra variante (min, max,
+assign) funciona igual de bien como motor subyacente.
+
+\textbf{Regla práctica:} usa HLD en cuanto el problema pida algo
+sobre un \textbf{camino} entre dos nodos de un árbol con muchas
+queries. Si solo pide algo sobre \textbf{subárboles} (sin caminos
+arbitrarios), no hace falta la descomposición en cadenas completa:
+basta un solo DFS para las posiciones (\texttt{pos[]} y
+\texttt{tamano[]}) y un Segment Tree normal, ya que el subárbol
+siempre es un rango contiguo por sí solo.
+
 
 
 %---------------------------------------------------------------------------
