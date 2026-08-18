@@ -1,0 +1,6331 @@
+%==============================================================================
+%  Competitive Programming Notebook — Guidebook
+%  Autor: Juan  ·  Universidad del Bosque
+%  Formato: doble columna (izquierda / derecha), estilo team notebook ICPC
+%  Compilar con: pdflatex guidebook.tex   (dos veces, para el índice)
+%==============================================================================
+\documentclass[10pt,a4paper,twocolumn]{article}
+
+% ---- Codificación e idioma -------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{amsmath}   % \text en modo matematico
+% Nombres en español (sin depender de babel-spanish, que no está instalado aquí)
+\renewcommand{\contentsname}{Índice}
+\renewcommand{\partname}{Parte}
+
+% ---- Diseño de página ------------------------------------------------------
+\usepackage[a4paper,margin=1.6cm,columnsep=0.8cm]{geometry}
+\setlength{\columnseprule}{0.4pt}             % línea fina que divide izquierda/derecha
+\usepackage{xcolor}
+\definecolor{acento}{RGB}{20,45,85}           % azul marino formal
+\definecolor{acentoClaro}{RGB}{70,110,170}
+\definecolor{grisCodigo}{RGB}{245,245,247}
+\definecolor{comentario}{RGB}{95,120,95}
+\definecolor{palabraClave}{RGB}{30,70,150}
+\definecolor{cadena}{RGB}{150,80,40}
+\def\columnseprulecolor{\color{gray!40}}
+
+% ---- Encabezados y pie -----------------------------------------------------
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape Competitive Programming Notebook}
+\fancyhead[R]{\small\nouppercase{\itshape\rightmark}}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{acento}}{\thesection}{0.6em}{}
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries\color{acentoClaro}}{\thesubsection}{0.5em}{}
+\titleformat{\part}
+  {\normalfont\Large\bfseries\color{acento}\filcenter}{\partname~\thepart}{0.5em}{}
+
+% ---- Resaltado de código ---------------------------------------------------
+\usepackage{listings}
+\lstset{
+  backgroundcolor=\color{grisCodigo},
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{palabraClave}\bfseries,
+  commentstyle=\color{comentario}\itshape,
+  stringstyle=\color{cadena},
+  numbers=left, numberstyle=\tiny\color{gray}, numbersep=5pt,
+  showstringspaces=false, breaklines=true, tabsize=2,
+  frame=single, rulecolor=\color{gray!40},
+  columns=fullflexible, keepspaces=true,
+  extendedchars=true,
+  literate=
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {¿}{{?`}}1 {¡}{{!`}}1 {°}{{\textdegree}}1
+}
+\lstdefinestyle{cpp}{language=C++}
+\lstdefinestyle{java}{language=Java}
+\lstdefinestyle{py}{language=Python}
+
+% ---- Enlaces (índice navegable) --------------------------------------------
+\usepackage[colorlinks=true,linkcolor=acento,urlcolor=acentoClaro]{hyperref}
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+
+% Marcador de secciones aún sin contenido
+\newcommand{\pendiente}{\textit{\color{gray}Contenido en desarrollo.}\par\medskip}
+
+%==============================================================================
+\begin{document}
+
+% ===== PORTADA =============================================================
+\onecolumn
+\thispagestyle{empty}
+\begin{titlepage}
+  \centering
+  \vspace*{\fill}
+
+  {\large\scshape Universidad del Bosque}\\[4pt]
+  {\normalsize Facultad de Ingeniería}\\[2pt]
+  {\normalsize Ingeniería de Software \& Ingeniería en Robótica}\\[24pt]
+
+  \color{acento}\rule{\linewidth}{1.2pt}\\[8pt]
+  {\Huge\bfseries Competitive Programming}\\[10pt]
+  {\Huge\bfseries Notebook}\\[10pt]
+  {\large\itshape Algoritmos, estructuras de datos y plantillas}\\[8pt]
+  {\large C\texttt{++} \quad}\\[6pt]
+  \color{acento}\rule{\linewidth}{1.2pt}\\[28pt]
+
+  \color{black}
+  {\large\bfseries Juan Carlos Morales}\\[4pt]
+  {\normalsize Doble titulación: Sistemas \& Robótica}\\[36pt]
+
+  {\normalsize Bogotá, Colombia \quad$\cdot$\quad 2026}
+
+  \vspace*{\fill}
+\end{titlepage}
+
+% ===== ÍNDICE ==============================================================
+\thispagestyle{empty}
+\tableofcontents
+\clearpage
+
+% ===== CUERPO (doble columna) ==============================================
+\twocolumn
+
+\part{Introduccion}
+%---------------------------------------------------------------------------
+\section{Fundamentos Básicos}
+%---------------------------------------------------------------------------
+
+\subsection{Entrada / Salida Rápida (Fast I/O)}
+Usar lectura rápida para evitar TLE, hay 3 niveles de lectura rápida, estandarizar Tier 2 y usar Tier 3 (lector por
+bytes) solo cuando haya del orden de $10^6$--$10^7$ lecturas.
+
+\begin{table}[h]
+\centering
+\caption{Casos donde se recomienda Fast I/O}
+\begin{tabular}{|p{0.36\columnwidth}|p{0.50\columnwidth}|}
+\hline
+\textbf{Tipo de problema} & \textbf{Ejemplo} \\
+\hline
+Arrays gigantes & Leer/ordenar/sumar $10^6$--$10^7$ enteros \\
+\hline
+Muchos test cases (T grande) & $T \leq 10^5$, cada uno trivial pero se acumula \\
+\hline
+Grafos grandes & $M \sim 10^6$--$2*10^6$ aristas para BFS/DFS/Dijkstra/MST \\
+\hline
+Geometria con muchas consultas & $L,S$ grandes + muchos test cases seguidos hasta EOF \\
+\hline
+Muchos tokens de texto & Strings/lineas que suman millones de caracteres \\
+\hline
+Judges clasicos "trampa de I/O" & SPOJ INTEST, ARRAYSUB, etc. \\
+\hline
+\end{tabular}
+\end{table}
+
+Regla practica: si N/M es del orden de $10^4-10^5$, cin con
+\texttt{sync\_with\_stdio(false);} cin.tie(nullptr); alcanza de sobra. El FastReader
+es la "artilleria pesada" para cuando eso deja de ser suficiente.
+
+\textbf{Tier 1 — Básico:} \texttt{cin} / \texttt{cout}.
+\begin{lstlisting}[style=cpp]
+int entero; double decimal; string palabra, linea;
+cin >> entero >> decimal >> palabra;  // >> lee UN token
+// ! cin >> deja el '\n' pendiente;
+// ! el 1er getline sale VACÍO -> hay que ignorarlo
+cin.ignore();
+getline(cin, linea);                  // línea completa
+\end{lstlisting}
+\textbf{Tier 2 — Rápido:} desactiva la sync con C (una vez en
+\texttt{main}). Punto dulce para casi todo.
+\begin{lstlisting}[style=cpp]
+ios_base::sync_with_stdio(false);
+cin.tie(nullptr);            // ! no mezclar con scanf/printf
+cout << entero << "\n";      // "\n", nunca endl (endl frena)
+\end{lstlisting}
+\textbf{Tier 3 — Más rápido:} lector por bytes con
+\texttt{fread}. Solo con $10^6$–$10^7$ lecturas.
+\begin{lstlisting}[style=cpp]
+struct FastReader {
+    static const int TAM = 1 << 16;   // 64 KB
+    char bufer[TAM];
+    int puntero = 0, leidos = 0;
+
+    int leer() {
+        if (puntero == leidos) {
+            leidos = (int) fread(bufer, 1, TAM, stdin);
+            puntero = 0;
+        }
+        return leidos == 0 ? -1 : bufer[puntero++]; // -1=EOF
+    }
+    int nextInt() {
+        int resultado = 0, b = leer();
+        while (b <= ' ') b = leer();      // saltar blancos
+        bool negativo = (b == '-');
+        if (negativo) b = leer();
+        while (b >= '0' && b <= '9') {
+            resultado = resultado * 10 + (b - '0'); b = leer();
+        }
+        return negativo ? -resultado : resultado;
+    }
+    long long nextLong() {
+        long long resultado = 0; int b = leer();
+        while (b <= ' ') b = leer();
+        bool negativo = (b == '-');
+        if (negativo) b = leer();
+        while (b >= '0' && b <= '9') {
+            resultado = resultado * 10 + (b - '0'); b = leer();
+        }
+        return negativo ? -resultado : resultado;
+    }
+    double nextDouble() {
+        double resultado = 0, divisor = 1; int b = leer();
+        while (b <= ' ') b = leer();
+        bool negativo = (b == '-');
+        if (negativo) b = leer();
+        while (b >= '0' && b <= '9') {
+            resultado = resultado * 10 + (b - '0'); b = leer();
+        }
+        if (b == '.') {
+            b = leer();
+            while (b >= '0' && b <= '9') {
+                resultado += (b - '0') / (divisor *= 10); b = leer();
+            }
+        }
+        return negativo ? -resultado : resultado;
+    }
+    string next() {                       // un token
+        string s; int b = leer();
+        while (b <= ' ') b = leer();
+        while (b > ' ') { s += (char) b; b = leer(); }
+        return s;
+    }
+    string nextLine() {                   // línea completa
+        string s; int b = leer();
+        while (b != '\n' && b != -1) {
+            if (b != '\r') s += (char) b; b = leer();
+        }
+        return s;
+    }
+};
+\end{lstlisting}
+
+\subsection{Formateo de Salida}
+
+
+La función \texttt{printf} utiliza una cadena de formato para indicar cómo
+debe interpretarse y mostrarse cada argumento. Cada especificador comienza
+con \texttt{\%} y corresponde al argumento que aparece después de la cadena.
+
+\begin{lstlisting}[style=cpp]
+// %d  -> entero (int)
+printf("%d\n", 42);
+// Entrada: 42
+// Salida: 42
+
+// %lld -> entero largo (long long)
+long long x = 1234567890123LL;
+printf("%lld\n", x);
+// Entrada: 1234567890123
+// Salida: 1234567890123
+
+// %5d -> ancho minimo de 5 caracteres, alineado a la derecha
+printf("%5d\n", 42);
+// Entrada: 42
+// Salida: "   42"
+
+// %-5d -> ancho minimo de 5 caracteres, alineado a la izquierda
+printf("%-5d|\n", 42);
+// Entrada: 42
+// Salida: "42   |"
+
+// %05d -> ancho 5, completando con ceros
+printf("%05d\n", 42);
+// Entrada: 42
+// Salida: "00042"
+
+// %+d -> muestra siempre el signo
+printf("%+d\n", 42);
+// Entrada: 42
+// Salida: "+42"
+
+// %x -> hexadecimal usando letras minusculas
+printf("%x\n", 255);
+// Entrada: 255
+// Salida: ff
+
+// %X -> hexadecimal usando letras mayusculas
+printf("%X\n", 255);
+// Entrada: 255
+// Salida: FF
+
+// %.2f -> numero real con exactamente 2 decimales
+printf("%.2f\n", 3.14159);
+// Entrada: 3.14159
+// Salida: 3.14
+
+// %.0f -> numero real sin decimales (redondea)
+printf("%.0f\n", 3.7);
+// Entrada: 3.7
+// Salida: 4
+
+// %e -> notacion cientifica
+printf("%e\n", 31415.9);
+// Entrada: 31415.9
+// Salida: 3.141590e+04
+
+// %c -> un solo caracter
+printf("%c\n", 'A');
+// Entrada: 'A'
+// Salida: A
+
+// %s -> cadena de caracteres
+printf("%s\n", "hola");
+// Entrada: "hola"
+// Salida: hola
+
+// Se pueden combinar varios especificadores
+printf("%d %lld %.2f\n", 42, 10000000000LL, 3.14159);
+// Entrada: 42, 10000000000, 3.14159
+// Salida: 42 10000000000 3.14
+
+// %% -> imprime un '%' literal
+printf("100%%\n");
+// Entrada: no recibe ningun argumento para %
+// Salida: 100%
+
+// ! NO uses %n en C/C++ (puede ser peligroso)
+// Para scanf, un double se lee con %lf
+\end{lstlisting}
+
+\subsubsection*{Estructura de un especificador}
+
+Un formato puede combinar varias partes:
+
+\begin{lstlisting}[style=cpp]
+//   % [flags] [width] [.precision] [specifier]
+//   %    0       5         .2          f
+
+printf("%05d\n", 42);
+//  %  -> comienza el formato
+//  0  -> rellena con ceros
+//  5  -> ancho minimo de 5 caracteres
+//  d  -> interpreta el argumento como int
+//
+//  Salida: 00042
+\end{lstlisting}
+
+Los modificadores más utilizados en programación competitiva son:
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Formato} & \textbf{Tipo} & \textbf{Ejemplo de salida} \\
+\hline
+\texttt{\%d} & \texttt{int} & \texttt{42} \\
+\hline
+\texttt{\%lld} & \texttt{long long} & \texttt{1234567890123} \\
+\hline
+\texttt{\%c} & \texttt{char} & \texttt{A} \\
+\hline
+\texttt{\%s} & \texttt{string/char*} & \texttt{hola} \\
+\hline
+\texttt{\%f} & \texttt{double} & \texttt{3.140000} \\
+\hline
+\texttt{\%.2f} & \texttt{double} & \texttt{3.14} \\
+\hline
+\texttt{\%x} & \texttt{int} & \texttt{ff} \\
+\hline
+\texttt{\%X} & \texttt{int} & \texttt{FF} \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Regla práctica:} en programación competitiva, los formatos más
+importantes son \texttt{\%d} para \texttt{int}, \texttt{\%lld} para
+\texttt{long long}, \texttt{\%c} para caracteres, \texttt{\%s} para cadenas
+y \texttt{\%.2f} (o una precisión diferente) para números reales.
+
+
+\subsection{Condicionales y Ciclos}
+
+\begin{lstlisting}[style=cpp]
+// if / else: ejecuta un bloque segun una condicion
+if (x > 0) cout << "pos";       // x > 0 -> "pos"
+else if (x < 0) cout << "neg";  // x < 0 -> "neg"
+else cout << "cero";             // x == 0 -> "cero"
+
+// Operador ternario: condicion ? valor_si_true : valor_si_false
+string s = (x >= 0) ? "no neg" : "neg";
+// Si x >= 0, s = "no neg"; si no, s = "neg"
+
+// switch: compara una expresion con diferentes valores
+// Solo funciona directamente con tipos integrales como int o char,
+// NO con string.
+switch (x) {
+    case 1: /*...*/ break;       // x == 1
+    case 2: case 3: /*...*/ break; // x == 2 o x == 3
+    default: /*...*/ ;           // ningun case coincide
+}
+// ! Sin break, se continua ejecutando el siguiente case (fall-through)
+
+// C++17: se puede declarar una variable dentro del if
+if (int r = x % 2; r == 0) {}
+// r solo existe dentro del if y sus bloques asociados
+
+// for clasico: usa un indice y se repite mientras i < n
+for (int i = 0; i < n; i++) {}
+
+// range-based for: recorre directamente los elementos
+// No proporciona el indice.
+for (int v : datos) {}
+
+// & obtiene una referencia al elemento original.
+// Por tanto, las modificaciones afectan al vector.
+for (int &v : datos) v *= 2;
+
+// while: ejecuta mientras la condicion sea verdadera
+while (c < n) c++;
+
+// do-while: primero ejecuta el bloque y DESPUES verifica la condicion.
+// Por eso se ejecuta AL MENOS una vez.
+do {
+    c--;
+} while (c > 0);
+
+// break -> termina inmediatamente el ciclo o switch
+// continue -> salta a la siguiente iteracion del ciclo
+
+// ! C++ NO tiene break con etiqueta.
+// Para salir de ciclos anidados se puede usar una bandera,
+// encapsular la logica en una funcion y usar return, etc.
+\end{lstlisting}
+
+
+
+
+\subsection{Conversiones, Parseos y Casteos}
+
+\begin{lstlisting}[style=cpp]
+// string -> numero (parseo)
+// Convierte una cadena de texto en el tipo numerico indicado.
+int e = stoi("42");
+// Entrada: "42"  ->  Salida: 42
+
+long long l = stoll("10000000000");
+// Entrada: "10000000000"  ->  Salida: 10000000000
+
+double d = stod("3.14");
+// Entrada: "3.14"  ->  Salida: 3.14
+
+// Tambien se puede indicar la base numerica.
+int bin = stoi("1010", nullptr, 2);
+// "1010" en base 2 -> 10
+
+int hex = stoi("ff", nullptr, 16);
+// "ff" en base 16 -> 255
+
+
+// numero -> string
+// Convierte cualquier numero compatible en texto.
+string s = to_string(42);
+// Entrada: 42  ->  Salida: "42"
+
+
+// Casteo: fuerza la conversion de un tipo a otro.
+// Al pasar de decimal a entero, se TRUNCA hacia 0.
+int t = (int) 3.99;
+// 3.99 -> 3
+
+int r = static_cast<int>(3.99);
+// 3.99 -> 3
+// static_cast<int> es la forma recomendada en C++
+
+
+// ! int / int = division ENTERA
+double mal = 7 / 2;
+// 7 y 2 son int -> 3
+// Luego 3 se convierte a double -> 3.0
+
+double bien = 7 / 2.0;
+// 2.0 es double -> division decimal
+// 7 / 2.0 -> 3.5
+
+
+// caracteres
+// Los char tienen un valor numerico asociado (ASCII).
+int cod = (int) 'A';
+// 'A' -> 65
+
+char ch = (char) 66;
+// 66 -> 'B'
+
+// Truco muy usado para convertir un digito char a int.
+int dig = '7' - '0';
+// '7' tiene valor 55 y '0' tiene valor 48
+// 55 - 48 -> 7
+\end{lstlisting}
+
+
+
+
+%---------------------------------------------------------------------------
+\part{Estructuras de Datos}
+%---------------------------------------------------------------------------
+
+\section{Basic Structures}
+
+\begin{lstlisting}[style=cpp]
+int a[5] = {1,2,3,4,5}; // crear con valores: O(n)
+
+int b[5];               // crear de tamano 5
+                        // posiciones: b[0] ... b[4]
+                        // ! Valores no inicializados
+
+b[0] = 10;              // INSERT: O(1)
+b[1] = 20;              // INSERT: O(1)
+
+int x = b[0];           // READ: O(1)
+
+b[0] = 30;              // UPDATE: O(1)
+
+for (int i = 0; i < 5; i++)
+    cout << b[i] << " ";// READ: recorrer -> O(n)
+
+// DELETE: no existe metodo para eliminar
+// Se puede sobrescribir o manejar logicamente
+b[0] = 0;               // DELETE logico: O(1)
+
+// ! El tamano de un array estatico no cambia.
+// Para mas posiciones se necesita otro arreglo.
+\end{lstlisting}
+
+\subsection{Matrices (Arreglos 2D)}
+
+Arreglo bidimensional (filas $\times$ columnas). \textbf{Complejidad:}
+acceso \texttt{[i][j]} $O(1)$; crear $n\times m$ en $O(nm)$.
+
+\begin{lstlisting}[style=cpp]
+vector<vector<int>> m(3, vector<int>(4,0)); // CREATE: O(n*m)
+// matriz 3x4, todas las posiciones inicializadas en 0
+
+m[1][2] = 7;              // INSERT: O(1)
+
+int x = m[1][2];           // READ: O(1)
+
+m[1][2] = 10;              // UPDATE: O(1)
+
+for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 4; j++)
+        cout << m[i][j] << " ";
+// READ: recorrer toda la matriz -> O(n*m)
+
+// DELETE: no existe metodo para eliminar una posicion.
+// Se puede sobrescribir el valor o manejarlo logicamente.
+m[1][2] = 0;               // DELETE logico: O(1)
+
+// ! El tamano de la matriz puede cambiar con vector,
+// pero un arreglo 2D estatico no puede cambiar de tamano.
+\end{lstlisting}
+
+
+
+\subsection{Vectores / Listas dinámicas}
+
+Arreglo que \textbf{crece} solo (ArrayList / \texttt{vector} /
+\texttt{list}). \textbf{Complejidad:} acceso por índice $O(1)$; agregar
+al final $O(1)$ amortizado; insertar/borrar en medio $O(n)$; buscar
+$O(n)$.
+
+\begin{lstlisting}[style=cpp]
+vector<int> v;              // CREATE: lista vacia
+
+v.push_back(3);             // INSERT: final -> O(1) amortizado
+v.push_back(7);             // INSERT: final -> O(1) amortizado
+
+int x = v[0];               // READ: acceso -> O(1)
+int n = v.size();            // READ: tamano -> O(1)
+
+v[0] = 10;                  // UPDATE: modificar -> O(1)
+
+v.insert(v.begin() + 1, 5);  // INSERT: medio -> O(n)
+
+v.erase(v.begin() + 1);      // DELETE: medio -> O(n)
+
+// Buscar un elemento recorriendo el vector
+for (int x : v)
+    if (x == 10) { /* ... */ }
+// SEARCH: recorrer -> O(n)
+
+// DELETE: eliminar el ultimo elemento
+v.pop_back();               // DELETE: final -> O(1)
+
+// ! vector mantiene acceso por indice O(1).
+// ! Al crecer puede realocar su memoria internamente.
+\end{lstlisting}
+
+
+
+\subsection{Listas enlazadas (LinkedList)}
+
+Nodos enlazados. \textbf{Complejidad:} insertar/eliminar en los
+\textbf{extremos} $O(1)$; acceso por índice $O(n)$; buscar $O(n)$. Útil
+como cola o deque.
+
+\begin{lstlisting}[style=cpp]
+list<int> l;                // CREATE: lista vacia
+
+l.push_front(1);            // INSERT: inicio -> O(1)
+l.push_back(9);             // INSERT: final -> O(1)
+
+int x = l.front();          // READ: primer elemento -> O(1)
+int y = l.back();           // READ: ultimo elemento -> O(1)
+
+l.front() = 5;              // UPDATE: primer elemento -> O(1)
+l.back() = 10;              // UPDATE: ultimo elemento -> O(1)
+
+l.pop_front();              // DELETE: inicio -> O(1)
+l.pop_back();               // DELETE: final -> O(1)
+
+// ! No existe acceso directo por indice.
+// Avanzar hasta una posicion requiere recorrer nodos.
+auto it = l.begin();
+advance(it, 2);             // acceso al tercer elemento -> O(n)
+
+// Buscar un elemento requiere recorrer la lista.
+for (int x : l)
+    if (x == 10) { /* ... */ }
+// SEARCH: recorrer -> O(n)
+
+// ! list no permite l[i].
+// Para acceso por indice, vector suele ser mejor.
+\end{lstlisting}
+
+\subsection{Pilas (Stack)}
+
+Estructura \textbf{LIFO} (último en entrar, primero en salir).
+\textbf{Complejidad:} insertar, eliminar y consultar el tope $O(1)$. Para DFS
+iterativo, paréntesis balanceados y deshacer.
+
+\begin{lstlisting}[style=cpp]
+stack<int> pila;            // CREATE: pila vacia
+
+pila.push(3);               // INSERT: O(1)
+pila.push(7);               // INSERT: O(1)
+
+int tope = pila.top();      // READ: consultar tope -> O(1)
+
+pila.top() = 10;            // UPDATE: modificar tope -> O(1)
+
+pila.pop();                 // DELETE: eliminar tope -> O(1)
+
+// ! Solo se puede acceder directamente al elemento superior.
+// ! No existe acceso por indice.
+\end{lstlisting}
+
+
+\subsection{Colas (Queue)}
+
+Estructura \textbf{FIFO} (primero en entrar, primero en salir).
+\textbf{Complejidad:} encolar y desencolar $O(1)$. Base del BFS.
+
+\begin{lstlisting}[style=cpp]
+queue<int> cola;             // CREATE: cola vacia
+
+cola.push(3);                // INSERT: final -> O(1)
+cola.push(7);                // INSERT: final -> O(1)
+
+int frente = cola.front();   // READ: primero -> O(1)
+int atras = cola.back();     // READ: ultimo -> O(1)
+
+cola.front() = 10;           // UPDATE: modificar primero -> O(1)
+
+cola.pop();                  // DELETE: primero -> O(1)
+
+// ! push agrega al final y pop elimina del frente.
+// ! No existe acceso directo por indice.
+\end{lstlisting}
+
+
+\subsection{Colas de prioridad (Priority Queue / Heap)}
+
+Devuelve siempre el elemento de mayor (o menor) prioridad.
+\textbf{Complejidad:} insertar y extraer $O(\log n)$; consultar el tope
+$O(1)$. Para Dijkstra, Prim, k-ésimo mayor.
+
+\begin{lstlisting}[style=cpp]
+priority_queue<int> pq;      // CREATE: MAX-heap por defecto
+
+pq.push(3);                  // INSERT: O(log n)
+pq.push(7);                  // INSERT: O(log n)
+
+int mx = pq.top();           // READ: mayor -> O(1)
+
+pq.pop();                    // DELETE: mayor -> O(log n)
+
+// min-heap: el menor queda en el tope
+priority_queue<int, vector<int>, greater<int>> pqMin;
+
+pqMin.push(3);               // INSERT: O(log n)
+int mn = pqMin.top();        // READ: menor -> O(1)
+pqMin.pop();                 // DELETE: O(log n)
+
+// ! No existe acceso directo a elementos intermedios.
+// ! priority_queue no tiene una operacion UPDATE directa.
+\end{lstlisting}
+
+
+\subsection{Comparadores en C++ (Comparators)}
+
+\textbf{Idea:} un comparador es una función (lambda, functor, o
+\texttt{operator<} sobrecargado) que le dice a \texttt{sort},
+\texttt{set}, \texttt{map}, \texttt{priority\_queue}, etc.
+\textbf{cómo ordenar} dos elementos. Debe cumplir la propiedad de
+\emph{orden estricto débil} (\textit{strict weak ordering}):
+devolver \texttt{true} si el primer argumento va
+\textbf{estrictamente antes} que el segundo, y \texttt{false} en
+cualquier otro caso —incluyendo cuando se consideran ``iguales'' para
+efectos de orden. El error más común es usar \texttt{<=} en vez de
+\texttt{<}: eso rompe la propiedad y produce comportamiento
+indefinido (desde resultados mal ordenados hasta crashes).
+
+\textbf{¿Por qué usarlo?} El orden por defecto casi nunca alcanza:
+necesitas ordenar por varios criterios a la vez, en orden
+descendente, por una clave derivada (no el valor mismo), o con un
+\texttt{struct}/\texttt{pair} propio que no debe usar el orden
+lexicográfico por defecto.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Ordenar por múltiples campos (ej. por costo, y en empate
+    por índice original).
+    \item \texttt{priority\_queue} como min-heap en vez de max-heap
+    (o con un orden custom sobre un \texttt{struct}).
+    \item \texttt{set}/\texttt{map} con orden propio sobre un tipo
+    definido por ti.
+    \item Ordenar \textbf{índices} según los valores de otro
+    arreglo, sin mover el arreglo original.
+\end{itemize}
+
+\textbf{Complejidad:} el comparador en sí no cambia la complejidad
+del algoritmo que lo usa (\texttt{sort} sigue siendo
+$O(n\log n)$); pero un comparador que no sea un orden estricto débil
+puede producir UB o bucles infinitos.
+
+
+\subsubsection{Comparador con lambda para \texttt{sort} (multi-criterio, índices)}
+
+\begin{lstlisting}[style=cpp]
+struct Persona {
+    string nombre;
+    int edad;
+};
+
+vector<Persona> personas = {
+    {"Ana", 30}, {"Luis", 25}, {"Eva", 25}
+};
+
+// ordena por edad ascendente; en empate, por nombre alfabetico
+sort(personas.begin(), personas.end(),
+     [](const Persona& a, const Persona& b) {
+         if (a.edad != b.edad)
+             return a.edad < b.edad;
+         return a.nombre < b.nombre;
+     });
+// resultado: Eva(25), Luis(25), Ana(30)
+
+// ordenar en orden DESCENDENTE: solo invierte la comparacion
+sort(personas.begin(), personas.end(),
+     [](const Persona& a, const Persona& b) {
+         return a.edad > b.edad;
+     });
+// resultado: Ana(30), luego Luis/Eva(25) en su orden relativo previo
+\end{lstlisting}
+
+\textbf{Ordenar índices en vez del arreglo (muy común):}
+
+\begin{lstlisting}[style=cpp]
+vector<int> valores = {40, 10, 30, 20};
+
+vector<int> idx(valores.size());
+iota(idx.begin(), idx.end(), 0);   // idx = [0, 1, 2, 3]
+
+sort(idx.begin(), idx.end(),
+     [&](int a, int b) { return valores[a] < valores[b]; });
+// idx queda [1, 3, 2, 0]
+// (valores[1]=10, valores[3]=20, valores[2]=30, valores[0]=40)
+
+for (int i : idx)
+    cout << valores[i] << " ";
+// imprime: 10 20 30 40
+// sin haber movido "valores" del lugar
+\end{lstlisting}
+
+
+\subsubsection{\texttt{operator<} dentro de un \texttt{struct} (orden por defecto)}
+
+\textbf{Idea:} si sobrecargas \texttt{operator<} dentro de tu propio
+tipo, ese es el orden que usan automáticamente \texttt{sort},
+\texttt{set}, \texttt{map} (como clave) y \texttt{priority\_queue}
+\textbf{sin pasar ningún comparador extra}.
+
+\begin{lstlisting}[style=cpp]
+struct Punto {
+    int x, y;
+
+    bool operator<(const Punto& otro) const {
+        if (x != otro.x) return x < otro.x;
+        return y < otro.y;
+    }
+};
+
+set<Punto> s;
+s.insert({3, 4});
+s.insert({1, 2});
+s.insert({1, 5});
+
+for (auto& p : s)
+    cout << "(" << p.x << "," << p.y << ") ";
+// imprime en orden: (1,2) (1,5) (3,4)
+// -> set los ordeno automaticamente usando operator<
+\end{lstlisting}
+
+
+\subsubsection{\texttt{priority\_queue} con comparador custom}
+
+\textbf{Idea:} \texttt{priority\_queue} es un \textbf{max-heap} por
+defecto (el elemento ``mayor'' según el comparador queda arriba). Para
+un min-heap con tipos simples, se usa \texttt{greater<T>}. Para un
+\texttt{struct} propio con una regla de prioridad distinta a
+\texttt{operator<}, se pasa un \textbf{functor} (struct con
+\texttt{operator()}).
+
+\begin{lstlisting}[style=cpp]
+// min-heap de enteros: el menor queda arriba
+priority_queue<int, vector<int>, greater<int>> minHeap;
+minHeap.push(5);
+minHeap.push(1);
+minHeap.push(3);
+
+cout << minHeap.top();
+// 1  (el menor, no el mayor)
+\end{lstlisting}
+
+\begin{lstlisting}[style=cpp]
+struct Persona {
+    string nombre;
+    int edad;
+};
+
+// functor: queda arriba la persona con MENOR edad
+// (priority_queue es max-heap, asi que se invierte el sentido:
+// operator() debe devolver true si "a" tiene MENOR prioridad que "b")
+struct CompararPorEdad {
+    bool operator()(const Persona& a, const Persona& b) const {
+        return a.edad > b.edad;
+    }
+};
+
+priority_queue<Persona, vector<Persona>, CompararPorEdad> pq;
+pq.push({"Ana", 30});
+pq.push({"Luis", 20});
+pq.push({"Eva", 25});
+
+cout << pq.top().nombre;
+// "Luis"  (la persona mas joven queda en la cima)
+\end{lstlisting}
+
+
+\subsubsection{Reglas de orden estricto débil (\textit{strict weak ordering})}
+
+Todo comparador \texttt{cmp(a, b)} debe cumplir:
+
+\begin{itemize}
+    \item \textbf{Irreflexividad:} \texttt{cmp(a, a)} siempre
+    \texttt{false}. Un elemento nunca va estrictamente antes que sí
+    mismo.
+    \item \textbf{Asimetría:} si \texttt{cmp(a, b)} es
+    \texttt{true}, entonces \texttt{cmp(b, a)} debe ser
+    \texttt{false}.
+    \item \textbf{Transitividad:} si \texttt{cmp(a, b)} y
+    \texttt{cmp(b, c)} son \texttt{true}, entonces \texttt{cmp(a, c)}
+    también debe serlo.
+    \item \textbf{Consistencia en los empates:} si ni
+    \texttt{cmp(a,b)} ni \texttt{cmp(b,a)} son \texttt{true}, se
+    consideran ``equivalentes'' para efectos de orden (aunque no
+    sean idénticos como objetos).
+\end{itemize}
+
+\textbf{El error más común:}
+
+\begin{lstlisting}[style=cpp]
+// INCORRECTO: usa <= en vez de <
+sort(v.begin(), v.end(), [](int a, int b) {
+    return a <= b;     // viola irreflexividad: cmp(a,a) da true
+});
+// esto es Undefined Behavior: en el mejor caso ordena mal,
+// en el peor caso crashea o hace un bucle infinito.
+
+// CORRECTO:
+sort(v.begin(), v.end(), [](int a, int b) {
+    return a < b;
+});
+\end{lstlisting}
+
+\textbf{Otro error común:} comparadores que no son transitivos al
+combinar varios criterios sin desempate consistente (ej. comparar
+solo por \texttt{a.x < b.x} cuando a veces \texttt{a.x == b.x} pero
+querías tratar esos casos con otro criterio). Si dos elementos
+``empatan'' en el primer criterio, siempre hay que \textbf{decidir}
+con un segundo criterio, o dejarlos expresamente como equivalentes.
+
+\textbf{Regla práctica:} si tu comparador tiene la forma
+\texttt{return a.campo1 < b.campo1;} y sospechas que puede haber
+empates que te importan, agrega el siguiente criterio explícitamente
+(\texttt{if (a.campo1 != b.campo1) return ...; return
+a.campo2 < b.campo2;}) en vez de dejar el desempate al azar del
+algoritmo de ordenamiento (que no es estable a menos que uses
+\texttt{stable\_sort}).
+
+
+\subsection{Vector circular (Circular Buffer)}
+
+\textbf{Idea:} un arreglo de tamaño fijo (\texttt{cap}) que se comporta
+como una \textbf{cola doble}. En lugar de mover elementos cuando se
+inserta o elimina, se reutilizan las posiciones del arreglo de forma
+circular.
+
+Se mantienen tres variables principales:
+
+\begin{itemize}
+    \item \texttt{cap}: capacidad total del arreglo.
+    \item \texttt{ini}: posición física donde comienza el primer elemento.
+    \item \texttt{tam}: cantidad actual de elementos almacenados.
+\end{itemize}
+
+La posición lógica $i$ no coincide necesariamente con la posición física
+del arreglo. Se obtiene mediante:
+
+\[
+\texttt{posicionFisica(i) = (ini + i) \% cap}
+\]
+
+Por ejemplo, con $\texttt{cap}=5$ y $\texttt{ini}=3$:
+
+\[
+\begin{array}{c|ccccc}
+\text{Índice lógico} & 0 & 1 & 2 & 3 & 4 \\ \hline
+\text{Índice físico} & 3 & 4 & 0 & 1 & 2
+\end{array}
+\]
+
+Cuando se llega al final del arreglo, el módulo hace que la siguiente
+posición vuelva al comienzo. Por eso \textbf{no es necesario mover los
+elementos}.
+
+\textbf{¿Por qué usarlo?} En un arreglo normal, insertar al frente
+requiere desplazar todos los elementos y cuesta $O(n)$. En un vector
+circular solo se mueve \texttt{ini}, por lo que cuesta $O(1)$.
+
+\textbf{Casos de uso:}
+\begin{itemize}
+    \item Colas de tamaño fijo.
+    \item Buffers de audio, video o red.
+    \item Ventanas deslizantes.
+    \item Sistemas donde llegan y salen datos continuamente.
+    \item Simulaciones de procesos en una cola.
+    \item Mantener únicamente los últimos $k$ elementos.
+\end{itemize}
+
+Si el buffer está lleno y se ejecuta \texttt{pushBack}, el nuevo elemento
+\textbf{reemplaza al más antiguo}. Esto permite mantener automáticamente
+una ventana de tamaño fijo.
+
+\textbf{Complejidad:} insertar, eliminar, consultar extremos, acceder
+por posición y comprobar el tamaño son $O(1)$.
+
+
+\begin{lstlisting}[style=cpp]
+struct VectorCircular {
+    vector<int> buf;
+    int cap, ini = 0, tam = 0;
+
+    VectorCircular(int c) : buf(c), cap(c) {}
+
+    // CREATE: crea un buffer con capacidad fija.
+    // Los elementos inicialmente no estan ocupados.
+    
+    bool empty() {
+        return tam == 0;
+    }                           // O(1)
+
+    bool full() {
+        return tam == cap;
+    }                           // O(1)
+
+    int size() {
+        return tam;
+    }                           // O(1)
+
+    int capacity() {
+        return cap;
+    }                           // O(1)
+
+    // Convierte una posicion logica en fisica.
+    int pos(int i) {
+        return (ini + i) % cap;
+    }                           // O(1)
+
+    // INSERT: agrega al final.
+    void pushBack(int x) {
+        buf[(ini + tam) % cap] = x;
+
+        if (tam < cap)
+            tam++;
+        else
+            ini = (ini + 1) % cap;
+    }                           // O(1)
+
+    // INSERT: agrega al inicio.
+    void pushFront(int x) {
+        ini = (ini - 1 + cap) % cap;
+        buf[ini] = x;
+
+        if (tam < cap)
+            tam++;
+    }                           // O(1)
+
+    // READ: consulta el primer elemento.
+    int front() {
+        return buf[ini];
+    }                           // O(1)
+
+    // READ: consulta el ultimo elemento.
+    int back() {
+        return buf[(ini + tam - 1) % cap];
+    }                           // O(1)
+
+    // READ: acceso por posicion logica.
+    int at(int i) {
+        return buf[(ini + i) % cap];
+    }                           // O(1)
+
+    // UPDATE: modifica un elemento.
+    void set(int i, int x) {
+        buf[(ini + i) % cap] = x;
+    }                           // O(1)
+
+    // DELETE: elimina el primer elemento.
+    int popFront() {
+        int v = buf[ini];
+        ini = (ini + 1) % cap;
+        tam--;
+        return v;
+    }                           // O(1)
+
+    // DELETE: elimina el ultimo elemento.
+    int popBack() {
+        tam--;
+        return buf[(ini + tam) % cap];
+    }                           // O(1)
+
+    // DELETE: elimina todos los elementos.
+    void clear() {
+        ini = 0;
+        tam = 0;
+    }                           // O(1)
+
+    // SEARCH: busca un elemento.
+    // A diferencia de las operaciones anteriores,
+    // hay que recorrer los elementos.
+    bool contains(int x) {
+        for (int i = 0; i < tam; i++)
+            if (at(i) == x)
+                return true;
+
+        return false;
+    }                           // O(n)
+
+    // READ: recorrer los elementos en orden logico.
+    void print() {
+        for (int i = 0; i < tam; i++)
+            cout << at(i) << " ";
+    }                           // O(n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+VectorCircular v(5);
+
+v.pushBack(10);
+v.pushBack(20);
+v.pushBack(30);
+// [10, 20, 30, _, _]
+// ini = 0, tam = 3
+
+v.pushFront(5);
+// [5, 10, 20, 30, _]
+// ini cambia de 0 a 4
+
+cout << v.front();
+// 5
+
+cout << v.back();
+// 30
+
+v.popFront();
+// elimina 5
+// [_, 10, 20, 30, _]
+
+v.pushBack(40);
+v.pushBack(50);
+// [_, 10, 20, 30, 40, 50]
+// El almacenamiento puede haber dado la vuelta.
+
+v.pushBack(60);
+// El buffer estaba lleno.
+// Se agrega 60 y se elimina el mas antiguo.
+// Resultado logico: [20, 30, 40, 50, 60]
+\end{lstlisting}
+
+\textbf{Ventaja principal:} el arreglo físico puede verse ``desordenado'',
+pero los elementos siempre tienen un orden lógico determinado por
+\texttt{ini}. Por ejemplo:
+
+\begin{lstlisting}[style=cpp]
+// Memoria fisica:
+// [40, 50, 20, 30,  _]
+//       ^
+//      ini = 2
+
+// Orden logico:
+// 20 -> 30 -> 40 -> 50
+\end{lstlisting}
+
+No importa dónde estén físicamente los elementos: \texttt{at(0)} siempre
+representa el primero, \texttt{at(1)} el segundo, y así sucesivamente.
+
+\textbf{Diferencia con un vector normal:}
+
+\begin{center}
+\small
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Operación} & \texttt{vector} & \textbf{Circular} \\
+\hline
+Agregar al final & $O(1)$* & $O(1)$ \\
+\hline
+Eliminar al final & $O(1)$ & $O(1)$ \\
+\hline
+Agregar al frente & $O(n)$ & $O(1)$ \\
+\hline
+Eliminar al frente & $O(n)$ & $O(1)$ \\
+\hline
+Acceso por índice & $O(1)$ & $O(1)$ \\
+\hline
+Buscar & $O(n)$ & $O(n)$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\noindent
+*Amortizado.
+
+\textbf{Regla práctica:} si necesitas una estructura de tamaño fijo
+donde los elementos entran y salen continuamente por los extremos,
+un vector circular evita los desplazamientos de un arreglo normal y
+mantiene las operaciones principales en $O(1)$.
+
+\section{Estructuras Hash/Tree}
+
+
+\subsection{Conjuntos hash (HashSet)}
+
+Colección de elementos \textbf{sin duplicados} y sin orden garantizado.
+En C\texttt{++} se implementa mediante \texttt{unordered\_set}. Utiliza
+una tabla hash, por lo que las operaciones son $O(1)$ en promedio.
+Es útil cuando solo interesa saber si un elemento existe, sin necesidad
+de mantener los elementos ordenados.
+
+\textbf{Complejidad:} insertar, buscar y borrar $O(1)$ promedio
+($O(n)$ peor caso).
+
+\begin{lstlisting}[style=cpp]
+unordered_set<int> s;          // CREATE: conjunto vacio
+
+s.insert(3);                   // INSERT: O(1) prom.
+s.insert(7);                   // INSERT: O(1) prom.
+s.insert(3);                   // no se agrega: ya existe
+
+bool hay = s.count(3);         // SEARCH: O(1) prom.
+// hay = 1 si existe, 0 si no existe
+
+auto it = s.find(7);            // SEARCH: O(1) prom.
+// devuelve iterador al elemento o s.end()
+
+s.erase(3);                    // DELETE: O(1) prom.
+
+int n = s.size();              // READ: cantidad -> O(1)
+bool vacio = s.empty();        // READ: ¿esta vacio? -> O(1)
+
+// Recorrer todos los elementos
+for (int x : s)
+    cout << x << " ";
+// O(n), pero el orden NO esta garantizado.
+
+// ! No existe acceso por indice: s[0] no es valido.
+// ! Los elementos repetidos se ignoran.
+// ! El orden puede cambiar entre ejecuciones.
+\end{lstlisting}
+
+\textbf{Cuándo usarlo:}
+\begin{itemize}
+    \item Saber rápidamente si un elemento ya apareció.
+    \item Eliminar duplicados.
+    \item Mantener un conjunto de elementos visitados.
+    \item Detectar elementos repetidos en $O(n)$ promedio.
+    \item BFS/DFS: guardar vértices visitados cuando sea conveniente.
+\end{itemize}
+
+
+\subsection{Mapas / Diccionarios hash}
+
+Estructura que almacena pares \textbf{clave $\rightarrow$ valor}.
+En C\texttt{++} se implementa mediante \texttt{unordered\_map}.
+Cada clave identifica un valor y \textbf{no puede repetirse}. Si se
+asigna un nuevo valor a una clave existente, se reemplaza el anterior.
+
+\textbf{Complejidad:} insertar, acceder, buscar y borrar por clave
+$O(1)$ promedio ($O(n)$ peor caso).
+
+\begin{lstlisting}[style=cpp]
+unordered_map<string,int> m;   // CREATE: mapa vacio
+
+m["a"] = 1;                    // INSERT: O(1) prom.
+m["b"] = 2;                    // INSERT: O(1) prom.
+
+int v = m["a"];                // READ: acceder -> O(1) prom.
+// v = 1
+
+m["a"] = 10;                   // UPDATE: O(1) prom.
+// la clave "a" ahora tiene valor 10
+
+m.erase("a");                  // DELETE: O(1) prom.
+
+bool existe = m.count("b");    // SEARCH: O(1) prom.
+// existe = 1
+
+auto it = m.find("b");         // SEARCH: O(1) prom.
+if (it != m.end())
+    cout << it->second;        // valor asociado a "b"
+
+// Recorrer todas las parejas
+for (auto [clave, valor] : m)
+    cout << clave << " " << valor;
+// O(n), sin orden garantizado.
+\end{lstlisting}
+
+\textbf{Importante:} usar \texttt{m[clave]} para consultar una clave
+que no existe puede \textbf{crear esa clave} con su valor por defecto.
+Para comprobar existencia sin insertar, es preferible usar
+\texttt{count()} o \texttt{find()}.
+
+\begin{lstlisting}[style=cpp]
+unordered_map<string,int> m;
+
+int x = m["a"];
+// Si "a" no existia, se crea:
+// "a" -> 0
+// ! operator[] puede INSERTAR una clave al consultar.
+
+// count(): comprueba si existe SIN insertar
+bool existe = m.count("b");
+// Devuelve 0 si no existe, 1 si existe.
+
+// find(): busca la clave SIN insertar
+auto it = m.find("b");
+
+if (it != m.end())
+    cout << it->second;       // valor asociado a "b"
+else
+    cout << "No existe";
+
+// ! count() solo indica si existe.
+// ! find() permite acceder a la pareja clave -> valor.
+\end{lstlisting}
+
+
+\textbf{Uso clásico: contar frecuencias.}
+
+\begin{lstlisting}[style=cpp]
+unordered_map<int,int> freq;
+
+for (int x : datos)
+    freq[x]++;                 // frecuencia de cada elemento
+
+cout << freq[5];
+// cantidad de veces que aparece 5
+\end{lstlisting}
+
+\textbf{Cuándo usarlo:}
+\begin{itemize}
+    \item Contar frecuencias.
+    \item Asociar identificadores con información.
+    \item Buscar rápidamente un valor a partir de una clave.
+    \item Problemas de conteo y frecuencia.
+    \item Memorizar resultados de estados o funciones.
+\end{itemize}
+
+
+\subsection{Conjuntos ordenados (TreeSet)}
+
+Conjunto de elementos \textbf{sin duplicados y ordenados}.
+En C\texttt{++} se implementa mediante \texttt{set}, normalmente como
+un árbol balanceado.
+
+A diferencia de \texttt{unordered\_set}, los elementos siempre se
+mantienen ordenados según el comparador utilizado.
+
+\textbf{Complejidad:} insertar, buscar y borrar $O(\log n)$.
+Consultar el menor o mayor elemento mediante \texttt{begin()} o
+\texttt{rbegin()} es $O(1)$.
+
+\begin{lstlisting}[style=cpp]
+set<int> s;                    // CREATE: conjunto vacio
+
+s.insert(5);                   // INSERT: O(log n)
+s.insert(1);                   // INSERT: O(log n)
+s.insert(3);                   // INSERT: O(log n)
+s.insert(3);                   // no se agrega: ya existe
+
+int menor = *s.begin();        // READ: minimo -> O(1)
+int mayor = *s.rbegin();       // READ: maximo -> O(1)
+
+auto it = s.find(3);           // SEARCH: O(log n)
+if (it != s.end())
+    cout << *it;
+
+s.erase(3);                    // DELETE: O(log n)
+
+int n = s.size();              // READ: cantidad -> O(1)
+
+// Recorrer en orden ascendente
+for (int x : s)
+    cout << x << " ";
+// O(n)
+\end{lstlisting}
+
+\textbf{lower\_bound y upper\_bound:}
+
+\begin{lstlisting}[style=cpp]
+set<int> s = {1, 3, 5, 7, 9};
+
+auto it1 = s.lower_bound(5);
+// primer elemento >= 5
+// resultado: 5
+
+auto it2 = s.upper_bound(5);
+// primer elemento > 5
+// resultado: 7
+\end{lstlisting}
+
+Esto permite resolver consultas de \textbf{piso y techo} rápidamente:
+
+\begin{lstlisting}[style=cpp]
+// FLOOR: mayor elemento <= x
+auto it = s.upper_bound(x);
+
+if (it != s.begin()) {
+    --it;
+    cout << *it;
+}
+
+// CEILING: menor elemento >= x
+auto it2 = s.lower_bound(x);
+
+if (it2 != s.end())
+    cout << *it2;
+\end{lstlisting}
+
+\textbf{Cuándo usarlo:}
+\begin{itemize}
+    \item Cuando se necesitan elementos únicos y ordenados.
+    \item Obtener mínimo o máximo dinámicamente.
+    \item Encontrar el siguiente elemento mayor o igual.
+    \item Encontrar el anterior elemento menor o igual.
+    \item Mantener un conjunto mientras se insertan y eliminan elementos.
+\end{itemize}
+
+\textbf{Diferencia clave:} si solo necesitas saber si existe un elemento,
+\texttt{unordered\_set} suele ser más rápido. Si necesitas consultar
+orden, \texttt{lower\_bound}, \texttt{upper\_bound}, mínimo o máximo,
+\texttt{set} es la opción adecuada.
+
+
+\subsection{Mapas ordenados (TreeMap)}
+
+Mapa \textbf{clave $\rightarrow$ valor} cuyas claves se mantienen
+ordenadas. En C\texttt{++} se implementa mediante \texttt{map}, usando
+un árbol balanceado.
+
+Cada clave aparece una sola vez. Los valores pueden repetirse.
+
+\textbf{Complejidad:} insertar, buscar, acceder y borrar por clave
+$O(\log n)$. \texttt{begin()} permite obtener la menor clave en
+$O(1)$.
+
+\begin{lstlisting}[style=cpp]
+map<string,int> m;             // CREATE: mapa vacio
+
+m["b"] = 2;                    // INSERT: O(log n)
+m["a"] = 1;                    // INSERT: O(log n)
+m["c"] = 3;                    // INSERT: O(log n)
+
+int v = m["a"];                // READ: O(log n)
+// v = 1
+
+m["a"] = 10;                   // UPDATE: O(log n)
+
+m.erase("b");                  // DELETE: O(log n)
+
+auto it = m.find("c");         // SEARCH: O(log n)
+if (it != m.end())
+    cout << it->second;
+
+// Primera pareja: menor clave
+auto primera = m.begin();      // O(1)
+cout << primera->first;
+
+// Ultima pareja: mayor clave
+auto ultima = prev(m.end());   // O(1) amortizado
+cout << ultima->first;
+\end{lstlisting}
+
+\textbf{Las claves se recorren ordenadas:}
+
+\begin{lstlisting}[style=cpp]
+map<int,string> m;
+
+m[30] = "C";
+m[10] = "A";
+m[20] = "B";
+
+for (auto [clave, valor] : m)
+    cout << clave << " " << valor;
+
+// Salida:
+// 10 A
+// 20 B
+// 30 C
+\end{lstlisting}
+
+\textbf{lower\_bound y upper\_bound} también funcionan sobre las claves:
+
+\begin{lstlisting}[style=cpp]
+map<int,string> m;
+m[10] = "A";
+m[20] = "B";
+m[30] = "C";
+
+auto it = m.lower_bound(15);
+// primera clave >= 15
+// apunta a 20
+
+auto it2 = m.upper_bound(20);
+// primera clave > 20
+// apunta a 30
+\end{lstlisting}
+
+\textbf{Uso clásico: contar frecuencias ordenadas.}
+
+\begin{lstlisting}[style=cpp]
+map<int,int> freq;
+
+for (int x : datos)
+    freq[x]++;
+
+// Las claves aparecen en orden creciente.
+for (auto [x, cantidad] : freq)
+    cout << x << ": " << cantidad << "\n";
+\end{lstlisting}
+
+\textbf{Cuándo usarlo:}
+\begin{itemize}
+    \item Cuando se necesitan pares clave--valor ordenados.
+    \item Contar frecuencias y procesarlas en orden.
+    \item Encontrar claves inmediatamente mayores o menores.
+    \item Procesar eventos o valores manteniendo un orden dinámico.
+    \item Cuando se necesitan operaciones de árbol como
+    \texttt{lower\_bound} y \texttt{upper\_bound}.
+\end{itemize}
+
+
+\subsection*{Comparación rápida}
+
+\begin{center}
+\small
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Estructura} & \textbf{Duplicados} & \textbf{Orden} & \textbf{Buscar} \\
+\hline
+\texttt{unordered\_set} & No & No & $O(1)$ prom. \\
+\hline
+\texttt{unordered\_map} & Claves: No & No & $O(1)$ prom. \\
+\hline
+\texttt{set} & No & Sí & $O(\log n)$ \\
+\hline
+\texttt{map} & Claves: No & Sí & $O(\log n)$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\textbf{Regla práctica:}
+
+\begin{itemize}[nosep,leftmargin=*]
+    \item \texttt{unordered\_set} $\rightarrow$ \textit{¿Ya existe este elemento?}
+    \item \texttt{unordered\_map} $\rightarrow$ \textit{¿Qué valor corresponde a esta clave?}
+    \item \texttt{set} $\rightarrow$ \textit{Elementos únicos + ordenados.}
+    \item \texttt{map} $\rightarrow$ \textit{Claves $\rightarrow$ valores + claves ordenadas.}
+\end{itemize}
+
+
+\section{Trees}
+
+\section{Range Queries}
+
+\subsection{Casos de uso}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|p{0.43\columnwidth}|p{0.29\columnwidth}|p{0.20\columnwidth}|}
+\hline
+\textbf{Cuando el problema te pida:} &
+\textbf{Entonces usa:} &
+\textbf{Complejidad} \\
+\hline
+
+Suma de rango sobre un arreglo que \textbf{nunca cambia}, con muchas consultas
+(ej. ``suma de ventas entre el día $l$ y $r$'') &
+Prefix Sums &
+Build $O(n)$ \newline Query $O(1)$ \\
+\hline
+
+Suma de rango con actualizaciones \textbf{puntuales} frecuentes
+(ej. ``suma el stock de la posición $i$, luego consulta un rango'') &
+Fenwick Tree (BIT) &
+Build $O(n)$ \newline Query/Update $O(\log n)$ \\
+\hline
+
+Sumar $v$ a \textbf{todo un rango} $[l,r]$ y también consultar la
+\textbf{suma} de cualquier rango &
+FenwickRangeUpdate (doble BIT) &
+Query/Update $O(\log n)$ \\
+\hline
+
+Range update + range query con operaciones más complejas:
+min/max en rango, asignar un valor a todo un rango, contar ceros, etc. &
+Segment Tree + Lazy Propagation &
+Query/Update $O(\log n)$ \\
+\hline
+
+Mínimo, máximo o gcd de cualquier rango sobre un arreglo
+\textbf{estático} (ej. RMQ clásico, LCA) &
+Sparse Table &
+Build $O(n\log n)$ \\ Query $O(1)$ \\
+\hline
+
+Mínimo o máximo de rango cuando el arreglo \textbf{sí cambia}
+con el tiempo &
+Segment Tree &
+Query/Update $O(\log n)$ \\
+\hline
+
+Consultas 2D: cuántos puntos o cuánta suma hay dentro de un
+rectángulo $[x_1,x_2]\times[y_1,y_2]$ &
+Fenwick 2D &
+Query/Update \newline $O(\log n\log m)$ \\
+\hline
+
+Encontrar el $k$-ésimo elemento, o ``menor índice cuya suma acumulada
+alcanza $X$'' (frecuencias) &
+Fenwick con \texttt{lowerBound} &
+$O(\log n)$ \\
+\hline
+
+Muchas queries de rango \textbf{offline} (las conoces todas de antemano)
+sobre un arreglo estático o con pocos updates &
+Mo's Algorithm &
+$O((n+q)\sqrt{n})$ \\
+\hline
+
+LCA entre dos nodos, o mínimo en rango sobre un recorrido Euler de un
+árbol (valores consecutivos difieren en $\pm1$) &
+RMQ $\pm1$ \newline (Euler Tour + Sparse Table) &
+Build $O(n)$ \newline Query $O(1)$ \\
+\hline
+
+Cuántos elementos en el rango $[l,r]$ están dentro de un rango de
+\textbf{valores} $[a,b]$, o cuál es el $k$-ésimo menor en $[l,r]$ &
+Wavelet Tree &
+Query $O(\log n)$ \\
+\hline
+
+Queries o updates sobre \textbf{caminos o subárboles} de un árbol
+(ej. ``suma el camino de $u$ a $v$'') &
+Heavy-Light Decomposition \newline (+ Segment/Fenwick) &
+Query/Update \newline $O(\log^2 n)$ \\
+\hline
+
+Necesitas algo simple de implementar bajo presión, con balance
+razonable entre update y query, sin memorizar mucha teoría &
+Sqrt Decomposition &
+Query/Update $O(\sqrt{n})$ \\
+\hline
+
+\end{tabular}
+\caption{Guía rápida: qué estructura de range queries usar según el problema, con su complejidad.}
+\end{table}
+
+\subsection{Prefix Sums}
+
+\textbf{Idea:} si un arreglo \textbf{no cambia}, puedes precalcular
+\texttt{pref[i]} $=$ suma de los primeros $i$ elementos en $O(n)$, una
+sola vez. Cualquier suma de rango $[l,r]$ se responde restando dos
+prefijos: \texttt{pref[r+1] - pref[l]}. Es la base conceptual de todo
+lo demás en esta sección: Fenwick y Segment Tree existen justamente
+para soportar lo que Prefix Sums no puede (actualizaciones), a costa
+de más complejidad de código.
+
+\textbf{¿Por qué usarlo?} Es lo más simple y rápido posible para
+consultas de rango cuando el arreglo es estático. Cero estructuras de
+datos elaboradas, cero recursión, solo un arreglo auxiliar y una
+resta.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Suma de rango sobre un arreglo que nunca se modifica, con
+    muchas queries.
+    \item Suma de submatriz (versión 2D) sobre una matriz estática.
+    \item Aplicar $B$ actualizaciones de rango \textbf{offline} y
+    consultar el arreglo final una sola vez (Difference Array).
+    \item Como paso final de un precómputo de teoría de números
+    (criba de $\phi$, $\mu$, número de divisores, etc.) cuando el
+    problema pide sumas sobre esos valores en un rango.
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$ (u $O(nm)$ en 2D), consulta
+$O(1)$. No soporta actualizaciones puntuales eficientes: modificar un
+elemento y volver a consultar obliga a reconstruir, $O(n)$.
+
+
+\subsubsection{Prefix Sum 1D}
+
+\begin{lstlisting}[style=cpp]
+struct PrefixSum1D {
+    vector<long long> pref;
+    int n;
+
+    // CREATE: construye los prefijos a partir de a[0..n-1].
+    PrefixSum1D(vector<long long>& a) {
+        n = a.size();
+        pref.assign(n + 1, 0);
+
+        for (int i = 0; i < n; i++)
+            pref[i + 1] = pref[i] + a[i];
+    }                                          // O(n)
+
+    // READ: suma del rango [l, r] (0-indexado, inclusivo).
+    long long rango(int l, int r) {
+        if (l > r) return 0;
+        return pref[r + 1] - pref[l];
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7};
+
+PrefixSum1D ps(a);
+// arreglo logico: [5, 2, 9, 1, 7]  (posiciones 0..4)
+
+cout << ps.rango(0, 2);
+// 5 + 2 + 9 = 16
+
+cout << ps.rango(1, 4);
+// 2 + 9 + 1 + 7 = 19
+
+cout << ps.rango(3, 3);
+// 1
+\end{lstlisting}
+
+
+\subsubsection{Prefix Sum 2D}
+
+\begin{lstlisting}[style=cpp]
+struct PrefixSum2D {
+    vector<vector<long long>> pref;
+    int n, m;
+
+    // CREATE: construye la matriz de prefijos a partir de
+    // a[0..n-1][0..m-1] usando inclusion-exclusion.
+    PrefixSum2D(vector<vector<long long>>& a) {
+        n = a.size();
+        m = a[0].size();
+        pref.assign(n + 1, vector<long long>(m + 1, 0));
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                pref[i + 1][j + 1] = a[i][j] + pref[i][j + 1]
+                                    + pref[i + 1][j] - pref[i][j];
+    }                                          // O(n * m)
+
+    // READ: suma del rectangulo [x1..x2] x [y1..y2] (0-indexado,
+    // inclusivo), usando inclusion-exclusion sobre los prefijos.
+    long long rango(int x1, int y1, int x2, int y2) {
+        return pref[x2 + 1][y2 + 1] - pref[x1][y2 + 1]
+             - pref[x2 + 1][y1] + pref[x1][y1];
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<vector<long long>> a = {
+    {1, 2, 3},
+    {4, 5, 6},
+    {7, 8, 9}
+};
+
+PrefixSum2D ps(a);
+
+cout << ps.rango(0, 0, 1, 1);
+// 1+2+4+5 = 12
+
+cout << ps.rango(1, 1, 2, 2);
+// 5+6+8+9 = 28
+\end{lstlisting}
+
+
+\subsubsection{Difference Array (updates de rango offline)}
+
+\textbf{Idea:} el truco inverso a Prefix Sums: para sumar $v$ a todo
+un rango $[l,r]$, marcas \texttt{diff[l] += v} y \texttt{diff[r+1] -=
+v} en $O(1)$. Después de aplicar \textbf{todas} las actualizaciones,
+un solo recorrido con prefijos reconstruye el arreglo final. Sirve
+solo cuando todas las updates son \textbf{offline} (las conoces antes
+de necesitar consultar); si necesitas consultar \emph{entre}
+actualizaciones, usa FenwickRangeUpdate en su lugar.
+
+\begin{lstlisting}[style=cpp]
+struct DifferenceArray {
+    vector<long long> diff;
+    int n;
+
+    // CREATE: reserva un arreglo de diferencias de tamano n.
+    DifferenceArray(int n) : n(n) {
+        diff.assign(n + 1, 0);
+    }
+
+    // UPDATE: marca +v en todo el rango [l, r] (0-indexado).
+    void rangoUpdate(int l, int r, long long v) {
+        diff[l] += v;
+        if (r + 1 <= n)
+            diff[r + 1] -= v;
+    }                                          // O(1)
+
+    // READ: reconstruye el arreglo final tras aplicar todas
+    // las actualizaciones marcadas hasta el momento.
+    vector<long long> aplicar() {
+        vector<long long> a(n);
+        long long acc = 0;
+
+        for (int i = 0; i < n; i++) {
+            acc += diff[i];
+            a[i] = acc;
+        }
+
+        return a;
+    }                                          // O(n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+DifferenceArray d(5);
+
+d.rangoUpdate(1, 3, 4);
+d.rangoUpdate(0, 4, 1);
+d.rangoUpdate(2, 2, 10);
+
+vector<long long> resultado = d.aplicar();
+// resultado: [1, 5, 15, 5, 1]
+\end{lstlisting}
+
+
+\subsubsection{Aplicación: suma de Euler Totient ($\phi$) en un rango}
+
+\textbf{Idea:} $\phi(n)$ cuenta cuántos enteros en $[1,n]$ son
+coprimos con $n$. Calcular $\phi$ de \emph{un} número es teoría de
+números ($O(\sqrt n)$ factorizando); pero cuando el problema pide la
+\textbf{suma de $\phi(i)$ para $i$ en un rango $[l,r]$}, con muchas
+queries, el patrón se resuelve en dos fases: (1) precalculas el
+arreglo de $\phi$ una sola vez con una criba (teoría de números), y
+(2) respondes las queries de rango con Prefix Sums sobre ese arreglo
+ya calculado (exactamente esta subsección). Factorizar cada número
+del rango por separado en cada query sería $O(q\sqrt n)$ y no escala;
+precalcular y sumar con prefijos reduce cada query a $O(1)$.
+
+\paragraph{Criba lineal + Prefix Sums (rango $[1,N]$).}
+
+\begin{lstlisting}[style=cpp]
+struct PhiRangeSum {
+    vector<long long> phi, pref;
+    int n;
+
+    // CREATE: calcula phi[1..n] con criba lineal y sus prefijos.
+    // phi[i] = cantidad de enteros en [1, i] coprimos con i.
+    PhiRangeSum(int n) : n(n) {
+        phi.assign(n + 1, 0);
+        pref.assign(n + 1, 0);
+
+        vector<int> primos;
+        vector<bool> compuesto(n + 1, false);
+        phi[1] = 1;
+
+        for (int i = 2; i <= n; i++) {
+            if (!compuesto[i]) {
+                primos.push_back(i);
+                phi[i] = i - 1;
+            }
+
+            for (int p : primos) {
+                if ((long long)i * p > n) break;
+
+                compuesto[i * p] = true;
+
+                if (i % p == 0) {
+                    phi[i * p] = phi[i] * p;
+                    break;
+                } else {
+                    phi[i * p] = phi[i] * (p - 1);
+                }
+            }
+        }
+
+        for (int i = 1; i <= n; i++)
+            pref[i] = pref[i - 1] + phi[i];
+    }                                          // O(n)
+
+    // READ: suma de phi(i) para i en [l, r].
+    long long rango(int l, int r) {
+        if (l > r) return 0;
+        return pref[r] - pref[l - 1];
+    }                                          // O(1)
+
+    // READ: valor individual de phi(i).
+    long long get(int i) {
+        return phi[i];
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+PhiRangeSum pr(10);
+// phi(1..10) = [1, 1, 2, 2, 4, 2, 6, 4, 6, 4]
+
+cout << pr.get(7);
+// phi(7) = 6  (7 es primo)
+
+cout << pr.rango(1, 10);
+// 1+1+2+2+4+2+6+4+6+4 = 32
+
+cout << pr.rango(4, 8);
+// 2+4+2+6+4 = 18
+\end{lstlisting}
+
+\paragraph{Criba segmentada (rango $[L,R]$ grande).}
+
+Si $R$ es muy grande ($10^{12}$) pero $R-L$ es manejable, no puedes
+cribar desde 1. En vez de eso, precalculas los primos hasta
+$\sqrt R$, y para cada número del segmento $[L,R]$ le quitas sus
+factores primos pequeños, aplicando $\phi(n) = n\prod_{p\mid
+n}(1-\tfrac1p)$. Si al final queda un residuo $>1$, es un único
+primo grande (mayor a $\sqrt R$) que también se aplica a la fórmula.
+
+\begin{lstlisting}[style=cpp]
+struct PhiSegmentedRangeSum {
+    vector<long long> phi, pref;
+    long long L, R;
+
+    // CREATE: calcula phi(i) para cada i en [L, R] factorizando con
+    // los primos hasta sqrt(R), y sus prefijos sobre el segmento.
+    PhiSegmentedRangeSum(long long L, long long R) : L(L), R(R) {
+        int lim = (int)sqrt((double)R) + 1;
+
+        vector<int> primos;
+        vector<bool> compuesto(lim + 1, false);
+        for (int i = 2; i <= lim; i++) {
+            if (!compuesto[i]) primos.push_back(i);
+            for (int p : primos) {
+                if ((long long)i * p > lim) break;
+                compuesto[i * p] = true;
+                if (i % p == 0) break;
+            }
+        }                                      // O(sqrt(R) log log sqrt(R))
+
+        int sz = R - L + 1;
+        vector<long long> num(sz);
+        phi.assign(sz, 0);
+
+        for (int i = 0; i < sz; i++) {
+            num[i] = L + i;
+            phi[i] = L + i;
+        }
+
+        for (int p : primos) {
+            long long start = ((L + p - 1) / p) * p;
+
+            for (long long j = start; j <= R; j += p) {
+                int idx = j - L;
+                phi[idx] -= phi[idx] / p;
+
+                while (num[idx] % p == 0)
+                    num[idx] /= p;
+            }
+        }
+
+        // lo que quede > 1 es un primo grande (> sqrt(R)).
+        for (int i = 0; i < sz; i++)
+            if (num[i] > 1)
+                phi[i] -= phi[i] / num[i];
+
+        pref.assign(sz + 1, 0);
+        for (int i = 0; i < sz; i++)
+            pref[i + 1] = pref[i] + phi[i];
+    }                                          // O((R-L+1) log log R + sqrt(R))
+
+    // READ: suma de phi(i) para i en [l, r], con L <= l <= r <= R.
+    long long rango(long long l, long long r) {
+        return pref[r - L + 1] - pref[l - L];
+    }                                          // O(1)
+
+    // READ: valor individual de phi(i), con L <= i <= R.
+    long long get(long long i) {
+        return phi[i - L];
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+PhiSegmentedRangeSum ps(95, 105);
+// calcula phi(95), phi(96), ..., phi(105)
+// sin cribar desde 1
+
+cout << ps.get(100);
+// phi(100) = 40
+
+cout << ps.rango(95, 105);
+// suma de phi(95) a phi(105)
+
+cout << ps.rango(100, 102);
+// phi(100) + phi(101) + phi(102)
+\end{lstlisting}
+
+\textbf{Cuál variante usar:}
+
+\begin{table}[H]
+\centering
+\tiny
+\setlength{\tabcolsep}{1.5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|p{0.32\columnwidth}|p{0.30\columnwidth}|p{0.27\columnwidth}|}
+\hline
+\textbf{Situación} & \textbf{Estructura} & \textbf{Complejidad} \\
+\hline
+$[1,N]$, $N$ chico/mediano
+& \texttt{PhiRangeSum}
+& $O(N)$ \\
+\hline
+$[L,R]$ grande, $R-L$ chico
+& \texttt{PhiSegmentedRangeSum}
+& $O((R{-}L)\log\log R+\sqrt{R})$ \\
+\hline
+$\phi$ cambia entre queries
+& Fenwick sobre $\phi$
+& $O(\log N)$ \\
+\hline
+\end{tabular}
+\caption{Variantes para la suma de $\phi$.}
+\label{tab:phi_variants}
+\end{table}
+
+\textbf{Regla práctica:} el cálculo de $\phi$ en sí (la criba, lineal
+o segmentada) es teoría de números y no cambia según la query. Una vez
+que tienes el arreglo de $\phi$ listo, trátalo como \emph{cualquier
+otro arreglo estático}: Prefix Sums resuelve el resto. No hace falta
+una estructura especial para $\phi$ más allá de construir bien el
+arreglo inicial.
+
+
+
+\subsection{Árbol de Fenwick (BIT)}
+
+\textbf{Idea:} un arreglo normal da suma de prefijo en $O(1)$ pero
+actualizar un elemento cuesta $O(n)$ (o al revés si guardas prefijos).
+El Fenwick equilibra ambas a $O(\log n)$ guardando \emph{sumas
+parciales inteligentes}: la posición $i$ almacena la suma de un bloque
+de tamaño $i\,\&\,(-i)$ (su bit menos significativo) que termina en
+$i$. Para consultar un prefijo saltas hacia atrás quitando el bit bajo
+($i\mathrel{-}=i\,\&\,(-i)$); para actualizar subes sumándolo
+($i\mathrel{+}=i\,\&\,(-i)$). Cada camino toca a lo más $\log n$
+posiciones (un bit por paso). Es 1-indexado.
+
+\textbf{¿Por qué usarlo?} Es mucho más simple y liviano que un Segment
+Tree cuando solo necesitas sumas (o cualquier operación invertible)
+de prefijo/rango con actualizaciones puntuales. Menos memoria, menos
+código y una constante más pequeña.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Suma de prefijo / suma de rango con updates frecuentes.
+    \item Conteo de inversiones en un arreglo.
+    \item Frecuencias acumuladas y búsqueda del $k$-ésimo elemento.
+    \item Range update + range query cuando no hace falta un Segment
+    Tree con Lazy Propagation.
+    \item Consultas 2D: conteo/suma de puntos dentro de un rectángulo.
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$, update puntual $O(\log n)$,
+query de prefijo/rango $O(\log n)$, range update + range query
+$O(\log n)$ y versión 2D $O(\log n \cdot \log m)$.
+
+
+\subsubsection{BIT clásico (Point Update, Range Query)}
+
+\begin{lstlisting}[style=cpp]
+struct FenwickTree {
+    vector<long long> t;
+    int n;
+
+    // CREATE: reserva un arbol de tamano n (1-indexado).
+    FenwickTree(int n) : t(n + 1, 0), n(n) {}
+
+    // CREATE: construye el arbol a partir de un arreglo a[0..n-1]
+    // propagando cada valor a su "padre" una sola vez, en vez de
+    // hacer n updates (que serian O(n log n)).
+    void build(vector<long long>& a) {
+        for (int i = 1; i <= n; i++) {
+            t[i] += a[i - 1];
+
+            int j = i + (i & (-i));
+
+            if (j <= n)
+                t[j] += t[i];
+        }
+    }                                      // O(n)
+
+    // UPDATE: suma v al elemento en la posicion i.
+    void update(int i, long long v) {
+        for (; i <= n; i += i & (-i))
+            t[i] += v;
+    }                                      // O(log n)
+
+    // UPDATE: fija el valor absoluto de la posicion i en x.
+    void set(int i, long long x) {
+        update(i, x - get(i));
+    }                                      // O(log n)
+
+    // READ: suma de prefijo [1..i].
+    long long query(int i) {
+        long long s = 0;
+
+        for (; i > 0; i -= i & (-i))
+            s += t[i];
+
+        return s;
+    }                                      // O(log n)
+
+    // READ: suma del rango [l, r].
+    long long rango(int l, int r) {
+        if (l > r)
+            return 0;
+
+        return query(r) - query(l - 1);
+    }                                      // O(log n)
+
+    // READ: valor puntual en la posicion i.
+    long long get(int i) {
+        return rango(i, i);
+    }                                      // O(log n)
+
+    // SEARCH: menor indice i tal que query(i) >= objetivo.
+    // Usa binary lifting sobre el arbol.
+    // Requiere que todos los valores sean >= 0.
+    int lowerBound(long long objetivo) {
+        int pos = 0;
+        long long ac = 0;
+
+        int LOG = 0;
+
+        while ((1 << LOG) <= n)
+            LOG++;
+
+        for (int k = LOG - 1; k >= 0; k--) {
+            int nx = pos + (1 << k);
+
+            if (nx <= n && ac + t[nx] < objetivo) {
+                pos = nx;
+                ac += t[nx];
+            }
+        }
+
+        return pos + 1;
+    }                                      // O(log n)
+
+    // DELETE: reinicia el arbol a ceros.
+    void clear() {
+        fill(t.begin(), t.end(), 0);
+    }                                      // O(n)
+};
+\end{lstlisting}
+
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7};
+
+FenwickTree bit(5);
+bit.build(a);
+
+// arreglo logico:
+// [5, 2, 9, 1, 7]
+// posiciones 1..5
+
+cout << bit.query(3);
+// 5 + 2 + 9 = 16
+
+cout << bit.rango(2, 4);
+// 2 + 9 + 1 = 12
+
+bit.update(2, 3);
+
+// arreglo logico:
+// [5, 5, 9, 1, 7]
+
+cout << bit.get(2);
+// 5
+
+bit.set(4, 10);
+
+// arreglo logico:
+// [5, 5, 9, 10, 7]
+
+cout << bit.lowerBound(15);
+// menor indice cuyo prefijo alcanza 15
+// -> indice 3 (5 + 5 + 9 = 19 >= 15)
+\end{lstlisting}
+
+
+\subsubsection{BIT con Range Update + Range Query (Doble BIT)}
+
+\textbf{Idea:} con \emph{dos} Fenwick y el truco de diferencias se
+puede sumar $v$ a todo un rango $[l,r]$ en $O(\log n)$ y también
+consultar la suma de cualquier rango en $O(\log n)$. Esto permite
+resolver simultáneamente actualizaciones y consultas de rango.
+
+\begin{lstlisting}[style=cpp]
+struct FenwickRangeUpdate {
+    FenwickTree b1, b2;
+    int n;
+
+    // CREATE: reserva dos arboles auxiliares de tamano n.
+    FenwickRangeUpdate(int n) : b1(n), b2(n), n(n) {}
+
+    // UPDATE: suma v a todos los elementos del rango [l, r].
+    void rangoUpdate(int l, int r, long long v) {
+        b1.update(l, v);
+        b1.update(r + 1, -v);
+
+        b2.update(l, v * (l - 1));
+        b2.update(r + 1, -v * r);
+    }                                      // O(log n)
+
+    // READ: suma de prefijo [1..i].
+    long long prefijo(int i) {
+        return b1.query(i) * i - b2.query(i);
+    }                                      // O(log n)
+
+    // READ: suma del rango [l, r].
+    long long rango(int l, int r) {
+        if (l > r)
+            return 0;
+
+        return prefijo(r) - prefijo(l - 1);
+    }                                      // O(log n)
+
+    // READ: valor puntual en la posicion i.
+    long long get(int i) {
+        return rango(i, i);
+    }                                      // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+FenwickRangeUpdate f(5);
+// arreglo logico inicial: [0, 0, 0, 0, 0]
+
+f.rangoUpdate(2, 4, 3);
+// arreglo logico: [0, 3, 3, 3, 0]
+
+cout << f.rango(1, 5);
+// 0+3+3+3+0 = 9
+
+f.rangoUpdate(1, 3, 2);
+// arreglo logico: [2, 5, 5, 3, 0]
+
+cout << f.get(2);
+// 5
+\end{lstlisting}
+
+\subsubsection{BIT 2D (point update, sum de submatriz)}
+
+\textbf{Idea:} un BIT dentro de otro BIT. Cada update/query en $x$
+dispara un update/query completo en $y$, dando $O(\log n \cdot
+\log m)$ en vez de $O(nm)$ por consulta.
+
+\begin{lstlisting}[style=cpp]
+struct Fenwick2D {
+    vector<vector<long long>> t;
+    int n, m;
+
+    // CREATE: reserva una matriz de arboles de tamano n x m.
+    Fenwick2D(int n, int m) : t(n + 1, vector<long long>(m + 1, 0)),
+                               n(n), m(m) {}
+
+    // UPDATE: suma v a la celda (x, y).
+    void update(int x, int y, long long v) {
+        for (int i = x; i <= n; i += i & (-i))
+            for (int j = y; j <= m; j += j & (-j))
+                t[i][j] += v;
+    }                                          // O(log n * log m)
+
+    // READ: suma de la submatriz [1..x] x [1..y].
+    long long query(int x, int y) {
+        long long s = 0;
+        for (int i = x; i > 0; i -= i & (-i))
+            for (int j = y; j > 0; j -= j & (-j))
+                s += t[i][j];
+        return s;
+    }                                          // O(log n * log m)
+
+    // READ: suma del rectangulo [x1..x2] x [y1..y2].
+    long long rango(int x1, int y1, int x2, int y2) {
+        return query(x2, y2) - query(x1 - 1, y2)
+             - query(x2, y1 - 1) + query(x1 - 1, y1 - 1);
+    }                                          // O(log n * log m)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+Fenwick2D f(4, 4);
+
+f.update(1, 1, 5);
+f.update(2, 3, 7);
+f.update(4, 4, 2);
+
+cout << f.rango(1, 1, 2, 3);
+// 5 + 7 = 12
+
+cout << f.rango(3, 3, 4, 4);
+// 2
+\end{lstlisting}
+
+\textbf{Diferencia con un arreglo de prefijos simple:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Estructura} & \textbf{Construir} & \textbf{Query} & \textbf{Update} \\
+\hline
+Prefijos simples & $O(n)$ & $O(1)$ & $O(n)$ \\
+\hline
+\texttt{FenwickTree} & $O(n)$ & $O(\log n)$ & $O(\log n)$ \\
+\hline
+\texttt{FenwickRangeUpdate} & $O(n)$ & $O(\log n)$ & $O(\log n)$* \\
+\hline
+\texttt{Fenwick2D} & $O(nm)$ & $O(\log n\log m)$ & $O(\log n\log m)$ \\
+\hline
+\end{tabular}
+\caption{Comparación de complejidades: Fenwick vs. prefijos simples.}
+\end{table}
+
+\noindent
+*Range update + range query, con la variante de doble BIT.
+
+\textbf{Regla práctica:} si el arreglo cambia con frecuencia y solo
+necesitas sumas (o cualquier operación invertible) de prefijo o rango,
+el Fenwick da el mejor balance entre simplicidad de código y
+velocidad. Si necesitas min/max, operaciones no invertibles, o updates
+de rango con lazy propagation general, usa Segment Tree en su lugar.
+
+
+
+
+\subsection{Sqrt Decomposition}
+
+\textbf{Idea:} divide el arreglo en bloques de tamaño
+$\approx\sqrt n$ y guarda un resumen (suma, mínimo, etc.) por bloque.
+Un update toca solo un bloque; una query de rango toca a lo más dos
+bloques \emph{parciales} (recorridos elemento por elemento) y varios
+bloques \emph{completos} en el medio (usados de golpe con su resumen
+precalculado). Como hay $\approx\sqrt n$ bloques y cada bloque tiene
+$\approx\sqrt n$ elementos, todo cuesta $O(\sqrt n)$: ni tan lento
+como un arreglo plano, ni tan rápido como Fenwick/Segment Tree, pero
+mucho más simple de escribir y de adaptar a operaciones raras.
+
+\textbf{¿Por qué usarlo?} Es la estructura más flexible cuando no
+tienes tiempo de pensar un Segment Tree con lazy propagation
+correcto: soporta casi cualquier operación (suma, min, max, contar
+algo con una condición) con el mismo esqueleto de código, aunque sea
+$O(\sqrt n)$ en vez de $O(\log n)$. También es la base conceptual de
+Mo's Algorithm.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Necesitas implementar algo rápido bajo presión, sin
+    memorizar casos de Segment Tree con lazy propagation.
+    \item Operaciones donde min/max cambian de forma que Fenwick no
+    puede manejar (Fenwick solo sirve para operaciones invertibles
+    como la suma).
+    \item $n$ no es tan grande ($\le 10^5$–$10^6$) y $O(\sqrt n)$ por
+    operación es suficiente para el límite de tiempo.
+    \item Base para Mo's Algorithm (ver esa sección).
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$, update puntual $O(1)$ (suma)
+u $O(\sqrt n)$ (min/max), query de rango $O(\sqrt n)$, range update +
+range query $O(\sqrt n)$ con lazy por bloque.
+
+
+\subsubsection{Sqrt Decomposition clásico (point update, range query — suma)}
+
+\begin{lstlisting}[style=cpp]
+struct SqrtDecomposition {
+    vector<long long> a, bloque;
+    int n, tam;
+
+    // CREATE: construye el arreglo en bloques de tamano ~sqrt(n).
+    SqrtDecomposition(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tam = max(1, (int)sqrt((double)n));
+
+        bloque.assign((n + tam - 1) / tam, 0);
+
+        for (int i = 0; i < n; i++)
+            bloque[i / tam] += a[i];
+    }                                          // O(n)
+
+    // UPDATE: suma v al elemento en la posicion i.
+    void update(int i, long long v) {
+        a[i] += v;
+        bloque[i / tam] += v;
+    }                                          // O(1)
+
+    // READ: suma del rango [l, r] (0-indexado, inclusivo).
+    long long rango(int l, int r) {
+        long long s = 0;
+        int bl = l / tam, br = r / tam;
+
+        if (bl == br) {
+            for (int i = l; i <= r; i++)
+                s += a[i];
+            return s;
+        }
+
+        for (int i = l; i < (bl + 1) * tam; i++)
+            s += a[i];
+
+        for (int b = bl + 1; b < br; b++)
+            s += bloque[b];
+
+        for (int i = br * tam; i <= r; i++)
+            s += a[i];
+
+        return s;
+    }                                          // O(sqrt(n))
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7, 3, 8, 4};
+
+SqrtDecomposition sd(a);
+// arreglo logico: [5, 2, 9, 1, 7, 3, 8, 4]  (posiciones 0..7)
+// tam = 2 -> bloques: [5+2, 9+1, 7+3, 8+4] = [7, 10, 10, 12]
+
+cout << sd.rango(1, 5);
+// 2 + 9 + 1 + 7 + 3 = 22
+
+sd.update(3, 10);
+// arreglo logico: [5, 2, 9, 11, 7, 3, 8, 4]
+
+cout << sd.rango(1, 5);
+// 2 + 9 + 11 + 7 + 3 = 32
+\end{lstlisting}
+
+
+\subsubsection{Sqrt Decomposition con range update + range query (lazy por bloque)}
+
+\textbf{Idea:} igual que arriba, pero cada bloque guarda un valor
+\texttt{lazy} pendiente que representa ``sumar $v$ a todo el bloque''
+sin tocar cada elemento individualmente. Solo se aplica a los
+elementos reales cuando un update o query \textbf{parcial} necesita
+tocar ese bloque específico.
+
+\begin{lstlisting}[style=cpp]
+struct SqrtRangeUpdate {
+    vector<long long> a, bloqueSum, lazy;
+    int n, tam;
+
+    // CREATE: construye el arreglo en bloques de tamano ~sqrt(n).
+    SqrtRangeUpdate(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tam = max(1, (int)sqrt((double)n));
+
+        int nb = (n + tam - 1) / tam;
+        bloqueSum.assign(nb, 0);
+        lazy.assign(nb, 0);
+
+        for (int i = 0; i < n; i++)
+            bloqueSum[i / tam] += a[i];
+    }                                          // O(n)
+
+    // READ auxiliar: cantidad de elementos reales del bloque b.
+    int tamBloque(int b) {
+        return min(n, (b + 1) * tam) - b * tam;
+    }                                          // O(1)
+
+    // UPDATE: suma v a todo el rango [l, r].
+    void rangoUpdate(int l, int r, long long v) {
+        int bl = l / tam, br = r / tam;
+
+        if (bl == br) {
+            for (int i = l; i <= r; i++)
+                a[i] += v;
+            bloqueSum[bl] += v * (r - l + 1);
+            return;
+        }
+
+        for (int i = l; i < (bl + 1) * tam; i++)
+            a[i] += v;
+        bloqueSum[bl] += v * ((bl + 1) * tam - l);
+
+        for (int b = bl + 1; b < br; b++)
+            lazy[b] += v;
+
+        for (int i = br * tam; i <= r; i++)
+            a[i] += v;
+        bloqueSum[br] += v * (r - br * tam + 1);
+    }                                          // O(sqrt(n))
+
+    // READ: suma del rango [l, r].
+    long long rango(int l, int r) {
+        long long s = 0;
+        int bl = l / tam, br = r / tam;
+
+        if (bl == br) {
+            for (int i = l; i <= r; i++)
+                s += a[i] + lazy[bl];
+            return s;
+        }
+
+        for (int i = l; i < (bl + 1) * tam; i++)
+            s += a[i] + lazy[bl];
+
+        for (int b = bl + 1; b < br; b++)
+            s += bloqueSum[b] + lazy[b] * tamBloque(b);
+
+        for (int i = br * tam; i <= r; i++)
+            s += a[i] + lazy[br];
+
+        return s;
+    }                                          // O(sqrt(n))
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {1, 1, 1, 1, 1, 1};
+
+SqrtRangeUpdate sr(a);
+// tam = 2 -> bloques: [1+1, 1+1, 1+1] = [2, 2, 2]
+
+sr.rangoUpdate(1, 4, 10);
+// arreglo logico "efectivo": [1, 11, 11, 11, 11, 1]
+
+cout << sr.rango(0, 5);
+// 1+11+11+11+11+1 = 46
+
+cout << sr.rango(2, 3);
+// 11+11 = 22
+\end{lstlisting}
+
+
+\subsubsection{Variante para mínimo / máximo (point update, range query)}
+
+\textbf{Idea:} a diferencia de Fenwick (que solo sirve para
+operaciones \emph{invertibles} como la suma), Sqrt Decomposition
+soporta min/max con el mismo esqueleto: la única diferencia es que un
+update ya no puede ajustar el resumen del bloque en $O(1)$, porque
+quitar el valor viejo no dice si sigue habiendo otro elemento igual
+de chico. Hay que \textbf{reconstruir el mínimo de todo el bloque},
+lo cual sigue siendo $O(\sqrt n)$.
+
+\begin{lstlisting}[style=cpp]
+struct SqrtMinQuery {
+    vector<long long> a, bloqueMin;
+    int n, tam;
+
+    // CREATE: construye el arreglo en bloques de tamano ~sqrt(n).
+    SqrtMinQuery(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tam = max(1, (int)sqrt((double)n));
+
+        bloqueMin.assign((n + tam - 1) / tam, LLONG_MAX);
+
+        for (int i = 0; i < n; i++)
+            bloqueMin[i / tam] = min(bloqueMin[i / tam], a[i]);
+    }                                          // O(n)
+
+    // UPDATE: fija el valor absoluto de la posicion i en x.
+    // Reconstruye el minimo de todo el bloque, ya que a diferencia
+    // de la suma, el minimo no se puede ajustar incrementalmente.
+    void set(int i, long long x) {
+        a[i] = x;
+
+        int b = i / tam;
+        long long mn = LLONG_MAX;
+
+        for (int j = b * tam; j < min(n, (b + 1) * tam); j++)
+            mn = min(mn, a[j]);
+
+        bloqueMin[b] = mn;
+    }                                          // O(sqrt(n))
+
+    // READ: minimo del rango [l, r].
+    long long rango(int l, int r) {
+        long long mn = LLONG_MAX;
+        int bl = l / tam, br = r / tam;
+
+        if (bl == br) {
+            for (int i = l; i <= r; i++)
+                mn = min(mn, a[i]);
+            return mn;
+        }
+
+        for (int i = l; i < (bl + 1) * tam; i++)
+            mn = min(mn, a[i]);
+
+        for (int b = bl + 1; b < br; b++)
+            mn = min(mn, bloqueMin[b]);
+
+        for (int i = br * tam; i <= r; i++)
+            mn = min(mn, a[i]);
+
+        return mn;
+    }                                          // O(sqrt(n))
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7, 3, 8, 4};
+
+SqrtMinQuery sm(a);
+// tam = 2 -> bloques min: [2, 1, 3, 4]
+
+cout << sm.rango(0, 4);
+// min(5,2,9,1,7) = 1
+
+sm.set(3, 100);
+// arreglo logico: [5, 2, 9, 100, 7, 3, 8, 4]
+
+cout << sm.rango(0, 4);
+// min(5,2,9,100,7) = 2
+\end{lstlisting}
+
+\textbf{Comparación con Fenwick y Segment Tree:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Estructura} & \textbf{Update} & \textbf{Query} & \textbf{Min/Max?} \\
+\hline
+Sqrt Decomposition & $O(1)$–$O(\sqrt n)$ & $O(\sqrt n)$ & Sí \\
+\hline
+\texttt{FenwickTree} & $O(\log n)$ & $O(\log n)$ & No \\
+\hline
+Segment Tree & $O(\log n)$ & $O(\log n)$ & Sí \\
+\hline
+\end{tabular}
+\caption{Sqrt Decomposition vs. Fenwick vs. Segment Tree.}
+\end{table}
+
+\textbf{Regla práctica:} usa Sqrt Decomposition cuando quieras algo
+simple y flexible de escribir rápido, sobre todo si la operación no
+es una suma (Fenwick no sirve) y no quieres arriesgarte con un
+Segment Tree + Lazy Propagation bajo presión de tiempo. Si $n$ es muy
+grande o el límite de tiempo es ajustado, $O(\log n)$ de Segment Tree
+gana; si la operación es solo suma, Fenwick es más simple y más
+rápido.
+
+
+\subsection{Sparse Table (RMQ)}
+
+\textbf{Idea:} responde consultas de rango en $O(1)$ sobre un arreglo
+que \textbf{no cambia}, precalculando \texttt{sp[k][i]} $=$ el
+resultado de combinar el bloque que empieza en $i$ y tiene largo
+$2^k$. La clave está en la consulta: para el rango $[l,r]$ tomas
+$k=\lfloor\log_2(r-l+1)\rfloor$ y lo cubres con \emph{dos} bloques de
+largo $2^k$ —uno pegado a $l$ y otro pegado a $r$— que
+\textbf{se solapan}. Si la operación es \emph{idempotente}
+($f(x,x)=x$, como min, max o gcd), contar el solape dos veces no
+cambia el resultado, así que la consulta son solo dos lecturas y una
+combinación. Para operaciones \textbf{no idempotentes} (como suma o
+xor) hace falta la variante \emph{Disjoint Sparse Table}, que evita el
+solape por construcción.
+
+\textbf{¿Por qué usarlo?} Es la estructura más rápida posible para
+consultas de rango ($O(1)$ por query) cuando el arreglo es estático.
+A cambio de esa velocidad, no soporta actualizaciones: reconstruir
+cuesta $O(n\log n)$, así que si el arreglo cambia, conviene un
+Segment Tree.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item RMQ clásico: mínimo o máximo de cualquier rango, arreglo
+    estático.
+    \item gcd o AND/OR de rango sobre un arreglo estático.
+    \item LCA vía Euler Tour + RMQ $\pm1$.
+    \item Suma, xor o cualquier operación no idempotente de rango
+    estático, en $O(1)$, usando Disjoint Sparse Table.
+    \item Cualquier problema con muchísimas queries offline sobre datos
+    que nunca se modifican.
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n\log n)$, consulta $O(1)$. (Si el
+arreglo \emph{cambia}, usa Segment Tree: $O(\log n)$ por operación.)
+
+
+\subsubsection{Sparse Table clásico (operaciones idempotentes: min, max, gcd)}
+
+\begin{lstlisting}[style=cpp]
+struct SparseTable {
+    vector<vector<long long>> sp;
+    vector<int> lg;
+    int n;
+
+    // CREATE: precalcula la tabla a partir de un arreglo a[0..n-1].
+    // sp[k][i] = minimo del bloque [i, i + 2^k - 1].
+    SparseTable(vector<long long>& a) {
+        n = a.size();
+
+        lg.assign(n + 1, 0);
+        for (int i = 2; i <= n; i++)
+            lg[i] = lg[i / 2] + 1;
+
+        int K = lg[n] + 1;
+        sp.assign(K, vector<long long>(n));
+        sp[0] = a;
+
+        for (int k = 1; k < K; k++)
+            for (int i = 0; i + (1 << k) <= n; i++)
+                sp[k][i] = min(sp[k - 1][i],
+                                sp[k - 1][i + (1 << (k - 1))]);
+    }                                          // O(n log n)
+
+    // READ: minimo del rango [l, r] (0-indexado, inclusivo).
+    // Cubre [l, r] con dos bloques de largo 2^k que se solapan;
+    // como min es idempotente, el solape no afecta el resultado.
+    long long query(int l, int r) {
+        int k = lg[r - l + 1];
+        return min(sp[k][l], sp[k][r - (1 << k) + 1]);
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7, 3};
+
+SparseTable st(a);
+// arreglo logico: [5, 2, 9, 1, 7, 3]  (posiciones 0..5)
+
+cout << st.query(0, 2);
+// min(5, 2, 9) = 2
+
+cout << st.query(2, 5);
+// min(9, 1, 7, 3) = 1
+
+cout << st.query(4, 4);
+// min(7) = 7
+\end{lstlisting}
+
+\textbf{Nota:} para \texttt{max} o \texttt{gcd} solo cambia
+\texttt{min(...)} por \texttt{max(...)} o \texttt{\_\_gcd(...)} en el
+constructor y en \texttt{query}. Si necesitas saber \emph{qué índice}
+alcanza el mínimo (no solo el valor), guarda índices en vez de
+valores y compara \texttt{a[sp[k][i]]} en lugar de \texttt{sp[k][i]}.
+
+
+\subsubsection{Disjoint Sparse Table (operaciones no idempotentes: suma, xor)}
+
+\textbf{Idea:} en vez de dos bloques que se solapan, cada nivel $k$
+particiona el arreglo en bloques de largo $2^{k+1}$ y precalcula, para
+cada bloque, un prefijo hacia la izquierda desde su punto medio y un
+prefijo hacia la derecha desde ese mismo punto medio. Toda consulta
+$[l,r]$ cae exactamente en un nivel donde $l$ y $r$ quedan en mitades
+distintas del mismo bloque (el nivel lo da el bit más alto donde
+difieren $l$ y $r$), así que se combina sin solapar y sirve para
+operaciones \textbf{no idempotentes} como la suma.
+
+\begin{lstlisting}[style=cpp]
+struct DisjointSparseTable {
+    vector<vector<long long>> pre;
+    vector<long long> a;
+    int n, LOG;
+
+    // CREATE: precalcula prefijos izquierda/derecha por nivel,
+    // partiendo el arreglo en bloques de tamano 2^(k+1).
+    DisjointSparseTable(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        LOG = 1;
+        while ((1 << LOG) < n) LOG++;
+        LOG++;
+
+        pre.assign(LOG, vector<long long>(n));
+
+        for (int k = 0; k < LOG; k++) {
+            int block = 1 << (k + 1);
+
+            for (int start = 0; start < n; start += block) {
+                int mid = min(start + block / 2, n);
+                int end = min(start + block, n);
+
+                if (mid > n) continue;
+
+                // prefijo hacia la izquierda desde mid-1
+                if (mid - 1 >= start) {
+                    pre[k][mid - 1] = a[mid - 1];
+                    for (int i = mid - 2; i >= start; i--)
+                        pre[k][i] = a[i] + pre[k][i + 1];
+                }
+
+                // prefijo hacia la derecha desde mid
+                if (mid < end) {
+                    pre[k][mid] = a[mid];
+                    for (int i = mid + 1; i < end; i++)
+                        pre[k][i] = pre[k][i - 1] + a[i];
+                }
+            }
+        }
+    }                                          // O(n log n)
+
+    // READ: suma del rango [l, r] (0-indexado, inclusivo).
+    // El nivel k lo da el bit mas alto donde l y r difieren:
+    // ahi es donde el bloque se parte en dos mitades disjuntas.
+    long long query(int l, int r) {
+        if (l == r) return a[l];
+
+        int k = 31 - __builtin_clz(l ^ r);
+        return pre[k][l] + pre[k][r];
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7, 3};
+
+DisjointSparseTable dst(a);
+// arreglo logico: [5, 2, 9, 1, 7, 3]  (posiciones 0..5)
+
+cout << dst.query(0, 2);
+// 5 + 2 + 9 = 16
+
+cout << dst.query(2, 5);
+// 9 + 1 + 7 + 3 = 20
+
+cout << dst.query(1, 1);
+// 2
+\end{lstlisting}
+
+\textbf{Diferencia entre las dos variantes:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Estructura} & \textbf{Construir} & \textbf{Query} & \textbf{Updates} \\
+\hline
+Sparse Table (min/max/gcd) & $O(n\log n)$ & $O(1)$ & No \\
+\hline
+Disjoint Sparse Table (suma/xor) & $O(n\log n)$ & $O(1)$ & No \\
+\hline
+Segment Tree & $O(n)$ & $O(\log n)$ & Sí, $O(\log n)$ \\
+\hline
+\end{tabular}
+\caption{Sparse Table vs. Disjoint Sparse Table vs. Segment Tree.}
+\end{table}
+
+\textbf{Regla práctica:} si el arreglo \textbf{no cambia}, usa Sparse
+Table para min/max/gcd, o Disjoint Sparse Table si necesitas suma,
+xor, o cualquier operación no idempotente. En cuanto el arreglo
+\textbf{cambia} —aunque sea una sola actualización— reconstruir en
+$O(n\log n)$ deja de valer la pena y conviene un Segment Tree.
+
+
+
+
+\subsection{Segment Tree}
+
+\textbf{Idea:} un árbol binario implícito (guardado en un arreglo)
+donde cada nodo representa el resultado combinado de un rango del
+arreglo original. La raíz cubre todo $[0,n-1]$; cada nodo se parte en
+dos mitades hasta llegar a las hojas, que son elementos individuales.
+Un update baja por el árbol tocando $O(\log n)$ nodos (uno por nivel);
+una query de rango se descompone en a lo más $O(\log n)$ nodos que
+cubren exactamente el rango pedido, sin necesidad de bloques
+parciales como en Sqrt Decomposition. A diferencia de Fenwick, sirve
+para \textbf{cualquier} operación asociativa (min, max, gcd, and, or,
+no solo sumas), y con Lazy Propagation soporta actualizaciones de
+rango completo.
+
+\textbf{¿Por qué usarlo?} Es la estructura más versátil de esta
+sección: $O(\log n)$ tanto para update como para query, funciona con
+casi cualquier operación asociativa, y con lazy propagation resuelve
+range update + range query para operaciones que Fenwick no puede
+(min, max, asignar un valor a todo un rango, etc.).
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Min/max/gcd de rango con actualizaciones (a diferencia de
+    Sparse Table, que exige arreglo estático).
+    \item Range update + range query con operaciones no invertibles:
+    asignar un valor a todo un rango, min/max con suma en rango, etc.
+    \item Cualquier operación asociativa que no sea una suma simple
+    (donde Fenwick ya alcanzaría y sería más simple).
+    \item Base para variantes más avanzadas: Segment Tree 2D, Merge
+    Sort Tree, Persistent Segment Tree, Segment Tree Beats.
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$, update puntual $O(\log n)$,
+query de rango $O(\log n)$, range update + range query con lazy
+propagation $O(\log n)$.
+
+
+\subsubsection{Segment Tree clásico (point update, range query — suma)}
+
+\begin{lstlisting}[style=cpp]
+struct SegmentTree {
+    vector<long long> tree, a;
+    int n;
+
+    // CREATE: reserva el arbol (tamano 4n es cota segura) y
+    // construye recursivamente a partir de a[0..n-1].
+    SegmentTree(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tree.assign(4 * n, 0);
+        if (n > 0)
+            build(1, 0, n - 1);
+    }                                          // O(n)
+
+    void build(int node, int l, int r) {
+        if (l == r) {
+            tree[node] = a[l];
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        build(2 * node, l, mid);
+        build(2 * node + 1, mid + 1, r);
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+
+    void updateUtil(int node, int l, int r, int i, long long x) {
+        if (l == r) {
+            tree[node] = x;
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        if (i <= mid)
+            updateUtil(2 * node, l, mid, i, x);
+        else
+            updateUtil(2 * node + 1, mid + 1, r, i, x);
+
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+
+    // UPDATE: fija el valor absoluto de la posicion i en x.
+    void update(int i, long long x) {
+        updateUtil(1, 0, n - 1, i, x);
+    }                                          // O(log n)
+
+    long long queryUtil(int node, int l, int r, int ql, int qr) {
+        if (qr < l || r < ql)
+            return 0;                          // neutro para suma
+
+        if (ql <= l && r <= qr)
+            return tree[node];
+
+        int mid = (l + r) / 2;
+        return queryUtil(2 * node, l, mid, ql, qr)
+             + queryUtil(2 * node + 1, mid + 1, r, ql, qr);
+    }
+
+    // READ: suma del rango [l, r] (0-indexado, inclusivo).
+    long long rango(int l, int r) {
+        return queryUtil(1, 0, n - 1, l, r);
+    }                                          // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7};
+
+SegmentTree st(a);
+// arreglo logico: [5, 2, 9, 1, 7]  (posiciones 0..4)
+
+cout << st.rango(1, 3);
+// 2 + 9 + 1 = 12
+
+st.update(2, 100);
+// arreglo logico: [5, 2, 100, 1, 7]
+
+cout << st.rango(1, 3);
+// 2 + 100 + 1 = 103
+\end{lstlisting}
+
+\textbf{Nota:} para min/max/gcd solo cambia el neutro del caso base
+(\texttt{LLONG\_MAX} para min, \texttt{0} para gcd, etc.) y el
+operador de combinación (\texttt{min(...)}, \texttt{\_\_gcd(...)}) en
+\texttt{build}, \texttt{updateUtil} y \texttt{queryUtil}.
+
+
+\subsubsection{Segment Tree con Lazy Propagation (range update + range query — suma)}
+
+\textbf{Idea:} cada nodo guarda un valor \texttt{lazy} pendiente que
+representa ``sumar $v$ a todo este rango'' sin aplicarlo todavía a
+los hijos. Se aplica (\emph{se propaga}) solo cuando hace falta bajar
+más en el árbol para otra operación.
+
+\begin{lstlisting}[style=cpp]
+struct SegmentTreeLazyAdd {
+    vector<long long> tree, lazy, a;
+    int n;
+
+    // CREATE: reserva arbol + lazy, construye a partir de a[0..n-1].
+    SegmentTreeLazyAdd(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tree.assign(4 * n, 0);
+        lazy.assign(4 * n, 0);
+        if (n > 0)
+            build(1, 0, n - 1);
+    }                                          // O(n)
+
+    void build(int node, int l, int r) {
+        if (l == r) {
+            tree[node] = a[l];
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        build(2 * node, l, mid);
+        build(2 * node + 1, mid + 1, r);
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+
+    // Aplica el lazy pendiente de este nodo y lo empuja a los hijos.
+    void propagar(int node, int l, int r) {
+        if (lazy[node] == 0)
+            return;
+
+        tree[node] += lazy[node] * (r - l + 1);
+
+        if (l != r) {
+            lazy[2 * node] += lazy[node];
+            lazy[2 * node + 1] += lazy[node];
+        }
+
+        lazy[node] = 0;
+    }
+
+    void rangoUpdateUtil(int node, int l, int r, int ql, int qr,
+                          long long v) {
+        propagar(node, l, r);
+
+        if (qr < l || r < ql)
+            return;
+
+        if (ql <= l && r <= qr) {
+            lazy[node] += v;
+            propagar(node, l, r);
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        rangoUpdateUtil(2 * node, l, mid, ql, qr, v);
+        rangoUpdateUtil(2 * node + 1, mid + 1, r, ql, qr, v);
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+
+    // UPDATE: suma v a todo el rango [l, r].
+    void rangoUpdate(int l, int r, long long v) {
+        rangoUpdateUtil(1, 0, n - 1, l, r, v);
+    }                                          // O(log n)
+
+    long long queryUtil(int node, int l, int r, int ql, int qr) {
+        propagar(node, l, r);
+
+        if (qr < l || r < ql)
+            return 0;
+
+        if (ql <= l && r <= qr)
+            return tree[node];
+
+        int mid = (l + r) / 2;
+        return queryUtil(2 * node, l, mid, ql, qr)
+             + queryUtil(2 * node + 1, mid + 1, r, ql, qr);
+    }
+
+    // READ: suma del rango [l, r].
+    long long rango(int l, int r) {
+        return queryUtil(1, 0, n - 1, l, r);
+    }                                          // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {1, 1, 1, 1, 1, 1};
+
+SegmentTreeLazyAdd st(a);
+
+st.rangoUpdate(1, 4, 10);
+// arreglo logico efectivo: [1, 11, 11, 11, 11, 1]
+
+cout << st.rango(0, 5);
+// 1+11+11+11+11+1 = 46
+
+cout << st.rango(2, 3);
+// 11+11 = 22
+\end{lstlisting}
+
+
+\subsubsection{Lazy Propagation con asignación (range assign + range query — mínimo)}
+
+\textbf{Idea:} en vez de \emph{sumar} un valor al rango, lo
+\textbf{reemplaza} por completo (\texttt{asigna x a todo
+$[l,r]$}). El lazy aquí no se acumula como en la suma: el último
+assign pisa a cualquier assign anterior pendiente, así que se necesita
+una bandera aparte para distinguir ``no hay lazy pendiente'' de
+``hay que asignar 0''.
+
+\begin{lstlisting}[style=cpp]
+struct SegmentTreeAssignMin {
+    vector<long long> tree, lazy, a;
+    vector<bool> tieneLazy;
+    int n;
+
+    // CREATE: reserva arbol + lazy + banderas, construye desde a.
+    SegmentTreeAssignMin(vector<long long>& arr) {
+        a = arr;
+        n = a.size();
+        tree.assign(4 * n, LLONG_MAX);
+        lazy.assign(4 * n, 0);
+        tieneLazy.assign(4 * n, false);
+        if (n > 0)
+            build(1, 0, n - 1);
+    }                                          // O(n)
+
+    void build(int node, int l, int r) {
+        if (l == r) {
+            tree[node] = a[l];
+            return;
+        }
+
+        int mid = (l + r) / 2;
+        build(2 * node, l, mid);
+        build(2 * node + 1, mid + 1, r);
+        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
+    }
+
+    // Empuja el assign pendiente de este nodo hacia sus hijos.
+    void propagar(int node) {
+        if (!tieneLazy[node])
+            return;
+
+        for (int hijo : {2 * node, 2 * node + 1}) {
+            tree[hijo] = lazy[node];
+            lazy[hijo] = lazy[node];
+            tieneLazy[hijo] = true;
+        }
+
+        tieneLazy[node] = false;
+    }
+
+    void rangoAssignUtil(int node, int l, int r, int ql, int qr,
+                          long long x) {
+        if (qr < l || r < ql)
+            return;
+
+        if (ql <= l && r <= qr) {
+            tree[node] = x;
+            lazy[node] = x;
+            tieneLazy[node] = true;
+            return;
+        }
+
+        propagar(node);
+        int mid = (l + r) / 2;
+        rangoAssignUtil(2 * node, l, mid, ql, qr, x);
+        rangoAssignUtil(2 * node + 1, mid + 1, r, ql, qr, x);
+        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
+    }
+
+    // UPDATE: asigna x a todo el rango [l, r].
+    void rangoAssign(int l, int r, long long x) {
+        rangoAssignUtil(1, 0, n - 1, l, r, x);
+    }                                          // O(log n)
+
+    long long queryUtil(int node, int l, int r, int ql, int qr) {
+        if (qr < l || r < ql)
+            return LLONG_MAX;
+
+        if (ql <= l && r <= qr)
+            return tree[node];
+
+        propagar(node);
+        int mid = (l + r) / 2;
+        return min(queryUtil(2 * node, l, mid, ql, qr),
+                    queryUtil(2 * node + 1, mid + 1, r, ql, qr));
+    }
+
+    // READ: minimo del rango [l, r].
+    long long rango(int l, int r) {
+        return queryUtil(1, 0, n - 1, l, r);
+    }                                          // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<long long> a = {5, 2, 9, 1, 7, 3};
+
+SegmentTreeAssignMin st(a);
+
+cout << st.rango(0, 5);
+// min(5,2,9,1,7,3) = 1
+
+st.rangoAssign(0, 2, 100);
+// arreglo logico efectivo: [100, 100, 100, 1, 7, 3]
+
+cout << st.rango(0, 2);
+// min(100,100,100) = 100
+
+cout << st.rango(0, 5);
+// min(100,100,100,1,7,3) = 1
+\end{lstlisting}
+
+\textbf{Comparación con las otras estructuras de rango:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Estructura} & \textbf{Update} & \textbf{Query} & \textbf{Min/Max?} \\
+\hline
+Segment Tree & $O(\log n)$ & $O(\log n)$ & Sí \\
+\hline
+Segment Tree + Lazy & $O(\log n)$ range & $O(\log n)$ range & Sí \\
+\hline
+\texttt{FenwickTree} & $O(\log n)$ punto & $O(\log n)$ rango & No \\
+\hline
+Sqrt Decomposition & $O(1)$–$O(\sqrt n)$ & $O(\sqrt n)$ & Sí \\
+\hline
+\end{tabular}
+\caption{Segment Tree vs. Fenwick vs. Sqrt Decomposition.}
+\end{table}
+
+\textbf{Regla práctica:} usa Segment Tree cuando necesites min/max/gcd
+(operaciones no invertibles que Fenwick no soporta), o cuando
+necesites range update + range query con una operación que no sea
+suma simple. Si la operación es solo suma y no necesitas range
+update, Fenwick es más simple y más rápido en la práctica (menor
+constante). Si no confías en escribir el lazy propagation correcto
+bajo presión, Sqrt Decomposition es una alternativa más simple a
+costa de $O(\sqrt n)$ en vez de $O(\log n)$.
+
+
+\subsection{RMQ (Range Minimum Query)}
+
+\textbf{Idea:} RMQ es el problema general de "dado un arreglo,
+encuentra el mínimo en cualquier rango $[l,r]$". Ya tienes las dos
+estructuras que lo resuelven: \textbf{Sparse Table} si el arreglo es
+estático ($O(1)$ por query) y \textbf{Segment Tree} si cambia
+($O(\log n)$ por query). Esta sección no repite esas estructuras,
+sino que muestra las dos aplicaciones clásicas donde un problema que
+\emph{no parece} de rango se puede \textbf{reformular} como RMQ sobre
+un arreglo auxiliar: LCA en árboles, y LCP entre sufijos arbitrarios
+de un string.
+
+\textbf{¿Por qué usarlo?} Reconocer cuándo un problema es "RMQ
+disfrazado" es lo que realmente separa resolver estos problemas en
+$O(1)$–$O(\log n)$ de resolverlos con fuerza bruta $O(n)$ por
+consulta. El patrón se repite: construyes un arreglo auxiliar donde
+la respuesta a tu pregunta real equivale al mínimo de un rango, y le
+aplicas Sparse Table o Segment Tree normal.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item LCA (ancestro común más bajo) de dos nodos en un árbol, con
+    muchas queries: Euler Tour + RMQ.
+    \item LCP (prefijo común más largo) entre dos sufijos
+    \emph{cualquiera} de un string (no necesariamente consecutivos en
+    el Suffix Array): Suffix Array + Kasai + RMQ sobre el LCP Array.
+    \item Cualquier problema donde la respuesta se pueda expresar como
+    "el mínimo de algo" sobre un rango de índices auxiliares.
+\end{itemize}
+
+\textbf{Complejidad:} en ambas aplicaciones, el precómputo (Euler
+Tour o Suffix Array + Kasai) es $O(n)$ a $O(n\log^2 n)$ según el
+método de Suffix Array usado; una vez armado el arreglo auxiliar, el
+RMQ es $O(n\log n)$ de build y $O(1)$ por query con Sparse Table
+(ambos casos son estáticos: el árbol y el string no cambian).
+
+
+\subsubsection{LCA vía Euler Tour + RMQ (Sparse Table)}
+
+\textbf{Idea:} recorres el árbol con un Euler Tour, anotando el nodo
+visitado cada vez que \textbf{entras o vuelves} a él (arreglo de
+tamaño $2n-1$) junto con su profundidad. El LCA de $u$ y $v$ es el
+nodo de \textbf{menor profundidad} que aparece entre la primera
+aparición de $u$ y la primera aparición de $v$ en ese recorrido —
+exactamente un RMQ (por profundidad) sobre el arreglo del Euler Tour.
+
+\begin{lstlisting}[style=cpp]
+struct LCA {
+    vector<int> euler, primeraApar, profundidad;
+    vector<vector<int>> sp;   // sp[k][i] = nodo con menor profundidad
+    vector<int> lg;
+
+    // CREATE: construye el Euler Tour del arbol (arr. de tamano
+    // 2n-1) y la Sparse Table sobre profundidad, para RMQ O(1).
+    LCA(vector<vector<int>>& adj, int raiz, int n) {
+        primeraApar.assign(n, -1);
+        profundidad.assign(n, 0);
+        euler.reserve(2 * n);
+
+        dfs(adj, raiz, -1, 0);
+        build();
+    }                                          // O(n log n)
+
+    void dfs(vector<vector<int>>& adj, int u, int p, int d) {
+        primeraApar[u] = euler.size();
+        profundidad[u] = d;
+        euler.push_back(u);
+
+        for (int v : adj[u]) {
+            if (v != p) {
+                dfs(adj, v, u, d + 1);
+                euler.push_back(u);
+            }
+        }
+    }
+
+    void build() {
+        int m = euler.size();
+        lg.assign(m + 1, 0);
+        for (int i = 2; i <= m; i++)
+            lg[i] = lg[i / 2] + 1;
+
+        int K = lg[m] + 1;
+        sp.assign(K, vector<int>(m));
+        sp[0] = euler;
+
+        for (int k = 1; k < K; k++)
+            for (int i = 0; i + (1 << k) <= m; i++) {
+                int l = sp[k - 1][i];
+                int r = sp[k - 1][i + (1 << (k - 1))];
+                sp[k][i] = profundidad[l] < profundidad[r] ? l : r;
+            }
+    }
+
+    // READ: LCA de u y v.
+    int query(int u, int v) {
+        int l = primeraApar[u], r = primeraApar[v];
+        if (l > r) swap(l, r);
+
+        int k = lg[r - l + 1];
+        int a = sp[k][l], b = sp[k][r - (1 << k) + 1];
+        return profundidad[a] < profundidad[b] ? a : b;
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+// arbol:      0
+//            / \
+//           1   2
+//          / \
+//         3   4
+
+vector<vector<int>> adj(5);
+adj[0] = {1, 2};
+adj[1] = {0, 3, 4};
+adj[2] = {0};
+adj[3] = {1};
+adj[4] = {1};
+
+LCA lca(adj, 0, 5);
+
+cout << lca.query(3, 4);
+// 1  (padre comun de 3 y 4)
+
+cout << lca.query(3, 2);
+// 0  (raiz)
+
+cout << lca.query(1, 4);
+// 1  (uno es ancestro del otro)
+\end{lstlisting}
+
+
+\subsubsection{LCP entre dos sufijos arbitrarios (Suffix Array + Kasai + RMQ)}
+
+\textbf{Idea:} el LCP Array (via Kasai) solo te da el LCP entre
+sufijos \textbf{consecutivos} en el Suffix Array. Para el LCP entre
+dos sufijos \textbf{cualquiera} $i,j$: los ubicas por su rango en el
+SA ($\texttt{rnk}[i]$, $\texttt{rnk}[j]$) y el LCP entre ambos es el
+\textbf{mínimo} del LCP Array en el rango entre esas dos posiciones
+—otra vez RMQ, esta vez sobre el LCP Array.
+
+\begin{lstlisting}[style=cpp]
+struct SuffixLCPQuery {
+    vector<int> sa, rnk, lcp;
+    vector<vector<int>> sp;
+    vector<int> lg;
+    int n;
+
+    // CREATE: construye SA, LCP (Kasai) y Sparse Table sobre lcp,
+    // todo en un solo paso.
+    SuffixLCPQuery(const string& s) {
+        n = s.size();
+        sa = buildSuffixArray(s);             // O(n log^2 n)
+        lcp = buildLCPArray(s, sa);           // O(n), Kasai
+
+        rnk.assign(n, 0);
+        for (int i = 0; i < n; i++)
+            rnk[sa[i]] = i;
+
+        buildSparse();
+    }                                          // O(n log^2 n)
+
+    void buildSparse() {
+        lg.assign(n + 1, 0);
+        for (int i = 2; i <= n; i++)
+            lg[i] = lg[i / 2] + 1;
+
+        int K = lg[n] + 1;
+        sp.assign(K, vector<int>(n));
+        sp[0] = lcp;
+
+        for (int k = 1; k < K; k++)
+            for (int i = 0; i + (1 << k) <= n; i++)
+                sp[k][i] = min(sp[k - 1][i],
+                                sp[k - 1][i + (1 << (k - 1))]);
+    }
+
+    // READ: LCP entre el sufijo que empieza en i y el que
+    // empieza en j (0-indexado sobre el string original).
+    int lcpEntreSufijos(int i, int j) {
+        if (i == j) return n - i;
+
+        int a = rnk[i], b = rnk[j];
+        if (a > b) swap(a, b);
+
+        // el minimo va de [a+1, b] en el LCP array
+        int k = lg[b - a];
+        return min(sp[k][a + 1], sp[k][b - (1 << k) + 1]);
+    }                                          // O(1)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+SuffixLCPQuery slq("banana");
+
+cout << slq.lcpEntreSufijos(1, 3);
+// sufijo desde 1: "anana"
+// sufijo desde 3: "ana"
+// LCP = "ana" -> 3
+
+cout << slq.lcpEntreSufijos(0, 3);
+// sufijo desde 0: "banana"
+// sufijo desde 3: "ana"
+// LCP = "" -> 0
+\end{lstlisting}
+
+\textbf{Nota:} \texttt{buildSuffixArray} y \texttt{buildLCPArray} son
+las funciones estándar de Suffix Array + Kasai (ver la sección de
+Algoritmos de Strings); aquí solo se reutilizan como precómputo antes
+de aplicar RMQ.
+
+\textbf{Regla práctica:} cuando un problema pida "algo" entre dos
+elementos que no son adyacentes en su estructura original (dos nodos
+de un árbol, dos sufijos de un string, dos elementos de cualquier
+secuencia con una noción de "orden" y "profundidad/afinidad"),
+pregúntate si esa relación se puede expresar como el mínimo de un
+arreglo auxiliar construido con un recorrido lineal. Si sí, el
+problema se reduce a Sparse Table (estático) o Segment Tree
+(dinámico), ya cubiertos en las secciones anteriores.
+
+
+\subsection{Mo's Algorithm}
+
+\textbf{Idea:} responde $q$ queries de rango \textbf{offline} (las
+conoces todas de antemano) en $O((n+q)\sqrt n)$ total, sin ninguna
+estructura de datos elaborada. La clave es \textbf{ordenar las
+queries} —no procesarlas en el orden dado— agrupándolas por bloque de
+tamaño $\sqrt n$ según su extremo izquierdo $l$, y dentro de cada
+bloque por su extremo derecho $r$ (alternando la dirección en bloques
+pares/impares para aprovechar mejor la localidad). Luego mantienes un
+puntero $[curL, curR]$ que se \textbf{desliza} de una query a la
+siguiente con funciones \texttt{add}/\texttt{remove} en $O(1)$ cada
+una. Como los punteros nunca retroceden más de lo necesario gracias al
+orden elegido, el total de movimientos amortizado es
+$O((n+q)\sqrt n)$ en vez de $O(nq)$ con fuerza bruta.
+
+\textbf{¿Por qué usarlo?} Sirve para respuestas que \textbf{no tienen
+una estructura de rango obvia} (por ejemplo: contar elementos
+distintos, sumar cuadrados de frecuencias, contar pares con cierta
+propiedad) donde escribir un Segment Tree específico sería
+complicado o imposible, pero sí es fácil mantener la respuesta
+incrementalmente al agregar/quitar un elemento a la vez.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Contar elementos distintos en un rango, con muchas queries.
+    \item Sumas o conteos que dependen de \emph{frecuencias} dentro
+    del rango (no solo de valores individuales), donde \texttt{add}/
+    \texttt{remove} son fáciles pero no hay forma clara de combinar
+    dos sub-rangos con un Segment Tree.
+    \item Todas las queries se conocen de antemano (offline). Si
+    necesitas responder \textbf{online} (una query a la vez, sin ver
+    las siguientes), Mo's no aplica: usa Segment Tree o Sqrt
+    Decomposition.
+    \item El arreglo tiene pocos updates puntuales intercalados con
+    las queries: usa la variante \emph{Mo's con updates} (3D Mo's).
+\end{itemize}
+
+\textbf{Complejidad:} $O((n+q)\sqrt n)$ total para $q$ queries sin
+updates; $O(n^{5/3})$ (aprox.) para la variante con updates, usando
+bloques de tamaño $n^{2/3}$.
+
+
+\subsubsection{Mo's clásico (queries offline, sin updates)}
+
+\textbf{Ejemplo guía:} contar cuántos valores \textbf{distintos} hay
+en cada rango $[l,r]$ preguntado.
+
+\begin{lstlisting}[style=cpp]
+struct MoAlgorithm {
+    int n, blockSize;
+    vector<int> a;
+    vector<long long> cnt;
+    int curL = 0, curR = -1;
+    long long curDistinct = 0;
+
+    // CREATE: reserva el arreglo de frecuencias segun el maximo
+    // valor posible, y fija el tamano de bloque en ~sqrt(n).
+    MoAlgorithm(vector<int>& arr, int maxVal) {
+        a = arr;
+        n = a.size();
+        blockSize = max(1, (int)sqrt((double)n));
+        cnt.assign(maxVal, 0);
+    }                                          // O(n)
+
+    // UPDATE: agrega el elemento en pos a la ventana actual.
+    void add(int pos) {
+        if (cnt[a[pos]]++ == 0)
+            curDistinct++;
+    }                                          // O(1)
+
+    // UPDATE: quita el elemento en pos de la ventana actual.
+    void remove(int pos) {
+        if (--cnt[a[pos]] == 0)
+            curDistinct--;
+    }                                          // O(1)
+
+    // READ: procesa todas las queries offline (l, r inclusive,
+    // 0-indexadas) y devuelve las respuestas en el orden original.
+    vector<long long> resolver(vector<array<int, 2>>& queries) {
+        int q = queries.size();
+        vector<int> idx(q);
+        iota(idx.begin(), idx.end(), 0);
+
+        sort(idx.begin(), idx.end(), [&](int i, int j) {
+            int bi = queries[i][0] / blockSize;
+            int bj = queries[j][0] / blockSize;
+            if (bi != bj) return bi < bj;
+            return (bi & 1) ? (queries[i][1] > queries[j][1])
+                             : (queries[i][1] < queries[j][1]);
+        });
+
+        vector<long long> respuestas(q);
+        for (int id : idx) {
+            int l = queries[id][0], r = queries[id][1];
+
+            while (curR < r) add(++curR);
+            while (curL > l) add(--curL);
+            while (curR > r) remove(curR--);
+            while (curL < l) remove(curL++);
+
+            respuestas[id] = curDistinct;
+        }
+        return respuestas;
+    }                                          // O((n+q) sqrt(n))
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<int> a = {1, 2, 1, 3, 2, 4, 1};
+// valores en [1, 4]
+
+MoAlgorithm mo(a, 5);
+
+vector<array<int, 2>> queries = {
+    {0, 2},   // [1, 2, 1] -> 2 distintos
+    {1, 4},   // [2, 1, 3, 2] -> 3 distintos
+    {0, 6}    // arreglo completo -> 4 distintos
+};
+
+vector<long long> resp = mo.resolver(queries);
+// resp = [2, 3, 4]
+\end{lstlisting}
+
+
+\subsubsection{Mo's con updates (3D Mo's)}
+
+\textbf{Idea:} si además de queries hay \textbf{updates puntuales}
+intercaladas, se agrega una tercera dimensión al ordenamiento: el
+\emph{tiempo} $t$ (cuántas updates ya ocurrieron antes de cada
+query). Se ordenan las queries por
+$(\text{bloque}(l), \text{bloque}(r), t)$, y además de deslizar
+$[curL,curR]$, se avanza o retrocede $curT$ aplicando o revirtiendo
+updates una por una. El bloque óptimo cambia a
+$\approx n^{2/3}$ (en vez de $\sqrt n$) porque ahora hay tres
+dimensiones que balancear.
+
+\begin{lstlisting}[style=cpp]
+struct MoUpdates {
+    int n, blockSize;
+    vector<int> a;
+    vector<long long> cnt;
+    vector<pair<int, int>> updates;   // (pos, valor); ver nota abajo
+    int curL = 0, curR = -1, curT = 0;
+    long long curDistinct = 0;
+
+    // CREATE: reserva frecuencias y fija el bloque en ~n^(2/3).
+    MoUpdates(vector<int>& arr, int maxVal) {
+        a = arr;
+        n = a.size();
+        blockSize = max(1, (int)cbrt((double)n) *
+                            (int)cbrt((double)n));
+        cnt.assign(maxVal, 0);
+    }                                          // O(n)
+
+    void add(int pos) {
+        if (cnt[a[pos]]++ == 0) curDistinct++;
+    }                                          // O(1)
+
+    void remove(int pos) {
+        if (--cnt[a[pos]] == 0) curDistinct--;
+    }                                          // O(1)
+
+    // CREATE: registra una update (aplicarla no es inmediato,
+    // solo queda en la lista para procesarse en su momento).
+    void agregarUpdate(int pos, int val) {
+        updates.push_back({pos, val});
+    }                                          // O(1)
+
+    // UPDATE: aplica (o revierte, es la misma operacion) la
+    // update numero t. El truco: como updates[t].second guarda
+    // "el valor a poner", tras aplicarla queda guardado el valor
+    // viejo -> llamar de nuevo revierte exactamente al estado
+    // anterior.
+    void alternarUpdate(int t) {
+        int pos = updates[t].first;
+        int val = updates[t].second;
+
+        if (pos >= curL && pos <= curR)
+            remove(pos);
+
+        swap(a[pos], val);
+        updates[t].second = val;
+
+        if (pos >= curL && pos <= curR)
+            add(pos);
+    }                                          // O(1)
+
+    // READ: procesa todas las queries offline (l, r, t) y
+    // devuelve las respuestas en el orden original.
+    vector<long long> resolver(vector<array<int, 3>>& queries) {
+        int q = queries.size();
+        vector<int> idx(q);
+        iota(idx.begin(), idx.end(), 0);
+
+        sort(idx.begin(), idx.end(), [&](int i, int j) {
+            int bi = queries[i][0] / blockSize;
+            int bj = queries[j][0] / blockSize;
+            if (bi != bj) return bi < bj;
+
+            int ri = queries[i][1] / blockSize;
+            int rj = queries[j][1] / blockSize;
+            if (ri != rj) return ri < rj;
+
+            return queries[i][2] < queries[j][2];
+        });
+
+        vector<long long> respuestas(q);
+        for (int id : idx) {
+            int l = queries[id][0], r = queries[id][1],
+                t = queries[id][2];
+
+            while (curR < r) add(++curR);
+            while (curL > l) add(--curL);
+            while (curR > r) remove(curR--);
+            while (curL < l) remove(curL++);
+
+            while (curT < t) alternarUpdate(curT++);
+            while (curT > t) alternarUpdate(--curT);
+
+            respuestas[id] = curDistinct;
+        }
+        return respuestas;
+    }                                          // O(n^(5/3)) aprox.
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+vector<int> a = {1, 2, 3};
+
+MoUpdates mo(a, 5);
+mo.agregarUpdate(0, 2);   // update #0: a[0] = 2
+mo.agregarUpdate(1, 1);   // update #1: a[1] = 1
+
+// queries: (l, r, cuantas updates ya se aplicaron)
+vector<array<int, 3>> queries = {
+    {0, 2, 0},   // arreglo original [1,2,3] -> 3 distintos
+    {0, 2, 1},   // tras update #0:  [2,2,3] -> 2 distintos
+    {0, 2, 2}    // tras update #1:  [2,1,3] -> 3 distintos
+};
+
+vector<long long> resp = mo.resolver(queries);
+// resp = [3, 2, 3]
+\end{lstlisting}
+
+\textbf{Nota:} para problemas sobre \textbf{árboles} (queries sobre
+un camino o subárbol) existe \emph{Mo's on Trees}, que aplana el
+árbol con un Euler Tour y aplica el mismo algoritmo sobre ese
+arreglo; el resto del razonamiento (ordenar queries, deslizar
+punteros) es idéntico.
+
+\textbf{Comparación con otras estructuras de rango:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|p{0.43\columnwidth}|p{0.30\columnwidth}|p{0.20\columnwidth}|}
+\hline
+\textbf{Situación} & \textbf{Estructura} & \textbf{Complejidad} \\
+\hline
+Queries offline, sin updates &
+Mo's clásico &
+$O((n+q)\sqrt{n})$ \\
+\hline
+Queries offline, con updates &
+Mo's con updates &
+$O(n^{5/3})$ \\
+\hline
+Queries online (una a la vez) &
+Segment Tree / Sqrt Decomp. &
+$O(\log n)$ / $O(\sqrt{n})$ \\
+\hline
+\end{tabular}
+\caption{Cuándo usar Mo's Algorithm frente a estructuras online.}
+\end{table}
+
+\textbf{Regla práctica:} usa Mo's solo cuando (1) todas las queries
+son offline, y (2) la respuesta es fácil de mantener
+incrementalmente con \texttt{add}/\texttt{remove}, pero difícil de
+combinar con un Segment Tree (min/max/suma sí se combinan fácil, así
+que ahí Mo's no aporta nada). Si el problema admite Segment Tree o
+Fenwick directamente, esas opciones son más simples y no necesitan
+que las queries sean offline.
+
+\subsection{Wavelet Tree}
+
+\textbf{Idea:} es un árbol binario sobre el \textbf{rango de valores}
+del arreglo (no sobre las posiciones, como Segment Tree). La raíz
+cubre $[\text{lo},\text{hi}]$ de valores posibles; en cada nodo, los
+elementos con valor $\le$ mediana van al hijo izquierdo y el resto al
+derecho, \textbf{preservando su orden relativo} (partición estable).
+Cada nodo guarda un arreglo \texttt{b[]} con cuántos elementos, hasta
+cada posición, fueron hacia la izquierda. Con eso puedes, en cada
+nivel, saber exactamente qué sub-rango de posiciones le corresponde a
+cada hijo — y bajar por el árbol respondiendo preguntas sobre
+\textbf{valores dentro de un rango de posiciones} en $O(\log C)$,
+donde $C$ es la cantidad de valores distintos.
+
+\textbf{¿Por qué usarlo?} Es la única estructura de esta sección que
+responde eficientemente preguntas que combinan \textbf{posición y
+valor} a la vez: "el $k$-ésimo menor en $[l,r]$", "cuántos elementos
+en $[l,r]$ son $\le X$", "cuántas veces aparece exactamente $X$ en
+$[l,r]$". Ninguna de las estructuras anteriores (Fenwick, Segment
+Tree, Sparse Table) resuelve esto directamente sin re-plantear el
+problema.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item $k$-ésimo elemento más chico (o más grande) dentro de un
+    rango $[l,r]$.
+    \item Conteo de elementos en $[l,r]$ cuyo valor está en un rango
+    $[a,b]$.
+    \item Frecuencia de un valor específico dentro de un rango de
+    posiciones (rank query).
+    \item Arreglo \textbf{estático} — no soporta updates sin
+    reconstruir (para eso existe la variante persistente, más
+    avanzada).
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n\log C)$, cada query
+$O(\log C)$, donde $C$ es la cantidad de valores distintos tras
+comprimir coordenadas.
+
+
+\subsubsection{Wavelet Tree: $k$-ésimo, conteo $\le X$ y frecuencia}
+
+\begin{lstlisting}[style=cpp]
+struct WaveletTree {
+    int lo, hi;
+    WaveletTree *izq = nullptr, *der = nullptr;
+    vector<int> b;   // b[i] = cuantos de a[0..i-1] fueron a la izq.
+
+    // CREATE: construye recursivamente sobre el segmento [from, to)
+    // de un arreglo mutable, particionando por la mediana de valor
+    // [lo, hi]. Los valores deben venir ya comprimidos a [0, C-1].
+    WaveletTree(int* from, int* to, int lo, int hi) : lo(lo), hi(hi) {
+        if (lo == hi || from >= to) return;
+
+        int mid = (lo + hi) / 2;
+        auto vaIzq = [mid](int x) { return x <= mid; };
+
+        b.reserve(to - from + 1);
+        b.push_back(0);
+        for (auto it = from; it != to; it++)
+            b.push_back(b.back() + vaIzq(*it));
+
+        auto pivote = stable_partition(from, to, vaIzq);
+        izq = new WaveletTree(from, pivote, lo, mid);
+        der = new WaveletTree(pivote, to, mid + 1, hi);
+    }                                          // O(n log C)
+
+    // READ: k-esimo valor mas chico en [l, r] (1-indexado, k desde 1).
+    int kth(int l, int r, int k) {
+        if (l > r) return -1;
+        if (lo == hi) return lo;
+
+        int enIzq = b[r] - b[l - 1];
+        int lb = b[l - 1], rb = b[r];
+
+        if (k <= enIzq)
+            return izq->kth(lb + 1, rb, k);
+        return der->kth(l - lb, r - rb, k - enIzq);
+    }                                          // O(log C)
+
+    // READ: cuantos elementos de [l, r] tienen valor <= val.
+    int contarMenorIgual(int l, int r, int val) {
+        if (l > r || val < lo) return 0;
+        if (hi <= val) return r - l + 1;
+
+        int lb = b[l - 1], rb = b[r];
+        return izq->contarMenorIgual(lb + 1, rb, val)
+             + der->contarMenorIgual(l - lb, r - rb, val);
+    }                                          // O(log C)
+
+    // READ: cuantas veces aparece exactamente val en [l, r].
+    int contarIgual(int l, int r, int val) {
+        if (l > r || val < lo || val > hi) return 0;
+        if (lo == hi) return r - l + 1;
+
+        int mid = (lo + hi) / 2;
+        int lb = b[l - 1], rb = b[r];
+
+        if (val <= mid)
+            return izq->contarIgual(lb + 1, rb, val);
+        return der->contarIgual(l - lb, r - rb, val);
+    }                                          // O(log C)
+
+    ~WaveletTree() {
+        delete izq;
+        delete der;
+    }
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento} (con compresión de coordenadas):
+
+\begin{lstlisting}[style=cpp]
+vector<int> original = {40, 10, 30, 10, 20, 40, 30};
+
+// comprimir a [0, C-1] para que el wavelet tree trabaje con
+// valores pequenos y contiguos.
+vector<int> ordenado = original;
+sort(ordenado.begin(), ordenado.end());
+ordenado.erase(unique(ordenado.begin(), ordenado.end()), ordenado.end());
+
+vector<int> comprimido(original.size());
+for (int i = 0; i < (int)original.size(); i++)
+    comprimido[i] = lower_bound(ordenado.begin(), ordenado.end(),
+                                  original[i]) - ordenado.begin();
+// comprimido: [3, 0, 2, 0, 1, 3, 2]   (valores 10,20,30,40 -> 0,1,2,3)
+
+WaveletTree wt(comprimido.data(),
+                comprimido.data() + comprimido.size(),
+                0, (int)ordenado.size() - 1);
+
+// 3er elemento mas chico en el rango [2, 6] (1-indexado)
+int idx = wt.kth(2, 6, 3);
+cout << ordenado[idx];
+// posiciones 2..6 (1-idx): 10,30,10,20,40,30 (valores 0-idx 2..6)
+// -> valores reales: 30,10,20,40,30 ordenados: 10,20,30,30,40
+// 3er mas chico = 30
+
+cout << wt.contarMenorIgual(1, 7, 1);
+// cuantos valores comprimidos <= 1 (o sea, <= 20) hay en todo el arreglo
+// original: 40,10,30,10,20,40,30 -> <=20 son: 10,10,20 -> 3
+
+cout << wt.contarIgual(1, 7, 0);
+// cuantas veces aparece el valor comprimido 0 (o sea, 10) -> 2
+\end{lstlisting}
+
+\textbf{Comparación con las otras estructuras de rango:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{|p{3.3cm}|p{3.3cm}|}
+\hline
+\textbf{Pregunta} & \textbf{Estructura} \\
+\hline
+Suma/min/max de rango & Fenwick / Segment Tree / Sparse Table \\
+\hline
+$k$-ésimo menor, o conteo por rango de \textbf{valores}, en un rango de \textbf{posiciones} & Wavelet Tree \\
+\hline
+Elementos distintos, moda, funciones no lineales de frecuencia & Mo's Algorithm \\
+\hline
+\end{tabular}
+\caption{Cuándo el problema necesita Wavelet Tree en vez de las otras estructuras.}
+\end{table}
+
+\textbf{Regla práctica:} si el enunciado combina una condición sobre
+\textbf{valores} (``menor que'', ``entre $a$ y $b$'', ``el $k$-ésimo
+más chico'') con un rango de \textbf{posiciones}, y el arreglo es
+estático, es casi siempre Wavelet Tree. Si solo te piden agregar
+(suma/min/max) sin condición sobre el valor, usa las estructuras más
+simples de las secciones anteriores.
+
+
+\subsection{Heavy-Light Decomposition}
+
+\textbf{Idea:} descompone un árbol en \textbf{cadenas} de forma que
+cualquier camino desde la raíz hasta cualquier nodo cruza a lo más
+$O(\log n)$ cadenas distintas. En cada nodo, el hijo con el
+\textbf{subárbol más grande} (el hijo ``pesado'') continúa la misma
+cadena que su padre; los demás hijos inician cadenas nuevas. Al
+numerar los nodos en el orden en que se visitan (DFS que siempre
+sigue primero al hijo pesado), cada cadena queda como un \textbf{rango
+contiguo} de posiciones — así que una query sobre un \textbf{camino}
+del árbol se convierte en $O(\log n)$ queries de rango sobre un
+Segment Tree normal, una por cada cadena que el camino atraviesa.
+
+\textbf{¿Por qué usarlo?} Es la forma estándar de llevar range
+queries de un arreglo a un \textbf{árbol}: sumas/mínimos/updates en
+el camino entre dos nodos, o en el subárbol de un nodo. Sin HLD, un
+camino arbitrario no tiene ninguna estructura contigua sobre la cual
+aplicar Fenwick o Segment Tree directamente.
+
+\textbf{Casos de uso:}
+
+\begin{itemize}
+    \item Suma/mínimo/máximo en el camino entre dos nodos $u$ y $v$.
+    \item Actualizar todos los nodos (o aristas) de un camino $u$-$v$.
+    \item Consultas o updates sobre el \textbf{subárbol} completo de un
+    nodo (más simple: el subárbol siempre es un rango contiguo, sin
+    necesidad de descomponer en cadenas).
+    \item Cualquier problema de árbol que ``se sentiría'' como Range
+    Queries si el árbol fuera un arreglo lineal.
+\end{itemize}
+
+\textbf{Complejidad:} construir $O(n)$ (dos DFS) más $O(n)$ del
+Segment Tree subyacente; query o update de \textbf{camino}
+$O(\log^2 n)$ ($O(\log n)$ cadenas $\times$ $O(\log n)$ por consulta
+al Segment Tree); query o update de \textbf{subárbol} $O(\log n)$
+(un solo rango contiguo).
+
+
+\subsubsection{HLD: suma en camino, suma en subárbol}
+
+\textbf{Idea de la implementación:} dos DFS \textbf{iterativas} (con
+pila explícita, para evitar stack overflow en árboles muy profundos
+o muy desbalanceados — un riesgo real con recursión cuando
+$n\ge10^5$ y el árbol es una cadena larga). El primero
+(\texttt{dfsTamano}) calcula el tamaño de cada subárbol y decide el
+hijo pesado de cada nodo. El segundo (\texttt{dfsDescomponer})
+recorre siempre primero al hijo pesado (así la cadena sigue
+consecutiva en las posiciones) y solo después explora los hijos
+livianos, cada uno iniciando su propia cadena nueva. Las posiciones
+resultantes (\texttt{pos[]}) alimentan un Segment Tree normal —aquí
+se reutiliza \texttt{SegmentTreeLazyAdd} de la sección anterior—
+sobre el cual se hacen las queries reales.
+
+\begin{lstlisting}[style=cpp]
+struct HLD {
+    vector<vector<int>> adj;
+    vector<int> padre, profundidad, tamano, pesado, cabeza, pos;
+    int n, timer = 0;
+    SegmentTreeLazyAdd* seg;   // Segment Tree sobre el orden pos[]
+
+    // CREATE: dos DFS iterativas para calcular cadenas, luego arma
+    // el Segment Tree sobre el arreglo reordenado por pos[].
+    HLD(vector<vector<int>>& adjacency, vector<long long>& valores,
+        int raiz) {
+        adj = adjacency;
+        n = adj.size();
+        padre.assign(n, -1);
+        profundidad.assign(n, 0);
+        tamano.assign(n, 1);
+        pesado.assign(n, -1);
+        cabeza.assign(n, raiz);
+        pos.assign(n, 0);
+
+        dfsTamano(raiz);
+        dfsDescomponer(raiz);
+
+        vector<long long> reordenado(n);
+        for (int v = 0; v < n; v++)
+            reordenado[pos[v]] = valores[v];
+
+        seg = new SegmentTreeLazyAdd(reordenado);
+    }                                          // O(n)
+
+    // Fase 1: obtiene un orden donde cada padre aparece ANTES que
+    // sus hijos (equivalente a un preorden), usando una pila.
+    // Fase 2: recorre ese orden al reves (hijos antes que padres)
+    // para acumular tamano[] y decidir el hijo pesado, igual que
+    // haria la version recursiva al "volver" de cada llamada.
+    void dfsTamano(int raiz) {
+        vector<int> orden;
+        stack<int> st;
+        st.push(raiz);
+        padre[raiz] = -1;
+        profundidad[raiz] = 0;
+
+        while (!st.empty()) {
+            int u = st.top();
+            st.pop();
+            orden.push_back(u);
+
+            for (int v : adj[u]) {
+                if (v != padre[u]) {
+                    padre[v] = u;
+                    profundidad[v] = profundidad[u] + 1;
+                    st.push(v);
+                }
+            }
+        }
+
+        for (int i = (int)orden.size() - 1; i >= 0; i--) {
+            int u = orden[i];
+            tamano[u] = 1;
+            int maxSub = 0;
+
+            for (int v : adj[u]) {
+                if (v == padre[u]) continue;
+
+                tamano[u] += tamano[v];
+                if (tamano[v] > maxSub) {
+                    maxSub = tamano[v];
+                    pesado[u] = v;
+                }
+            }
+        }
+    }                                          // O(n)
+
+    // Pila de pares (nodo, cabeza de su cadena). Para que el hijo
+    // pesado quede en el tope de la pila (y por lo tanto se
+    // procese inmediatamente despues, como en la version
+    // recursiva), se empuja de ULTIMO: los hijos livianos
+    // (cadena nueva) se empujan primero.
+    void dfsDescomponer(int raiz) {
+        stack<pair<int, int>> st;
+        st.push({raiz, raiz});
+
+        while (!st.empty()) {
+            auto [u, h] = st.top();
+            st.pop();
+
+            cabeza[u] = h;
+            pos[u] = timer++;
+
+            for (int v : adj[u]) {
+                if (v == padre[u] || v == pesado[u]) continue;
+                st.push({v, v});                // cadena nueva
+            }
+
+            if (pesado[u] != -1)
+                st.push({pesado[u], h});        // misma cadena
+        }
+    }                                          // O(n)
+
+    // READ: suma de todos los nodos en el camino u-v.
+    long long consultarCamino(int u, int v) {
+        long long resultado = 0;
+
+        while (cabeza[u] != cabeza[v]) {
+            if (profundidad[cabeza[u]] < profundidad[cabeza[v]])
+                swap(u, v);
+
+            resultado += seg->rango(pos[cabeza[u]], pos[u]);
+            u = padre[cabeza[u]];
+        }
+
+        if (profundidad[u] > profundidad[v]) swap(u, v);
+        resultado += seg->rango(pos[u], pos[v]);
+        return resultado;
+    }                                          // O(log^2 n)
+
+    // UPDATE: suma val a todos los nodos en el camino u-v.
+    void actualizarCamino(int u, int v, long long val) {
+        while (cabeza[u] != cabeza[v]) {
+            if (profundidad[cabeza[u]] < profundidad[cabeza[v]])
+                swap(u, v);
+
+            seg->rangoUpdate(pos[cabeza[u]], pos[u], val);
+            u = padre[cabeza[u]];
+        }
+
+        if (profundidad[u] > profundidad[v]) swap(u, v);
+        seg->rangoUpdate(pos[u], pos[v], val);
+    }                                          // O(log^2 n)
+
+    // READ: suma de todo el subarbol de u (rango contiguo por
+    // construccion, gracias al orden DFS de dfsDescomponer).
+    long long consultarSubarbol(int u) {
+        return seg->rango(pos[u], pos[u] + tamano[u] - 1);
+    }                                          // O(log n)
+
+    // UPDATE: suma val a todo el subarbol de u.
+    void actualizarSubarbol(int u, long long val) {
+        seg->rangoUpdate(pos[u], pos[u] + tamano[u] - 1, val);
+    }                                          // O(log n)
+};
+\end{lstlisting}
+
+\textbf{Ejemplo de funcionamiento:}
+
+\begin{lstlisting}[style=cpp]
+// arbol:        0
+//              /|\
+//             1 2 3
+//            /|
+//           4 5
+
+vector<vector<int>> adj(6);
+adj[0] = {1, 2, 3};
+adj[1] = {0, 4, 5};
+adj[2] = {0};
+adj[3] = {0};
+adj[4] = {1};
+adj[5] = {1};
+
+vector<long long> valores = {1, 2, 3, 4, 5, 6};
+// nodo:                     0  1  2  3  4  5
+
+HLD hld(adj, valores, 0);
+
+cout << hld.consultarCamino(4, 3);
+// camino 4 -> 1 -> 0 -> 3 : valores 5+2+1+4 = 12
+
+cout << hld.consultarSubarbol(1);
+// subarbol de 1: nodos {1,4,5} : 2+5+6 = 13
+
+hld.actualizarCamino(4, 5, 10);
+// suma 10 a cada nodo del camino 4 -> 1 -> 5
+
+cout << hld.consultarSubarbol(0);
+// subarbol de 0 (todo el arbol) tras el update:
+// 1+(2+10)+3+4+(5+10)+(6+10) = 51
+\end{lstlisting}
+
+\textbf{Nota:} al ser iterativas, \texttt{dfsTamano} y
+\texttt{dfsDescomponer} no tienen riesgo de stack overflow incluso en
+árboles con $n\ge10^5$ y forma de ``cadena larga'' (el peor caso para
+recursión). \texttt{SegmentTreeLazyAdd} es exactamente el struct de
+la sección de Segment Tree — cualquier otra variante (min, max,
+assign) funciona igual de bien como motor subyacente.
+
+\textbf{Regla práctica:} usa HLD en cuanto el problema pida algo
+sobre un \textbf{camino} entre dos nodos de un árbol con muchas
+queries. Si solo pide algo sobre \textbf{subárboles} (sin caminos
+arbitrarios), no hace falta la descomposición en cadenas completa:
+basta un solo DFS para las posiciones (\texttt{pos[]} y
+\texttt{tamano[]}) y un Segment Tree normal, ya que el subárbol
+siempre es un rango contiguo por sí solo.
+
+
+
+\part{Grafos}
+
+\subsection{¿Qué algoritmo usar?}
+
+La siguiente tabla resume situaciones típicas de Competitive Programming
+y el algoritmo que debe considerarse. La idea es reconocer las palabras
+clave o condiciones del enunciado y asociarlas rápidamente con una técnica.
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.42\columnwidth}|p{0.23\columnwidth}|p{0.25\columnwidth}|}
+\hline
+\textbf{Cuando el ejercicio diga / pida} &
+\textbf{Usa} &
+\textbf{Pista rápida} \\
+\hline
+
+``Recorrer el grafo por niveles'' &
+BFS &
+Usa una cola. \\
+\hline
+
+``Encontrar la distancia mínima'' con aristas de igual costo &
+BFS &
+Cada arista cuesta lo mismo. \\
+\hline
+
+``Encontrar caminos mínimos'' con pesos $0$ y $1$ &
+0-1 BFS &
+Deque; pesos únicamente $0$ o $1$. \\
+\hline
+
+``Camino mínimo'' con pesos no negativos &
+Dijkstra &
+Usa una cola de prioridad. \\
+\hline
+
+``Camino mínimo'' con pesos negativos &
+Bellman-Ford &
+Permite detectar ciclos negativos. \\
+\hline
+
+``Camino mínimo entre todos los pares'' y $n$ pequeño &
+Floyd-Warshall &
+DP sobre todos los pares. \\
+\hline
+
+``¿Existe un camino entre $u$ y $v$?'' &
+DFS / BFS &
+Problema de conectividad. \\
+\hline
+
+``Encontrar componentes conexas'' &
+DFS / BFS &
+Ejecutar traversal desde cada nodo no visitado. \\
+\hline
+
+``Detectar si existe un ciclo'' en grafo no dirigido &
+DFS / DSU &
+DFS para recorrer; DSU si se agregan aristas. \\
+\hline
+
+``Detectar ciclos'' en grafo dirigido &
+DFS / Kahn &
+Usar estados en DFS o grados de entrada. \\
+\hline
+
+``Ordenar tareas con dependencias'' &
+Topological Sort &
+El grafo debe ser dirigido y acíclico. \\
+\hline
+
+``Encontrar puentes'' &
+Tarjan &
+DFS + tiempos de descubrimiento. \\
+\hline
+
+``Encontrar puntos de articulación'' &
+Tarjan &
+Vértices cuya eliminación desconecta el grafo. \\
+\hline
+
+``Encontrar componentes fuertemente conexas'' &
+Kosaraju / Tarjan &
+Grafo dirigido. \\
+\hline
+
+``Conectar todos los nodos con costo mínimo'' &
+MST &
+Kruskal o Prim. \\
+\hline
+
+``MST procesando aristas ordenadas por peso'' &
+Kruskal &
+Ordenar aristas + DSU. \\
+\hline
+
+``MST expandiendo desde un nodo'' &
+Prim &
+Priority Queue + lista de adyacencia. \\
+\hline
+
+``¿Dos nodos pertenecen al mismo conjunto?'' &
+DSU &
+Union-Find. \\
+\hline
+
+``Agrupar elementos mediante uniones'' &
+DSU &
+\texttt{union} + \texttt{find}. \\
+\hline
+
+``Encontrar si un grafo es bipartito'' &
+2-Coloring &
+Colorear con dos colores. \\
+\hline
+
+``Máximo número de parejas entre dos grupos'' &
+Bipartite Matching &
+Emparejamiento entre conjuntos. \\
+\hline
+
+``Máximo flujo de una fuente a un destino'' &
+Dinic &
+Network Flow. \\
+\hline
+
+``Separar fuente y sumidero con capacidad mínima'' &
+Min-Cut &
+Por el teorema Max-Flow Min-Cut. \\
+\hline
+
+``Distancia entre dos nodos de un árbol'' &
+LCA &
+$\operatorname{dist}(u,v)=
+d[u]+d[v]-2d[\operatorname{LCA}(u,v)]$. \\
+\hline
+
+``Encontrar el ancestro $k$ niveles arriba'' &
+Binary Lifting &
+Saltar potencias de $2$. \\
+\hline
+
+``Consultas sobre subárboles'' &
+Euler Tour + Fenwick / Segment Tree &
+Convertir subárbol en intervalo. \\
+\hline
+
+``Consultas o actualizaciones sobre caminos de un árbol'' &
+HLD &
+Descomponer el camino en cadenas. \\
+\hline
+
+``Encontrar el diámetro de un árbol'' &
+BFS / DFS &
+Dos traversals desde extremos. \\
+\hline
+
+``Encontrar un camino que use todas las aristas'' &
+Eulerian Path / Hierholzer &
+Trabaja con aristas, no con vértices. \\
+\hline
+
+``Encontrar todas las rutas posibles'' &
+DFS + Backtracking &
+Explorar y deshacer decisiones. \\
+\hline
+
+``Rellenar una región conectada'' &
+Flood Fill &
+DFS / BFS desde una celda inicial. \\
+\hline
+
+``Moverse por una cuadrícula buscando la menor cantidad de pasos'' &
+BFS &
+Cada movimiento tiene costo $1$. \\
+\hline
+
+``Variables booleanas con restricciones de la forma OR'' &
+2-SAT + SCC &
+Construir grafo de implicaciones. \\
+\hline
+
+``Resolver muchas consultas sobre un árbol'' &
+LCA / HLD &
+Depende de si son ancestros o caminos. \\
+\hline
+
+\end{tabular}
+\caption{Guía rápida para seleccionar algoritmos de grafos.}
+\end{table}
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|p{0.43\columnwidth}|p{0.27\columnwidth}|p{0.22\columnwidth}|}
+\hline
+\textbf{Condición del problema} &
+\textbf{Algoritmo} &
+\textbf{Complejidad} \\
+\hline
+Aristas sin peso / costo $1$ &
+BFS &
+$O(n+m)$ \\
+\hline
+Pesos únicamente $0$ y $1$ &
+0-1 BFS &
+$O(n+m)$ \\
+\hline
+Pesos no negativos &
+Dijkstra &
+$O((n+m)\log n)$ \\
+\hline
+Puede haber pesos negativos &
+Bellman-Ford &
+$O(nm)$ \\
+\hline
+Todos los pares y $n$ pequeño &
+Floyd-Warshall &
+$O(n^3)$ \\
+\hline
+\end{tabular}
+\caption{Selección del algoritmo para caminos mínimos.}
+\end{table}
+
+
+
+% =========================================================
+% TRAVERSAL
+% =========================================================
+
+\section{Traversal}
+
+
+\subsection{Representación de Grafos}
+
+\textbf{Idea:} antes de aplicar cualquier algoritmo sobre un grafo,
+primero debemos decidir cómo almacenar sus vértices y aristas. Las
+tres representaciones más comunes son la \textbf{lista de adyacencia},
+la \textbf{matriz de adyacencia} y la \textbf{lista de aristas}. La
+elección depende principalmente de la cantidad de vértices y aristas
+y del tipo de consultas que realizará el algoritmo.
+
+La \textbf{lista de adyacencia} almacena, para cada vértice, todos los
+vértices conectados directamente con él. Es la representación más
+utilizada en Competitive Programming porque ocupa $O(n+m)$ memoria y
+permite recorrer eficientemente todos los vecinos de un vértice.
+
+La \textbf{matriz de adyacencia} utiliza una matriz $n\times n$ donde
+la posición $(u,v)$ indica si existe una arista entre $u$ y $v$.
+Permite comprobar la existencia de una arista en $O(1)$, pero requiere
+$O(n^2)$ memoria.
+
+La \textbf{lista de aristas} simplemente almacena cada arista como un
+par $(u,v)$, o como una terna $(u,v,w)$ si tiene peso. Es especialmente
+útil para algoritmos que necesitan procesar todas las aristas, como
+Kruskal o Bellman-Ford.
+
+\textbf{¿Por qué usar cada una?}
+
+\begin{itemize}
+    \item \textbf{Lista de adyacencia:} opción general para BFS, DFS,
+    Dijkstra, Prim, búsqueda de ciclos y prácticamente la mayoría de
+    algoritmos sobre grafos dispersos.
+
+    \item \textbf{Matriz de adyacencia:} útil cuando $n$ es pequeño o
+    cuando se necesita comprobar constantemente si existe una arista
+    entre dos vértices en $O(1)$.
+
+    \item \textbf{Lista de aristas:} conveniente cuando el algoritmo
+    necesita recorrer todas las aristas directamente, especialmente
+    en Kruskal y Bellman-Ford.
+\end{itemize}
+
+\textbf{Tipos de grafos:} una arista puede ser \textbf{dirigida} o
+\textbf{no dirigida}, y puede tener o no un \textbf{peso}. En un grafo
+no dirigido, una arista $(u,v)$ se representa agregando $v$ a los
+vecinos de $u$ y $u$ a los vecinos de $v$. En un grafo dirigido,
+solamente se agrega $v$ a los vecinos de $u$.
+
+\textbf{Complejidad:}
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|p{0.27\columnwidth}|c|c|c|}
+\hline
+\textbf{Representación} &
+\textbf{Memoria} &
+\textbf{Consulta} &
+\textbf{Vecinos} \\
+\hline
+Lista de adyacencia &
+$O(n+m)$ &
+$O(\deg(u))$ &
+$O(\deg(u))$ \\
+\hline
+Matriz de adyacencia &
+$O(n^2)$ &
+$O(1)$ &
+$O(n)$ \\
+\hline
+Lista de aristas &
+$O(m)$ &
+$O(m)$ &
+$O(m)$ \\
+\hline
+\end{tabular}
+\caption{Comparación de representaciones de grafos.}
+\end{table}
+
+\subsubsection{Lista de adyacencia}
+
+\textbf{Idea de la implementación:} se utiliza un
+\texttt{vector<vector<int>>} donde la posición $u$ contiene todos los
+vértices conectados directamente con $u$. Para grafos ponderados se
+puede almacenar un par $(v,w)$, donde $v$ es el destino y $w$ el peso
+de la arista.
+
+\begin{lstlisting}[style=cpp]
+// Grafo no dirigido y no ponderado.
+int n = 5;
+vector<vector<int>> adj(n);
+
+// Agrega una arista u-v.
+auto agregarArista = [&](int u, int v) {
+    adj[u].push_back(v);
+    adj[v].push_back(u);
+};
+
+agregarArista(0, 1);
+agregarArista(0, 2);
+agregarArista(1, 3);
+agregarArista(1, 4);
+\end{lstlisting}
+
+\textbf{Grafo resultante:}
+
+\begin{lstlisting}[style=cpp]
+//        0
+//       / \
+//      1   2
+//     / \
+//    3   4
+//
+// adj[0] = {1, 2}
+// adj[1] = {0, 3, 4}
+// adj[2] = {0}
+// adj[3] = {1}
+// adj[4] = {1}
+\end{lstlisting}
+
+Para un grafo dirigido, solamente se agrega la arista en una dirección:
+
+\begin{lstlisting}[style=cpp]
+// Grafo dirigido.
+vector<vector<int>> adj(n);
+
+auto agregarArista = [&](int u, int v) {
+    adj[u].push_back(v);
+};
+
+agregarArista(0, 1);
+agregarArista(0, 2);
+agregarArista(1, 3);
+\end{lstlisting}
+
+Para un grafo ponderado, cada vecino puede almacenar también el peso:
+
+\begin{lstlisting}[style=cpp]
+// Grafo ponderado.
+vector<vector<pair<int, long long>>> adj(n);
+
+auto agregarArista = [&](int u, int v, long long w) {
+    adj[u].push_back({v, w});
+    adj[v].push_back({u, w});
+};
+
+agregarArista(0, 1, 5);
+agregarArista(0, 2, 3);
+agregarArista(1, 3, 7);
+\end{lstlisting}
+
+\textbf{Ejemplo de recorrido:}
+
+\begin{lstlisting}[style=cpp]
+void dfs(int u, int padre, vector<vector<int>>& adj) {
+
+    cout << u << ' ';
+
+    for (int v : adj[u]) {
+        if (v == padre) continue;
+
+        dfs(v, u, adj);
+    }
+}
+\end{lstlisting}
+
+La lista de adyacencia permite que DFS o BFS procesen cada vértice y
+cada arista una cantidad constante de veces, obteniendo una
+complejidad total de $O(n+m)$.
+
+\subsubsection{Matriz de adyacencia}
+
+\textbf{Idea:} una matriz $adj[u][v]$ indica directamente si existe
+una conexión desde $u$ hacia $v$. Si el grafo es ponderado, la
+posición puede almacenar directamente el peso de la arista.
+
+\begin{lstlisting}[style=cpp]
+int n = 5;
+vector<vector<int>> adj(n, vector<int>(n, 0));
+
+auto agregarArista = [&](int u, int v) {
+    adj[u][v] = 1;
+    adj[v][u] = 1;
+};
+
+agregarArista(0, 1);
+agregarArista(0, 2);
+agregarArista(1, 3);
+agregarArista(1, 4);
+\end{lstlisting}
+
+Ahora comprobar si existe una arista entre $u$ y $v$ es inmediato:
+
+\begin{lstlisting}[style=cpp]
+if (adj[u][v]) {
+    cout << "Existe una arista";
+}
+\end{lstlisting}
+
+La consulta anterior cuesta $O(1)$, pero recorrer todos los vecinos de
+$u$ requiere revisar las $n$ posiciones de la fila:
+
+\begin{lstlisting}[style=cpp]
+for (int v = 0; v < n; v++) {
+    if (adj[u][v]) {
+        cout << v << ' ';
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Lista de aristas}
+
+\textbf{Idea:} almacena directamente todas las aristas del grafo.
+Para un grafo no ponderado basta guardar $(u,v)$; para uno ponderado
+se guarda $(u,v,w)$.
+
+\begin{lstlisting}[style=cpp]
+// Grafo ponderado.
+struct Edge {
+    int u, v;
+    long long w;
+};
+
+vector<Edge> edges;
+
+edges.push_back({0, 1, 5});
+edges.push_back({0, 2, 3});
+edges.push_back({1, 3, 7});
+\end{lstlisting}
+
+Esta representación resulta especialmente conveniente cuando el
+algoritmo necesita procesar todas las aristas:
+
+\begin{lstlisting}[style=cpp]
+for (Edge e : edges) {
+    cout << e.u << " -> " << e.v
+         << " peso = " << e.w << '\n';
+}
+\end{lstlisting}
+
+Por ejemplo, \textbf{Kruskal} ordena directamente esta lista por peso,
+mientras que \textbf{Bellman-Ford} puede recorrerla completa en cada
+iteración.
+
+\textbf{Nota:} para la mayoría de problemas de Competitive Programming,
+la \textbf{lista de adyacencia} debe ser la representación por defecto.
+Es especialmente importante cuando el grafo es disperso, es decir,
+cuando $m$ es mucho menor que $n^2$. La matriz de adyacencia solamente
+conviene cuando $n$ es pequeño o cuando las consultas de existencia de
+aristas en $O(1)$ son importantes.
+
+\textbf{Regla práctica:} si no tienes una razón específica para usar
+otra representación, usa \textbf{lista de adyacencia}. Si necesitas
+preguntar constantemente ``¿existe una arista $u\rightarrow v$?'',
+considera una \textbf{matriz de adyacencia}. Si el algoritmo trabaja
+directamente con todas las aristas, considera una \textbf{lista de
+aristas}.
+
+```latex
+\subsection{BFS (Breadth-First Search)}
+
+\textbf{Idea:} BFS (\textit{Breadth-First Search}) es un algoritmo de
+recorrido de grafos que explora los vértices por \textbf{niveles}. A
+partir de un vértice inicial, primero visita todos sus vecinos
+directos, después los vecinos de estos, y continúa de esta manera
+hasta procesar todos los vértices alcanzables.
+
+Para mantener este orden se utiliza una \textbf{cola}
+(\texttt{queue}), siguiendo el principio FIFO (\textit{First In,
+First Out}). Cada vértice se marca como visitado cuando se agrega a
+la cola, evitando procesarlo varias veces.
+
+Una de las propiedades más importantes de BFS es que, en un grafo
+\textbf{no ponderado}, encuentra la distancia mínima desde un vértice
+origen hasta cualquier otro vértice alcanzable, donde la distancia se
+mide como el número de aristas recorridas.
+
+\textbf{¿Por qué usarlo?}
+
+\begin{itemize}
+    \item \textbf{Camino mínimo:} encuentra el camino con menor número
+    de aristas en grafos no ponderados.
+
+    \item \textbf{Distancias:} permite calcular la distancia mínima
+    desde un origen hasta todos los vértices alcanzables.
+
+    \item \textbf{Recorrido por niveles:} permite procesar los
+    vértices según su distancia al origen.
+
+    \item \textbf{Reconstrucción de caminos:} almacenando el padre de
+    cada vértice se puede recuperar el camino mínimo.
+
+    \item \textbf{Bipartición:} permite determinar si un grafo es
+    bipartito utilizando dos colores.
+
+    \item \textbf{Componentes conexas:} ejecutando BFS desde cada
+    vértice no visitado se pueden encontrar todas las componentes
+    conexas.
+
+    \item \textbf{Problemas en grids:} permite encontrar la cantidad
+    mínima de movimientos cuando cada movimiento tiene el mismo costo.
+
+    \item \textbf{Multi-Source BFS:} permite calcular la distancia
+    mínima desde cualquiera de varios vértices iniciales.
+\end{itemize}
+
+\textbf{Funcionamiento:}
+
+El algoritmo sigue los siguientes pasos:
+
+\begin{enumerate}
+    \item Elegir un vértice inicial $s$.
+    \item Marcar $s$ como visitado y agregarlo a la cola.
+    \item Mientras la cola no esté vacía, extraer el primer vértice.
+    \item Recorrer todos los vecinos del vértice extraído.
+    \item Si un vecino no ha sido visitado, marcarlo y agregarlo a
+    la cola.
+\end{enumerate}
+
+La cola garantiza que los vértices se procesen por niveles. Primero
+se procesan los vértices a distancia $0$, después los de distancia
+$1$, luego los de distancia $2$, y así sucesivamente.
+
+\textbf{Implementación básica:}
+
+\begin{lstlisting}[style=cpp]
+void bfs(int inicio, vector<vector<int>>& adj) {
+
+    int n = adj.size();
+
+    vector<bool> visitado(n, false);
+    queue<int> q;
+
+    visitado[inicio] = true;
+    q.push(inicio);
+
+    while (!q.empty()) {
+
+        int u = q.front();
+        q.pop();
+
+        cout << u << ' ';
+
+        for (int v : adj[u]) {
+
+            if (visitado[v]) continue;
+
+            visitado[v] = true;
+            q.push(v);
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Ejemplo:}
+
+Consideremos el siguiente grafo:
+
+\begin{lstlisting}[style=cpp]
+//        0
+//       / \
+//      1   2
+//     / \
+//    3   4
+\end{lstlisting}
+
+Si comenzamos BFS desde el vértice $0$, los niveles son:
+
+\begin{lstlisting}[style=cpp]
+// Nivel 0: 0
+// Nivel 1: 1 2
+// Nivel 2: 3 4
+\end{lstlisting}
+
+Por lo tanto, un posible orden de recorrido es:
+
+\begin{lstlisting}[style=cpp]
+0 1 2 3 4
+\end{lstlisting}
+
+El orden entre vértices del mismo nivel depende del orden en que
+aparezcan en la lista de adyacencia.
+
+\textbf{BFS para encontrar distancias:}
+
+Para calcular la distancia mínima desde el origen hasta cada vértice,
+se utiliza un arreglo \texttt{dist}. Inicialmente todos los valores
+son $-1$, indicando que el vértice todavía no ha sido visitado.
+
+Cuando BFS descubre un nuevo vértice $v$ desde $u$, su distancia se
+calcula como:
+
+\[
+dist[v] = dist[u] + 1
+\]
+
+\begin{lstlisting}[style=cpp]
+vector<int> bfsDist(int inicio, vector<vector<int>>& adj) {
+
+    int n = adj.size();
+
+    vector<int> dist(n, -1);
+    queue<int> q;
+
+    dist[inicio] = 0;
+    q.push(inicio);
+
+    while (!q.empty()) {
+
+        int u = q.front();
+        q.pop();
+
+        for (int v : adj[u]) {
+
+            if (dist[v] != -1) continue;
+
+            dist[v] = dist[u] + 1;
+            q.push(v);
+        }
+    }
+
+    return dist;
+}
+\end{lstlisting}
+
+Para el ejemplo anterior, comenzando desde $0$, se obtiene:
+
+\begin{lstlisting}[style=cpp]
+// dist[0] = 0
+// dist[1] = 1
+// dist[2] = 1
+// dist[3] = 2
+// dist[4] = 2
+\end{lstlisting}
+
+Por ejemplo, $dist[3] = 2$ significa que el camino mínimo desde
+$0$ hasta $3$ utiliza dos aristas.
+
+\textbf{Reconstrucción del camino:}
+
+Si además de la distancia se necesita conocer el camino utilizado,
+se puede almacenar el \textbf{padre} de cada vértice. Cuando BFS
+descubre $v$ desde $u$, se establece:
+
+\[
+padre[v] = u
+\]
+
+\begin{lstlisting}[style=cpp]
+vector<int> dist(n, -1);
+vector<int> padre(n, -1);
+
+queue<int> q;
+
+dist[inicio] = 0;
+q.push(inicio);
+
+while (!q.empty()) {
+
+    int u = q.front();
+    q.pop();
+
+    for (int v : adj[u]) {
+
+        if (dist[v] != -1) continue;
+
+        dist[v] = dist[u] + 1;
+        padre[v] = u;
+
+        q.push(v);
+    }
+}
+\end{lstlisting}
+
+Una vez terminado BFS, el camino hasta un destino se reconstruye
+siguiendo los padres desde el destino hasta el origen:
+
+\begin{lstlisting}[style=cpp]
+vector<int> camino;
+
+for (int v = destino; v != -1; v = padre[v]) {
+    camino.push_back(v);
+}
+
+reverse(camino.begin(), camino.end());
+\end{lstlisting}
+
+Por ejemplo, si:
+
+\begin{lstlisting}[style=cpp]
+// padre[3] = 1
+// padre[1] = 0
+// padre[0] = -1
+\end{lstlisting}
+
+el camino mínimo desde $0$ hasta $3$ es:
+
+\begin{lstlisting}[style=cpp]
+0 -> 1 -> 3
+\end{lstlisting}
+
+\textbf{BFS en grafos no conectados:}
+
+Un BFS iniciado desde un único vértice solamente visita los vértices
+que pueden alcanzarse desde él. Para recorrer todo el grafo, se puede
+ejecutar BFS desde cada vértice que todavía no haya sido visitado.
+
+\begin{lstlisting}[style=cpp]
+vector<bool> visitado(n, false);
+
+for (int s = 0; s < n; s++) {
+
+    if (visitado[s]) continue;
+
+    queue<int> q;
+
+    visitado[s] = true;
+    q.push(s);
+
+    while (!q.empty()) {
+
+        int u = q.front();
+        q.pop();
+
+        for (int v : adj[u]) {
+
+            if (visitado[v]) continue;
+
+            visitado[v] = true;
+            q.push(v);
+        }
+    }
+}
+\end{lstlisting}
+
+Esta técnica permite encontrar, entre otras cosas, el número de
+\textbf{componentes conexas} de un grafo.
+
+\textbf{BFS para comprobar si un grafo es bipartito:}
+
+Un grafo es bipartito si sus vértices pueden dividirse en dos grupos
+de manera que ninguna arista conecte dos vértices del mismo grupo.
+BFS puede comprobar esta propiedad asignando alternativamente los
+colores $0$ y $1$ a los vértices.
+
+Si un vértice $u$ tiene color $c$, sus vecinos deben tener el color
+$c \mathbin{\hat{}} 1$. Si una arista conecta dos vértices del mismo
+color, el grafo no es bipartito.
+
+\begin{lstlisting}[style=cpp]
+bool esBipartito(vector<vector<int>>& adj) {
+
+    int n = adj.size();
+
+    vector<int> color(n, -1);
+
+    for (int inicio = 0; inicio < n; inicio++) {
+
+        if (color[inicio] != -1) continue;
+
+        queue<int> q;
+
+        color[inicio] = 0;
+        q.push(inicio);
+
+        while (!q.empty()) {
+
+            int u = q.front();
+            q.pop();
+
+            for (int v : adj[u]) {
+
+                if (color[v] == -1) {
+
+                    color[v] = color[u] ^ 1;
+                    q.push(v);
+
+                } else if (color[v] == color[u]) {
+
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+\end{lstlisting}
+
+El arreglo \texttt{color} también funciona como arreglo de visitados:
+un valor de $-1$ significa que el vértice todavía no ha sido
+procesado.
+
+\textbf{BFS en un grid:}
+
+BFS también puede utilizarse sobre matrices o tableros. Cada celda
+se considera un vértice y cada movimiento válido entre celdas se
+considera una arista.
+
+Por ejemplo, si solamente se permiten movimientos hacia arriba,
+abajo, izquierda y derecha:
+
+\begin{lstlisting}[style=cpp]
+int dx[] = {-1, 1, 0, 0};
+int dy[] = {0, 0, -1, 1};
+
+queue<pair<int, int>> q;
+
+q.push({sx, sy});
+dist[sx][sy] = 0;
+
+while (!q.empty()) {
+
+    auto [x, y] = q.front();
+    q.pop();
+
+    for (int d = 0; d < 4; d++) {
+
+        int nx = x + dx[d];
+        int ny = y + dy[d];
+
+        if (nx < 0 || nx >= n ||
+            ny < 0 || ny >= m)
+            continue;
+
+        if (dist[nx][ny] != -1)
+            continue;
+
+        if (grid[nx][ny] == '#')
+            continue;
+
+        dist[nx][ny] = dist[x][y] + 1;
+        q.push({nx, ny});
+    }
+}
+\end{lstlisting}
+
+Esta técnica es especialmente útil en problemas donde se pregunta
+por la menor cantidad de movimientos necesarios para llegar desde
+una celda hasta otra.
+
+\textbf{Multi-Source BFS:}
+
+En algunos problemas existen varios vértices iniciales al mismo
+tiempo. En lugar de ejecutar un BFS separado desde cada uno, todos
+los orígenes se introducen inicialmente en la misma cola con
+distancia $0$.
+
+\begin{lstlisting}[style=cpp]
+queue<int> q;
+vector<int> dist(n, -1);
+
+for (int s : fuentes) {
+
+    dist[s] = 0;
+    q.push(s);
+}
+
+while (!q.empty()) {
+
+    int u = q.front();
+    q.pop();
+
+    for (int v : adj[u]) {
+
+        if (dist[v] != -1) continue;
+
+        dist[v] = dist[u] + 1;
+        q.push(v);
+    }
+}
+\end{lstlisting}
+
+De esta manera, cada vértice obtiene la distancia mínima hasta
+\textbf{cualquiera} de las fuentes.
+
+\textbf{Complejidad:}
+
+Utilizando una lista de adyacencia, cada vértice se procesa una sola
+vez y cada arista se revisa una cantidad constante de veces.
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Representación} &
+\textbf{Tiempo} &
+\textbf{Memoria adicional} \\
+\hline
+Lista de adyacencia &
+$O(n+m)$ &
+$O(n)$ \\
+\hline
+Matriz de adyacencia &
+$O(n^2)$ &
+$O(n)$ \\
+\hline
+\end{tabular}
+\caption{Complejidad de BFS según la representación del grafo.}
+\end{table}
+
+La complejidad $O(n+m)$ hace que BFS sea especialmente eficiente
+para grafos dispersos representados mediante listas de adyacencia.
+
+\textbf{Nota:} BFS encuentra caminos mínimos cuando todas las aristas
+tienen el mismo costo. No debe utilizarse directamente para encontrar
+caminos mínimos en grafos con pesos arbitrarios. Para pesos no
+negativos se puede utilizar \textbf{Dijkstra}; si los pesos solamente
+son $0$ y $1$, una alternativa eficiente es \textbf{0-1 BFS}.
+
+\textbf{Regla práctica:} si un problema pide minimizar el número de
+\textbf{pasos, movimientos o aristas} y cada movimiento tiene el mismo
+costo, considera primero \textbf{BFS}. Si necesitas conocer la
+distancia, utiliza \texttt{dist}; si necesitas recuperar el camino,
+utiliza \texttt{padre}; y si existen múltiples puntos de origen,
+considera \textbf{Multi-Source BFS}.
+```
+
+
+```latex
+\subsection{BFS en Grafos Desconectados}
+
+\textbf{Idea:} un BFS iniciado desde un único vértice solamente visita
+los vértices que son alcanzables desde él. Si el grafo tiene varias
+\textbf{componentes conexas}, es necesario iniciar un nuevo BFS desde
+cada vértice que todavía no haya sido visitado.
+
+La idea consiste en recorrer todos los vértices y, cada vez que se
+encuentra uno que no ha sido visitado, iniciar un nuevo BFS desde él.
+Cada ejecución de BFS procesa una componente conexa completa.
+
+\textbf{Implementación:}
+
+\begin{lstlisting}[style=cpp]
+void bfs(int inicio, vector<vector<int>>& adj,
+         vector<bool>& visitado) {
+
+    queue<int> q;
+
+    visitado[inicio] = true;
+    q.push(inicio);
+
+    while (!q.empty()) {
+
+        int u = q.front();
+        q.pop();
+
+        for (int v : adj[u]) {
+
+            if (visitado[v]) continue;
+
+            visitado[v] = true;
+            q.push(v);
+        }
+    }
+}
+\end{lstlisting}
+
+Para recorrer todo el grafo:
+
+\begin{lstlisting}[style=cpp]
+vector<bool> visitado(n, false);
+
+for (int u = 0; u < n; u++) {
+
+    if (visitado[u]) continue;
+
+    bfs(u, adj, visitado);
+}
+\end{lstlisting}
+
+Cada vez que se ejecuta \texttt{bfs}, se procesa una componente conexa
+que todavía no había sido visitada.
+
+\textbf{Contar componentes conexas:}
+
+Una aplicación directa consiste en contar cuántas componentes conexas
+tiene el grafo. Basta incrementar un contador cada vez que se inicia
+un nuevo BFS.
+
+\begin{lstlisting}[style=cpp]
+int componentes = 0;
+
+vector<bool> visitado(n, false);
+
+for (int u = 0; u < n; u++) {
+
+    if (visitado[u]) continue;
+
+    componentes++;
+
+    queue<int> q;
+
+    visitado[u] = true;
+    q.push(u);
+
+    while (!q.empty()) {
+
+        int v = q.front();
+        q.pop();
+
+        for (int w : adj[v]) {
+
+            if (visitado[w]) continue;
+
+            visitado[w] = true;
+            q.push(w);
+        }
+    }
+}
+
+cout << componentes << '\n';
+\end{lstlisting}
+
+\textbf{Ejemplo:}
+
+Consideremos el siguiente grafo:
+
+\begin{lstlisting}[style=cpp]
+//    0 --- 1       3 --- 4
+//          |
+//          2
+//
+//    5 --- 6
+\end{lstlisting}
+
+El grafo tiene tres componentes conexas:
+
+\begin{lstlisting}[style=cpp]
+// Componente 1: {0, 1, 2}
+// Componente 2: {3, 4}
+// Componente 3: {5, 6}
+\end{lstlisting}
+
+Si recorremos los vértices en orden, el primer BFS puede comenzar
+desde $0$ y visitar $\{0,1,2\}$. Después, los vértices $1$ y $2$ ya
+están visitados, por lo que el siguiente BFS comienza desde $3$ y
+visita $\{3,4\}$. Finalmente, se inicia otro BFS desde $5$ para
+visitar $\{5,6\}$.
+
+\textbf{Complejidad:}
+
+Aunque se ejecuten varios BFS, cada vértice se visita una sola vez y
+cada arista se procesa una cantidad constante de veces. Por lo tanto,
+la complejidad total utilizando una lista de adyacencia sigue siendo:
+
+\[
+O(n+m)
+\]
+
+La memoria adicional utilizada por el arreglo de visitados y la cola
+es $O(n)$.
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Operación} & \textbf{Complejidad} \\
+\hline
+Recorrer todas las componentes & $O(n+m)$ \\
+\hline
+Contar componentes conexas & $O(n+m)$ \\
+\hline
+Memoria adicional & $O(n)$ \\
+\hline
+\end{tabular}
+\caption{Complejidad de BFS en grafos desconectados.}
+\end{table}
+
+\textbf{Regla práctica:} si el grafo puede estar desconectado y se
+necesita procesar \textbf{todos los vértices}, no basta con ejecutar
+BFS una sola vez. Recorre todos los vértices y comienza un nuevo BFS
+cada vez que encuentres uno que todavía no haya sido visitado.
+```
+
+
+\subsection{BFS para Todos los Caminos}
+
+\textbf{Idea:} BFS no solamente permite encontrar la distancia mínima
+desde un vértice origen hacia los demás vértices. También puede
+utilizarse para reconstruir el \textbf{camino mínimo} desde el origen
+hasta cualquier vértice alcanzable.
+
+Para reconstruir un camino, además de almacenar la distancia, se
+guarda para cada vértice su \textbf{padre}, es decir, el vértice desde
+el cual fue descubierto por primera vez. Como BFS visita los vértices
+por niveles, el primer padre asignado a un vértice pertenece a un
+camino mínimo.
+
+\textbf{Implementación:}
+
+\begin{lstlisting}[style=cpp]
+vector<int> dist(n, -1);
+vector<int> padre(n, -1);
+
+queue<int> q;
+
+dist[inicio] = 0;
+q.push(inicio);
+
+while (!q.empty()) {
+
+    int u = q.front();
+    q.pop();
+
+    for (int v : adj[u]) {
+
+        if (dist[v] != -1) continue;
+
+        dist[v] = dist[u] + 1;
+        padre[v] = u;
+
+        q.push(v);
+    }
+}
+\end{lstlisting}
+
+Después de ejecutar BFS, \texttt{dist[v]} contiene la distancia mínima
+desde \texttt{inicio} hasta $v$, mientras que \texttt{padre[v]} indica
+qué vértice se debe seguir para reconstruir el camino.
+
+\textbf{Reconstrucción del camino:}
+
+Para obtener el camino hasta un vértice destino, se comienza en
+\texttt{destino} y se siguen los padres hasta llegar al origen.
+
+\begin{lstlisting}[style=cpp]
+vector<int> camino;
+
+for (int v = destino; v != -1; v = padre[v]) {
+    camino.push_back(v);
+}
+
+reverse(camino.begin(), camino.end());
+\end{lstlisting}
+
+El vector \texttt{camino} contiene ahora los vértices en el orden
+correcto, desde el origen hasta el destino.
+
+\textbf{Ejemplo:}
+
+Supongamos que BFS produce los siguientes padres:
+
+\begin{lstlisting}[style=cpp]
+// padre[0] = -1
+// padre[1] = 0
+// padre[2] = 0
+// padre[3] = 1
+// padre[4] = 3
+\end{lstlisting}
+
+Si el origen es $0$ y queremos reconstruir el camino hasta $4$,
+seguimos los padres:
+
+\[
+4 \rightarrow 3 \rightarrow 1 \rightarrow 0
+\]
+
+Después de invertirlo obtenemos:
+
+\[
+0 \rightarrow 1 \rightarrow 3 \rightarrow 4
+\]
+
+Por lo tanto, este es un camino mínimo desde $0$ hasta $4$.
+
+\textbf{Función para reconstruir el camino:}
+
+La reconstrucción puede encapsularse en una función:
+
+\begin{lstlisting}[style=cpp]
+vector<int> reconstruirCamino(int destino,
+                              vector<int>& padre) {
+
+    vector<int> camino;
+
+    for (int v = destino; v != -1; v = padre[v]) {
+        camino.push_back(v);
+    }
+
+    reverse(camino.begin(), camino.end());
+
+    return camino;
+}
+\end{lstlisting}
+
+El BFS completo puede combinarse con esta función:
+
+\begin{lstlisting}[style=cpp]
+vector<int> dist(n, -1);
+vector<int> padre(n, -1);
+
+queue<int> q;
+
+dist[inicio] = 0;
+q.push(inicio);
+
+while (!q.empty()) {
+
+    int u = q.front();
+    q.pop();
+
+    for (int v : adj[u]) {
+
+        if (dist[v] != -1) continue;
+
+        dist[v] = dist[u] + 1;
+        padre[v] = u;
+
+        q.push(v);
+    }
+}
+
+vector<int> camino =
+    reconstruirCamino(destino, padre);
+\end{lstlisting}
+
+\textbf{¿Qué significa ``todos los caminos''?}
+
+En este contexto, BFS obtiene un camino mínimo desde el origen hacia
+\textbf{cada vértice alcanzable}. No significa que encuentre todos los
+caminos posibles entre dos vértices, ya que la cantidad de caminos
+posibles puede ser exponencial.
+
+Por ejemplo, después de ejecutar BFS desde $s$:
+
+\begin{itemize}
+    \item \texttt{dist[v]} indica la distancia mínima de $s$ a $v$.
+    \item \texttt{padre[v]} permite reconstruir un camino mínimo hacia
+    $v$.
+    \item Si \texttt{dist[v]} es $-1$, $v$ no es alcanzable desde $s$.
+\end{itemize}
+
+\textbf{Camino inexistente:}
+
+Antes de reconstruir el camino conviene comprobar si el destino fue
+alcanzado:
+
+\begin{lstlisting}[style=cpp]
+if (dist[destino] == -1) {
+    cout << "No existe camino\n";
+}
+else {
+    vector<int> camino =
+        reconstruirCamino(destino, padre);
+
+    for (int v : camino) {
+        cout << v << ' ';
+    }
+}
+\end{lstlisting}
+
+\textbf{Complejidad:}
+
+La ejecución de BFS utilizando una lista de adyacencia cuesta
+$O(n+m)$. La reconstrucción de un camino cuesta $O(k)$, donde $k$ es
+la cantidad de vértices que contiene el camino.
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|l|c|}
+\hline
+\textbf{Operación} & \textbf{Complejidad} \\
+\hline
+BFS & $O(n+m)$ \\
+\hline
+Reconstruir un camino & $O(k)$ \\
+\hline
+Memoria adicional & $O(n)$ \\
+\hline
+\end{tabular}
+\caption{Complejidad de BFS para reconstrucción de caminos.}
+\end{table}
+
+\textbf{Nota:} BFS encuentra caminos mínimos en grafos donde todas las
+aristas tienen el mismo costo. Si las aristas tienen pesos diferentes,
+deben utilizarse algoritmos como \textbf{Dijkstra}, \textbf{0-1 BFS} o
+\textbf{Bellman-Ford}, dependiendo de las características del problema.
+
+\textbf{Regla práctica:} si el problema pide no solamente la distancia
+mínima sino también \textbf{qué vértices forman el camino}, guarda un
+arreglo \texttt{padre} durante el BFS. No es necesario almacenar todos
+los caminos: basta con guardar un padre por vértice.
+
+\subsection{DFS}
+
+\textbf{Idea:} Depth-First Search (DFS) explora un grafo siguiendo un
+camino lo más profundamente posible antes de regresar y explorar otras
+ramas. A diferencia de BFS, que utiliza una \textbf{cola}, DFS utiliza
+una \textbf{pila}.
+
+DFS puede implementarse de forma recursiva o iterativa. En Competitive
+Programming, la versión iterativa es útil cuando el grafo puede tener
+muchos vértices y una implementación recursiva podría provocar un
+\textbf{stack overflow}.
+
+\textbf{Implementación iterativa:}
+
+Se utiliza un \texttt{stack<int>} para almacenar los vértices que deben
+ser procesados. Un vértice se marca como visitado cuando se introduce
+en la pila, evitando que pueda agregarse múltiples veces.
+
+\begin{lstlisting}[style=cpp]
+void dfs(int inicio, vector<vector<int>>& adj,
+         vector<bool>& visitado) {
+
+    stack<int> st;
+
+    visitado[inicio] = true;
+    st.push(inicio);
+
+    while (!st.empty()) {
+
+        int u = st.top();
+        st.pop();
+
+        cout << u << ' ';
+
+        for (int v : adj[u]) {
+
+            if (visitado[v]) continue;
+
+            visitado[v] = true;
+            st.push(v);
+        }
+    }
+}
+\end{lstlisting}
+
+El orden exacto en que se visitan los vértices depende del orden de los
+vecinos en la lista de adyacencia. Lo importante es que cada vértice
+alcanzable sea procesado una vez.
+
+\textbf{Ejemplo:}
+
+Consideremos el siguiente grafo:
+
+\begin{lstlisting}[style=cpp]
+//        0
+//       / \
+//      1   2
+//     / \
+//    3   4
+\end{lstlisting}
+
+La lista de adyacencia puede ser:
+
+\begin{lstlisting}[style=cpp]
+adj[0] = {1, 2};
+adj[1] = {0, 3, 4};
+adj[2] = {0};
+adj[3] = {1};
+adj[4] = {1};
+\end{lstlisting}
+
+Si comenzamos DFS desde $0$, la pila inicialmente contiene:
+
+\begin{lstlisting}[style=cpp]
+st = {0}
+\end{lstlisting}
+
+Se extrae $0$ y se agregan sus vecinos:
+
+\begin{lstlisting}[style=cpp]
+st = {1, 2}
+\end{lstlisting}
+
+El siguiente vértice que se extrae depende del orden en que fueron
+agregados a la pila. Por ejemplo, si se extrae primero $2$, se procesa
+esa rama antes de regresar a $1$.
+
+\textbf{DFS en un grafo desconectado:}
+
+Al igual que BFS, una sola ejecución de DFS solamente visita los
+vértices alcanzables desde el origen. Para recorrer todo el grafo,
+debemos iniciar un nuevo DFS desde cada vértice que todavía no haya
+sido visitado.
+
+\begin{lstlisting}[style=cpp]
+vector<bool> visitado(n, false);
+
+for (int u = 0; u < n; u++) {
+
+    if (visitado[u]) continue;
+
+    dfs(u, adj, visitado);
+}
+\end{lstlisting}
+
+Este patrón permite procesar todas las componentes conexas del grafo.
+
+\textbf{Contar componentes conexas:}
+
+Podemos contar el número de componentes incrementando un contador cada
+vez que sea necesario iniciar un nuevo DFS.
+
+\begin{lstlisting}[style=cpp]
+int componentes = 0;
+
+vector<bool> visitado(n, false);
+
+for (int u = 0; u < n; u++) {
+
+    if (visitado[u]) continue;
+
+    componentes++;
+    dfs(u, adj, visitado);
+}
+
+cout << componentes << '\n';
+\end{lstlisting}
+
+\textbf{DFS en árboles:}
+
+En un árbol no es necesario mantener un arreglo de visitados si se
+conoce el padre del vértice actual. Al recorrer un vecino, simplemente
+se evita regresar al padre.
+
+Sin embargo, en un grafo general se recomienda utilizar
+\texttt{visitado}, ya que pueden existir ciclos.
+
+\begin{lstlisting}[style=cpp]
+void dfs(int inicio, vector<vector<int>>& adj) {
+
+    stack<pair<int, int>> st;
+
+    st.push({inicio, -1});
+
+    while (!st.empty()) {
+
+        auto [u, padre] = st.top();
+        st.pop();
+
+        cout << u << ' ';
+
+        for (int v : adj[u]) {
+
+            if (v == padre) continue;
+
+            st.push({v, u});
+        }
+    }
+}
+\end{lstlisting}
+
+Esta última versión es apropiada para árboles, pero para grafos
+generales debe utilizarse un arreglo de visitados.
+
+\textbf{Aplicaciones:}
+
+DFS es una de las herramientas fundamentales para resolver problemas
+de grafos. Entre sus aplicaciones más comunes se encuentran:
+
+\begin{itemize}
+    \item Recorrer todos los vértices alcanzables desde un origen.
+    \item Encontrar componentes conexas.
+    \item Detectar ciclos.
+    \item Construir árboles DFS.
+    \item Encontrar puntos de articulación y puentes.
+    \item Realizar ordenamiento topológico.
+    \item Resolver problemas de conectividad.
+    \item Recorrer árboles y estructuras jerárquicas.
+\end{itemize}
+
+\textbf{Complejidad:}
+
+Utilizando una lista de adyacencia, cada vértice se procesa una sola
+vez y cada arista se revisa una cantidad constante de veces. Por lo
+tanto:
+
+\[
+O(n+m)
+\]
+
+La pila y el arreglo de visitados requieren $O(n)$ memoria adicional.
+
+\begin{table}[H]
+\raggedright
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{|l|c|c|}
+\hline
+\textbf{Representación} &
+\textbf{Tiempo} &
+\textbf{Memoria adicional} \\
+\hline
+Lista de adyacencia &
+$O(n+m)$ &
+$O(n)$ \\
+\hline
+Matriz de adyacencia &
+$O(n^2)$ &
+$O(n)$ \\
+\hline
+\end{tabular}
+\caption{Complejidad de DFS según la representación del grafo.}
+\end{table}
+
+\textbf{Nota:} DFS y BFS tienen la misma complejidad asintótica
+$O(n+m)$ utilizando una lista de adyacencia, pero exploran el grafo de
+manera diferente. BFS procesa por niveles mediante una cola, mientras
+que DFS profundiza utilizando una pila.
+
+\textbf{Regla práctica:} utiliza DFS cuando el problema dependa de
+explorar profundamente una estructura, recorrer componentes, detectar
+ciclos o realizar algún procesamiento basado en el orden de entrada y
+salida de los vértices. Si el problema requiere distancias mínimas en
+un grafo no ponderado, normalmente BFS es la opción adecuada.
+
+\subsection{DFS para Conteo de Caminos}
+
+\subsection{DFS + Cerramiento Transitivo}
+
+\subsection{Flood Fill}
+
+\subsection{Laberinto con BFS}
+
+\subsection{Tour de Caballo de Ajedrez}
+
+\subsection{Mínimo Número de Movimientos de Caballo}
+
+\subsection{Serpientes y Escaleras}
+
+
+% =========================================================
+% CONECTIVIDAD
+% =========================================================
+
+\section{Conectividad}
+
+\subsection{Componentes Conexas}
+
+\subsection{Detección de Ciclos}
+
+\subsection{Ciclo en Grafo Dirigido}
+
+\subsection{Puentes}
+
+\subsection{Puntos de Articulación}
+
+\subsection{Componentes Biconectados}
+
+\subsection{Tarjan}
+
+
+% =========================================================
+% TOPOLOGICAL SORT
+% =========================================================
+
+\section{Topological Sort}
+
+\subsection{Kahn's Algorithm}
+
+\subsection{DFS + Orden Topológico}
+
+\subsection{Detección de Ciclos con Topological Sort}
+
+
+% =========================================================
+% SSSP
+% =========================================================
+
+\section{Single Source Shortest Path (SSSP)}
+
+\subsection{BFS para Caminos Más Cortos}
+
+\subsection{0-1 BFS}
+
+\subsection{Dijkstra}
+
+\subsection{Bellman-Ford}
+
+\subsection{Shortest Path en Grafos Binarios}
+
+\subsection{Shortest Path desde Múltiples Orígenes}
+
+\subsection{Shortest Path en Grafos Multietapa}
+
+\subsection{Shortest Path con Exactamente $k$ Aristas}
+
+
+% =========================================================
+% APSP
+% =========================================================
+
+\section{All Pairs Shortest Path (APSP)}
+
+\subsection{Floyd-Warshall}
+
+
+% =========================================================
+% MST
+% =========================================================
+
+\section{Minimum Spanning Tree (MST)}
+
+\subsection{Disjoint Set Union (DSU)}
+
+\subsection{Kruskal}
+
+\subsection{Prim}
+
+
+% =========================================================
+% SCC
+% =========================================================
+
+\section{Strongly Connected Components (SCC)}
+
+\subsection{Kosaraju}
+
+\subsection{Tarjan SCC}
+
+\subsection{Condensation Graph}
+
+
+% =========================================================
+% BIPARTITE
+% =========================================================
+
+\section{Bipartite Graphs}
+
+\subsection{2-Coloring}
+
+\subsection{Bipartite Matching}
+
+
+% =========================================================
+% TREES
+% =========================================================
+
+\section{Trees}
+
+\subsection{DFS en Árboles}
+
+\subsection{BFS en Árboles}
+
+\subsection{Diámetro de un Árbol}
+
+\subsection{Centro de un Árbol}
+
+\subsection{Combinatoria en Árboles Ordenados}
+
+\subsection{Tree DP}
+
+\subsection{Rerooting}
+
+
+% =========================================================
+% LCA
+% =========================================================
+
+\section{Lowest Common Ancestor (LCA)}
+
+\subsection{Binary Lifting}
+
+\subsection{Euler Tour + RMQ}
+
+\subsection{Distancia entre Dos Nodos}
+
+\subsection{$k$-ésimo Ancestro}
+
+
+% =========================================================
+% TREE QUERIES
+% =========================================================
+
+\section{Tree Queries}
+
+\subsection{Euler Tour}
+
+\subsection{Subtree Queries}
+
+\subsection{Path Queries}
+
+\subsection{Heavy-Light Decomposition}
+
+\subsection{Heavy-Light Decomposition + Fenwick}
+
+\subsection{Heavy-Light Decomposition + Segment Tree}
+
+
+% =========================================================
+% DISJOINT SET UNION
+% =========================================================
+
+\section{Disjoint Set Union}
+
+\subsection{Union-Find}
+
+\subsection{Path Compression}
+
+\subsection{Union by Size / Rank}
+
+\subsection{Unión de Conjuntos Disjuntos en un Árbol}
+
+\subsection{DSU Offline}
+
+\subsection{DSU Rollback}
+
+
+% =========================================================
+% GRAPH DECOMPOSITION
+% =========================================================
+
+\section{Graph Decomposition}
+
+\subsection{Bridge Tree}
+
+\subsection{Block-Cut Tree}
+
+\subsection{Condensation Graph}
+
+
+% =========================================================
+% EULERIAN
+% =========================================================
+
+\section{Eulerian Graphs}
+
+\subsection{Eulerian Path}
+
+\subsection{Eulerian Circuit}
+
+\subsection{Hierholzer}
+
+
+% =========================================================
+% NETWORK FLOW
+% =========================================================
+
+\section{Network Flow}
+
+\subsection{Ford-Fulkerson}
+
+\subsection{Edmonds-Karp}
+
+\subsection{Dinic}
+
+\subsection{Min-Cut}
+
+\subsection{Maximum Bipartite Matching}
+
+
+% =========================================================
+% 2-SAT
+% =========================================================
+
+\section{2-SAT}
+
+\subsection{Implication Graph}
+
+\subsection{2-SAT con SCC}
+
+
+% =========================================================
+% BACKTRACKING Y PROBLEMAS CLÁSICOS
+% =========================================================
+
+\section{Backtracking y Problemas Clásicos}
+
+\subsection{Problema de las $N$ Reinas}
+
+\subsection{Variaciones del Problema de las $N$ Reinas}
+
+\subsection{Tour de Caballo}
+
+
+% =========================================================
+% ADVANCED
+% =========================================================
+
+\section{Advanced Graph Algorithms}
+
+\subsection{Centroid Decomposition}
+
+\subsection{DSU on Tree}
+
+\subsection{Hopcroft-Karp}
+
+\subsection{Min-Cost Max-Flow}
+
+\subsection{DSU Rollback}
+
+%---------------------------------------------------------------------------
+\part{Ordenamiento y Búsqueda}
+%---------------------------------------------------------------------------
+
+\section{Ordenamiento y Búsqueda (Sorting \& Searching)}
+Varias búsquedas lineales y sub-lineales. (La búsqueda binaria tiene
+su propia sección.)
+
+\subsection{Número faltante (Missing Number)}
+\textbf{Idea:} los números $0,1,\dots,n$ deberían sumar
+$\frac{n(n+1)}{2}$ (fórmula de Gauss). Si falta uno, la suma real queda
+corta \emph{exactamente} en ese valor, así que el faltante es
+(suma esperada $-$ suma real). Basta un recorrido para acumular la suma.
+Alternativa sin riesgo de overflow: hacer XOR de $0..n$ y de todos los
+elementos; lo que quede es el faltante. \textbf{Complejidad:} $O(n)$.
+\begin{lstlisting}[style=cpp]
+long long esp = (long long)n*(n+1)/2;          // suma 0..n
+long long falta = esp - accumulate(a.begin(),a.end(),0LL);
+\end{lstlisting}
+
+
+\subsection{Máximo / Mínimo (Array Max/Min)}
+\textbf{Idea:} recorres el arreglo una sola vez llevando el menor y el
+mayor vistos hasta ahora; comparás cada elemento contra ambos y
+actualizas. No requiere ordenar (ordenar sería $O(n\log n)$, peor). Con
+un recorrido consigues los dos a la vez. \textbf{Complejidad:} $O(n)$.
+\begin{lstlisting}[style=cpp]
+int mn = *min_element(a.begin(), a.end());
+int mx = *max_element(a.begin(), a.end());
+\end{lstlisting}
+
+
+\subsection{Par de suma absoluta mínima}
+\textbf{Idea:} buscamos el par cuya suma esté \emph{más cerca de cero}.
+Tras ordenar, ponemos un puntero en cada extremo. La suma de los
+extremos te dice hacia dónde moverte: si es negativa, para acercarla a
+$0$ hay que subir el menor (\texttt{lo++}); si es positiva, hay que
+bajar el mayor (\texttt{hi--}). Cada movimiento descarta el candidato
+menos prometedor, y en el camino guardas el $|suma|$ más pequeño visto.
+Los dos punteros recorren el arreglo una vez ($O(n)$); domina el sort.
+\textbf{Complejidad:} $O(n\log n)$.
+\begin{lstlisting}[style=cpp]
+sort(a.begin(), a.end());
+int lo=0, hi=a.size()-1; long long mej=LLONG_MAX;
+while(lo<hi){ long long s=(long long)a[lo]+a[hi];
+  mej=min(mej,llabs(s));
+  if(s<0) lo++; else hi--; }
+\end{lstlisting}
+
+
+\subsection{Par con diferencia dada (Difference Pair)}
+\textbf{Idea:} ¿existe un par cuya diferencia sea exactamente $d$? Tras
+ordenar, dos punteros avanzan hacia adelante: si la diferencia actual
+$a_j-a_i$ es menor que $d$, adelantas el puntero lejano ($j$) para
+agrandarla; si es mayor, adelantas el cercano ($i$) para achicarla; si
+es igual, encontraste el par. Como el arreglo está ordenado, la
+diferencia crece con $j$ y decrece con $i$, así que el barrido nunca
+retrocede. \textbf{Complejidad:} $O(n\log n)$ (domina el sort).
+\begin{lstlisting}[style=cpp]
+sort(a.begin(),a.end()); int i=0,j=1,n=a.size();
+while(i<n && j<n){
+  if(i!=j && a[j]-a[i]==d) return true;
+  if(a[j]-a[i]<d) j++; else i++; }
+\end{lstlisting}
+
+
+\subsection{Búsqueda ternaria (Ternary Search)}
+\textbf{Idea:} sirve para hallar el pico de una función
+\textbf{unimodal} (sube y luego baja, con un solo máximo — no para buscar
+un valor en un arreglo cualquiera). Partes el rango en tres con dos
+puntos $m_1<m_2$ y comparas: si $f(m_1)<f(m_2)$, el máximo no puede estar
+a la izquierda de $m_1$, así que descartas ese tercio; en caso contrario
+descartas el tercio derecho. Cada paso elimina $\sim\frac{1}{3}$ del
+rango, por eso converge en logarítmico. (Para un mínimo, invierte la
+comparación.) \textbf{Complejidad:} $O(\log n)$ — NO $O(n\log n)$.
+\begin{lstlisting}[style=cpp]
+while(hi-lo>2){ long long m1=lo+(hi-lo)/3, m2=hi-(hi-lo)/3;
+  if(f(m1)<f(m2)) lo=m1+1; else hi=m2-1; }
+// revisa [lo,hi] y devuelve el x que maximiza f
+\end{lstlisting}
+
+
+\subsection{Búsqueda de Fibonacci (Fibonacci Search)}
+\textbf{Idea:} misma estrategia que la binaria (descartar mitades de un
+arreglo ordenado), pero en vez de partir por el punto medio elige el
+punto de comparación usando números de Fibonacci consecutivos. Mantiene
+tres Fibonacci y en cada paso mira la posición \texttt{off+f2}; según el
+elemento sea menor o mayor que el objetivo, retrocede uno o dos pasos en
+la secuencia. Ventaja: solo usa \emph{sumas y restas}, nunca división,
+lo que la hace útil en hardware sin división rápida o para saltar por
+posiciones amigables con la caché. \textbf{Complejidad:} $O(\log n)$.
+\begin{lstlisting}[style=cpp]
+int f2=0,f1=1,fb=f1+f2;
+while(fb<n){ f2=f1; f1=fb; fb=f1+f2; }
+int off=-1;
+while(fb>1){ int i=min(off+f2,n-1);
+  if(a[i]<x){ fb=f1; f1=f2; f2=fb-f1; off=i; }
+  else if(a[i]>x){ fb=f2; f1=f1-f2; f2=fb-f1; }
+  else return i; }
+if(f1==1 && off+1<n && a[off+1]==x) return off+1;
+\end{lstlisting}
+
+(En Java es idéntico al C\texttt{++}, cambiando \texttt{a.length}.)
+
+\subsection{Búsqueda exponencial (Exponential Search)}
+\textbf{Idea:} dos fases sobre un arreglo \textbf{ordenado}. Primero
+\emph{acotas} el objetivo doblando el índice ($1,2,4,8,\dots$) hasta que
+$a[i]$ lo supera; en ese momento sabes que el objetivo está entre $i/2$
+e $i$. Segundo, haces una binaria normal dentro de ese bloque. Como el
+bloque encontrado tiene tamaño proporcional a la posición del objetivo,
+es ideal cuando el arreglo es enorme o de tamaño desconocido y el
+objetivo está cerca del inicio. \textbf{Complejidad:} $O(\log n)$.
+\begin{lstlisting}[style=cpp]
+if(a[0]==x) return 0;
+int i=1; while(i<n && a[i]<=x) i*=2;   // dobla el rango
+// luego binaria en [i/2, min(i,n-1)]
+\end{lstlisting}
+
+\subsection{Búsqueda por saltos (Jump Search)}
+\textbf{Idea:} en vez de revisar elemento por elemento, avanzas en
+bloques de tamaño $\sqrt{n}$ mirando solo el \emph{último} de cada
+bloque; cuando ese último ya supera al objetivo, sabes que (si existe)
+está en el bloque anterior, así que lo barres linealmente. El balance
+$\sqrt{n}$ saltos $+$ $\sqrt{n}$ del barrido minimiza el total. Punto
+medio entre la lineal ($O(n)$) y la binaria ($O(\log n)$), útil cuando
+saltar hacia atrás es costoso. \textbf{Complejidad:} $O(\sqrt{n})$.
+\begin{lstlisting}[style=cpp]
+int paso=max(1,(int)sqrt((double)n)), prev=0;
+while(prev<n && a[min(prev+paso,n)-1]<x) prev+=paso;
+for(int i=prev; i<min(prev+paso,n); i++)
+  if(a[i]==x) return i;
+\end{lstlisting}
+
+
+\subsection{Heap Sort}
+\textbf{Idea:} un \emph{heap} binario se representa en el mismo arreglo:
+el hijo izquierdo de $i$ es $2i+1$ y el derecho $2i+2$; en un
+\emph{max-heap} todo padre es $\geq$ sus hijos, así que el mayor está en
+la raíz. Heap Sort tiene dos fases. \textbf{(1) Construir el heap}:
+recorres de abajo hacia arriba aplicando \texttt{bajar} (sift-down) a
+cada padre. Aunque parezca $O(n\log n)$, es $O(n)$: casi todos los nodos
+están cerca de las hojas y se hunden poco (la suma
+$\sum n/2^h\cdot h$ converge a $2n$). \textbf{(2) Ordenar}: repetidamente
+intercambias la raíz (el mayor) con el último elemento activo —quedando
+ya ordenado al final— y ``hundes'' la nueva raíz para restaurar el heap;
+cada una de las $n$ extracciones cuesta $O(\log n)$. In-place, sin
+memoria extra, pero \textbf{no estable}. \textbf{Complejidad:}
+$O(n\log n)$ en todos los casos.
+\begin{lstlisting}[style=cpp]
+void bajar(vector<int>&a,int n,int i){    // hunde: O(log n)
+  while(true){ int m=i,l=2*i+1,r=2*i+2;
+    if(l<n&&a[l]>a[m]) m=l;
+    if(r<n&&a[r]>a[m]) m=r;
+    if(m==i) break; swap(a[i],a[m]); i=m; } }
+void heapSort(vector<int>&a){ int n=a.size();
+  for(int i=n/2-1;i>=0;i--) bajar(a,n,i);   // heap: O(n)
+  for(int i=n-1;i>0;i--){ swap(a[0],a[i]);  // max al final
+    bajar(a,i,0); } }
+\end{lstlisting}
+
+
+\subsection{QuickSelect}
+\textbf{Idea:} encuentra el $k$-ésimo menor \emph{sin ordenar todo}.
+Como quicksort, particiona alrededor de un pivote dejando a la izquierda
+lo menor y a la derecha lo mayor; pero como sabes en qué lado cae la
+posición $k$, recurres (o iteras) sobre \emph{un solo} lado y descartas
+el otro. Por eso el promedio baja de $O(n\log n)$ a $O(n)$: cada fase
+procesa \emph{la mitad} del anterior, y $n+\tfrac{n}{2}+\tfrac{n}{4}+
+\dots = 2n$. El peor caso $O(n^2)$ aparece con pivotes pésimos (arreglo
+casi ordenado + pivote extremo); \textbf{elegir el pivote al azar} lo
+vuelve prácticamente imposible. La versión de abajo es iterativa (sin
+pila de recursión). Si necesitas garantía $O(n)$ en el peor caso, existe
+\emph{mediana de medianas} para elegir un buen pivote.
+\textbf{Complejidad:} promedio $O(n)$, peor $O(n^2)$.
+\begin{lstlisting}[style=cpp]
+int quickSelect(vector<int> a, int k){       // k in [0,n-1]
+  int lo=0, hi=a.size()-1;
+  while(lo<hi){
+    int p=a[lo+rand()%(hi-lo+1)], i=lo, j=hi; // pivote aleatorio
+    while(i<=j){ while(a[i]<p) i++; while(a[j]>p) j--;
+      if(i<=j){ swap(a[i],a[j]); i++; j--; } }
+    if(k<=j) hi=j;                             // k a la izq
+    else if(k>=i) lo=i;                        // k a la der
+    else return a[k];
+  }
+  return a[lo];
+}
+// C++ trae nth_element(a.begin(), a.begin()+k, a.end()); // O(n)
+\end{lstlisting}
+
+(En Java igual, con \texttt{Random}; código completo en el repo.)
+
+\section{Búsqueda Binaria (Binary Search)}
+\textbf{Idea central:} mantienes un rango $[lo,hi]$ donde \emph{sabes}
+que está la respuesta y en cada paso lo partes por la mitad, descartando
+la mitad que no puede contenerla. Como reduces a la mitad cada vez,
+llegas en $\log_2 n$ pasos. Funciona si los datos están \textbf{ordenados}
+o, más general, si existe un \textbf{predicado monótono} (una condición
+que pasa de falsa a verdadera una sola vez): entonces buscas la frontera
+del cambio. \textbf{Complejidad:} $O(\log n)$ en discreto,
+$O(\text{iter})$ en reales, $O(L\log n)$ con cadenas. Tip: usa
+\texttt{lo+(hi-lo)/2} para el \texttt{mid} y evitar overflow.
+
+\subsection{En arreglo ordenado}
+\textbf{Cómo:} comparas $x$ con el elemento del medio; si es menor,
+descartas la mitad derecha, si es mayor la izquierda. \texttt{lower\_bound}
+te da el primer índice con valor $\geq x$ y \texttt{upper\_bound} el
+primer $> x$; con eso sabes si $x$ existe y cuántas copias hay.
+\begin{lstlisting}[style=cpp]
+int i = lower_bound(a.begin(),a.end(),x)-a.begin(); // >= x
+int j = upper_bound(a.begin(),a.end(),x)-a.begin(); // >  x
+bool hay = binary_search(a.begin(),a.end(),x);
+\end{lstlisting}
+
+
+\subsection{Menor $x$ que cumple}
+\textbf{Cómo:} aquí no buscas en un arreglo sino en el \emph{rango de
+respuestas posibles}. El predicado es monótono F..F\,T..T (una vez que
+algo ``sirve'', todo lo mayor también). En cada paso pruebas el
+\texttt{mid}: si cumple, lo guardas como candidato y sigues buscando a la
+izquierda (\texttt{hi=mid-1}) por si hay uno menor que también sirva; si
+no cumple, subes (\texttt{lo=mid+1}). Al final \texttt{res} es la
+frontera izquierda: el \emph{menor} que cumple. Ejemplo: ``mínima
+capacidad para repartir en $\leq k$ días''.
+\begin{lstlisting}[style=cpp]
+long long res=-1;
+while(lo<=hi){ long long mid=lo+(hi-lo)/2;
+  if(cumple(mid)){res=mid; hi=mid-1;} // sirve -> izq
+  else lo=mid+1; }
+\end{lstlisting}
+
+
+\subsection{Mayor $x$ que cumple}
+\textbf{Cómo:} el caso espejo. Ahora el predicado es T..T\,F..F (sirve
+hasta cierto punto y luego deja de servir). Cuando el \texttt{mid}
+cumple, lo guardas y buscas a la \emph{derecha} (\texttt{lo=mid+1}) por
+si hay uno mayor que también sirva; si no cumple, bajas
+(\texttt{hi=mid-1}). Respecto al anterior solo cambian esas dos líneas.
+Ejemplo: ``máxima longitud de corte tal que salgan $\geq k$ piezas''.
+\begin{lstlisting}[style=cpp]
+long long res=-1;
+while(lo<=hi){ long long mid=lo+(hi-lo)/2;
+  if(cumple(mid)){res=mid; lo=mid+1;} // sirve -> der
+  else hi=mid-1; }
+\end{lstlisting}
+
+
+\subsection{Sobre reales}
+\textbf{Cómo:} cuando la respuesta es un número \emph{real} (raíces,
+puntos de equilibrio) no hay ``mitad entera'' ni condición $lo\leq hi$
+para parar. En su lugar iteras un número fijo de veces (unas 100 basta:
+el rango se divide por $2^{100}$, precisión más que suficiente),
+moviendo \texttt{lo} o \texttt{hi} al \texttt{mid} según el predicado.
+Al terminar, \texttt{lo}$\approx$\texttt{hi} es la frontera buscada.
+\begin{lstlisting}[style=cpp]
+for(int it=0; it<100; it++){ double mid=(lo+hi)/2;
+  if(cumple(mid)) hi=mid; else lo=mid; }
+// lo ~ hi = frontera
+\end{lstlisting}
+
+
+\subsection{Con strings}
+\textbf{Cómo:} exactamente la misma binaria, pero comparando cadenas en
+orden \emph{lexicográfico} (diccionario) en lugar de números. La única
+diferencia de costo es que comparar dos cadenas cuesta $O(L)$ (longitud),
+no $O(1)$, así que el total sube a $O(L\log n)$. Ojo: el arreglo debe
+estar ordenado con el mismo criterio (ASCII: mayúsculas antes que
+minúsculas).
+\begin{lstlisting}[style=cpp]
+// vector<string> s ordenado
+int i = lower_bound(s.begin(),s.end(),string("caro"))
+        - s.begin();
+bool hay = binary_search(s.begin(),s.end(),string("caro"));
+\end{lstlisting}
+
+
+%---------------------------------------------------------------------------
+\part{Matemáticas}
+%---------------------------------------------------------------------------
+
+\section{Matemáticas (Math)}
+\pendiente
+
+\section{Teoría de Números (Number Theory)}
+\pendiente
+
+
+
+\pendiente
+
+\part{Geometría Computacional}
+
+
+
+\part{Programación Dinámica (Dynamic Programming)}
+\pendiente
+
+\part{Algoritmos Voraces (Greedy)}
+\pendiente
+
+\part{Ad-hoc y Simulación}
+\pendiente
+
+%---------------------------------------------------------------------------
+\part{String Processing}
+%---------------------------------------------------------------------------
+
+\section{Cadenas (Strings)}
+\pendiente
+
+\part{BitWise}
+
+\part{Game Theory}
+\end{document}
