@@ -5,12 +5,14 @@
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![LaTeX](https://img.shields.io/badge/LaTeX-008080?style=flat&logo=latex&logoColor=white)
 ![Pages](https://img.shields.io/badge/notebook-330%20pages-blueviolet)
-![Status](https://img.shields.io/badge/status-active-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue)
+![Status](https://img.shields.io/badge/status-in%20progress-brightgreen)
+![Updates](https://img.shields.io/badge/updates-constant-orange)
 
 My personal competitive programming toolkit: a **330-page C++ notebook (PDF)** with algorithms, data structures and ready-to-paste templates, plus a **code repository** of solutions organized by topic in C++, Java and Python.
 
 > 📖 The notebook is written in **Spanish**. Code identifiers and technical terms are kept in English where that is the standard in contests.
+
+> 🔄 **This repository is updated constantly.** The notebook and the code are refined continuously: explanations get rewritten, templates are optimized, typos and duplicated sections are fixed, and new chapters are added. Expect changes between versions.
 
 ---
 
@@ -134,12 +136,6 @@ Solutions and templates live under `algorithms/`, split first by language, then 
 
 ## 📌 Notes
 
-This is a living repository — folders will fill in over time as new problems are solved and templates are refined.
+This is a living repository, updated constantly to refine details — folders will fill in over time as new problems are solved and templates are improved.
 
 Found a bug or a better approach? Feel free to open an issue.
-
----
-
-## 📄 License
-
-Released under the [MIT License](./LICENSE).
