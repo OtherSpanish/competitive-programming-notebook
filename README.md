@@ -4,11 +4,11 @@
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat&logo=openjdk&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
 ![LaTeX](https://img.shields.io/badge/LaTeX-008080?style=flat&logo=latex&logoColor=white)
-![Pages](https://img.shields.io/badge/notebook-330%20pages-blueviolet)
+![Pages](https://img.shields.io/badge/notebook-350%20pages-blueviolet)
 ![Status](https://img.shields.io/badge/status-in%20progress-brightgreen)
 ![Updates](https://img.shields.io/badge/updates-constant-orange)
 
-My personal competitive programming toolkit: a **330-page C++ notebook (PDF)** with algorithms, data structures and ready-to-paste templates, plus a **code repository** of solutions organized by topic in C++, Java and Python.
+My personal competitive programming toolkit: a **350-page C++ notebook (PDF)** with algorithms, data structures and ready-to-paste templates, plus a **code repository** of solutions organized by topic in C++, Java and Python.
 
 > 📖 The notebook is written in **Spanish**. Code identifiers and technical terms are kept in English where that is the standard in contests.
 
